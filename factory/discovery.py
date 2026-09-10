@@ -40,7 +40,8 @@ def migrate(db):
     )
     for statement in statements:
         db.execute(statement)
-    db.execute("PRAGMA user_version = 2")
+    if previous_version < 2:
+        db.execute("PRAGMA user_version = 2")
     if previous_version == 1 and db.execute("SELECT phase FROM workflow WHERE id = 1").fetchone()[0] == "discovery":
         for decision in db.execute("SELECT id, answer FROM decisions WHERE answer IS NOT NULL").fetchall():
             remember_decision(db, decision["id"], decision["answer"])
@@ -126,19 +127,31 @@ class Discovery:
         self.model = model
 
     def submit(self, message):
+        self.enqueue(message)
+        return self.resume()
+
+    def enqueue(self, message, request_id=None):
         if (not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_CHARS
                 or len(dumps(message).encode("utf-8")) > MAX_MESSAGE_BYTES):
             raise WorkflowError(f"Message must contain 1..{MAX_MESSAGE_CHARS} characters, at most {MAX_MESSAGE_BYTES} UTF-8 bytes as JSON")
         # Save input before calling Codex; a failed/interrupted call can be resumed.
         with self.store._connection(write=True) as db:
+            if request_id is not None:
+                old = db.execute('SELECT message,turn_id FROM factory_requests WHERE id=?', (request_id,)).fetchone()
+                if old:
+                    if old['message'] != message:
+                        raise WorkflowError('Request ID already used for different input')
+                    return old['turn_id']
             state = db.execute("SELECT phase, revision FROM workflow WHERE id = 1").fetchone()
             if state["phase"] != "discovery":
                 raise WorkflowError("This project is no longer in discovery")
             if db.execute("SELECT 1 FROM discovery_turns WHERE status = 'pending'").fetchone():
                 raise WorkflowError("A discovery message is pending; retry it before sending another")
             turn_id = db.execute("INSERT INTO discovery_turns(message, status) VALUES (?, 'pending')", (message,)).lastrowid
+            if request_id is not None:
+                db.execute('INSERT INTO factory_requests VALUES (?, ?, ?)', (request_id, message, turn_id))
             self.store._record(db, state["revision"] + 1, "discovery_input", {"turn_id": turn_id})
-        return self.resume()
+        return turn_id
 
     def resume(self):
         # Snapshot and pending input must belong to the same transaction/revision.

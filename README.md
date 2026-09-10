@@ -1,9 +1,15 @@
-# Software factory: discovery conversacional local
+# Software Factory
 
 La factory convierte una idea incompleta en conocimiento estructurado suficiente para
-iniciar arquitectura. Codex conduce la conversación; Python valida y persiste cada
-interacción, evalúa readiness y controla las transiciones. Arquitectura todavía no tiene
-handler y nunca se ejecuta automáticamente.
+producir una baseline arquitectónica estructurada y versionada. Codex conduce discovery
+y diseña/revisa arquitectura; Python valida, persiste y controla los gates y transiciones.
+Planning produce un roadmap progresivo versionado con gates de cobertura/verificación y necesidades de harness. El proceso se detiene en `execution` antes de implementar producto.
+
+La interfaz principal es Codex App mediante el plugin local y MCP. Consulta
+[instalación y uso desde Codex](docs/codex.md). La CLI se conserva para recovery, debugging
+y scripting, sobre el mismo `FactoryService`.
+
+Consulta también [el contrato y gate de arquitectura](docs/architecture.md) y [progressive planning](docs/planning.md).
 
 ## Probar una conversación
 
@@ -42,7 +48,7 @@ python3 -m factory init /ruta/al/proyecto
 
 `status` y `next` siguen siendo consultas JSON sin efectos. `next` devuelve `discovery`
 con su readiness y preguntas, `wait_for_human` con IDs cuando hay decisiones pendientes,
-o `architecture` con `implemented: false` al finalizar. `init` es idempotente.
+o `architecture` con `implemented: true`, etapa y bloqueos al finalizar. `init` es idempotente.
 
 ## Diseño y contrato
 
@@ -126,11 +132,11 @@ discovery -> architecture -> planning -> execution -> verification -> completed
 
 `requirements` se conserva únicamente para poder leer y avanzar proyectos antiguos que
 ya estuvieran en esa fase. El nuevo discovery reúne la información de producto y requisitos
-y pasa directamente a arquitectura. Las demás fases no se implementan en esta entrega.
+y pasa directamente a arquitectura. Architecture y planning tienen handlers y gates propios; execution y las fases posteriores aún no se implementan.
 
 ## Persistencia y recuperación
 
-Fuente autoritativa: `.factory/state.sqlite3`, esquema v2. La migración aditiva desde v1
+Fuente autoritativa: `.factory/state.sqlite3`, esquema v5. La migración aditiva desde v1/v2/v3/v4
 ocurre en `init` o la siguiente escritura y conserva fase, revisión, eventos y decisiones.
 Las lecturas de v1 siguen funcionando sin migrarlo; versiones desconocidas se rechazan.
 
@@ -151,16 +157,16 @@ No es necesario reconstruir el conocimiento reproduciendo eventos o leyendo el t
 
 Añade `.factory/` al `.gitignore` de los proyectos gestionados. La CLI no modifica su código
 ni su configuración Git. Usa SQLite en almacenamiento local, preferiblemente bajo `/home`
-en WSL. No se genera un Markdown duplicado: `/estado` y `status` proyectan directamente
-el estado autoritativo.
+en WSL. Discovery se consulta con `/estado` y `status`. Architecture guarda una proyección Markdown
+generada desde la baseline estructurada; no se edita como fuente de verdad.
 
 ## Verificación
 
-La infraestructura y los tests usan solo biblioteca estándar; el SDK se importa únicamente
-al conversar realmente. Para ejecutar la suite sin consumir cuota:
+La lógica de dominio usa biblioteca estándar; los tests MCP utilizan su SDK oficial.
+La suite mockea los workers y no consume cuota. Para ejecutar la suite sin consumir cuota:
 
 ```bash
-python3 -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 Se prueban procesos separados, actualizaciones incrementales, preguntas y decisiones,
@@ -170,7 +176,8 @@ CLI interactiva, contexto sin transcript y el contrato del SDK mediante dobles.
 
 ## Routing determinista de skills
 
-La infraestructura de routing es independiente del workflow y no ejecuta arquitectura.
+La infraestructura de routing se puede consultar por separado sin ejecutar arquitectura.
+El handler de architecture la integra y activa required mediante inputs nativos del SDK.
 Consulta el catálogo real de Codex y selecciona pocas skills según dominio, intención,
 riesgo y preocupaciones semánticas, con requisitos bloqueantes y recomendaciones opcionales:
 

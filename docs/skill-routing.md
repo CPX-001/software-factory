@@ -1,7 +1,7 @@
 # Routing de skills
 
 El router selecciona herramientas de trabajo; no crea agentes, no ejecuta skills ni cambia
-el workflow. Discovery y la futura fase de arquitectura siguen siendo independientes.
+el workflow. Discovery sigue siendo independiente; el handler de architecture consume este routing.
 Solo el descubrimiento consulta el runtime local. El routing posterior es una función
 determinista que puede reutilizar el mismo catálogo en muchas unidades de trabajo.
 
@@ -160,7 +160,7 @@ agregan selectores del proyecto; `exclude` filtra disponibilidad. Excluir una sk
 produce bloqueo. Las claves o reglas desconocidas y los tipos incorrectos se rechazan.
 Las raíces relativas se resuelven respecto al directorio del proyecto.
 
-## Integración futura con Codex
+## Integración con Codex
 
 ```python
 from factory.skill_catalog import discover_catalog
@@ -180,7 +180,7 @@ contenido SKILL.md. `required_inputs()` produce los objetos `{type: "skill", nam
 del protocolo de Codex únicamente para requisitos; las recomendaciones siguen siendo pistas.
 El método tampoco ejecuta nada y rechaza un catálogo posterior que haya perdido un requisito.
 
-El futuro ejecutor debe usar el mismo directorio y las mismas raíces explícitas al consultar
+El ejecutor debe usar el mismo directorio y las mismas raíces explícitas al consultar
 skills en su conexión, o adjuntar los inputs por ruta. El registro de raíces es local a la
 conexión y no se debe asumir que persiste entre procesos. Las dependencias externas de las
 skills (navegador, conectores, etc.) se resuelven al ejecutarlas; este router verifica la
@@ -188,3 +188,6 @@ disponibilidad de las skills, no instala sus herramientas.
 
 No hay cambios de esquema SQLite, invocaciones LLM, ejecución de arquitectura ni pruebas
 reales que consuman cuota para seleccionar skills.
+
+Architecture adjunta las required por ruta mediante `SkillInput` y deja recommended como
+candidatas. Consulta [el flujo de architecture](architecture.md) para sus checkpoints y gates.

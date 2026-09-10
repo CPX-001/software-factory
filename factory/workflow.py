@@ -34,6 +34,14 @@ def next_action(snapshot):
                 "pending_questions": discovery.get("questions", []),
                 "retry_pending_turn": discovery.get("pending_turn") is not None,
                 "readiness": discovery.get("readiness")}
+    if snapshot["phase"] == "architecture":
+        return {"action": "architecture", "implemented": True,
+                "stage": snapshot.get("architecture", {}).get("stage", "not_started"),
+                "blockers": snapshot.get("architecture", {}).get("blockers", [])}
+    if snapshot["phase"] == "planning":
+        return {"action": "planning", "implemented": True,
+                "stage": snapshot.get("planning", {}).get("stage", "not_started"),
+                "blockers": snapshot.get("planning", {}).get("blockers", [])}
     return {"action": snapshot["phase"], "implemented": False}
 
 
@@ -58,10 +66,19 @@ class Store:
             db.execute("PRAGMA synchronous = FULL")
             db.execute("BEGIN IMMEDIATE" if write or initialize else "BEGIN")
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (1, 2) and not (initialize and version == 0):
+            if version not in (1, 2, 3, 4, 5) and not (initialize and version == 0):
                 raise WorkflowError(f"Unsupported schema version: {version}")
             if version == 1 and (write or initialize):
                 from .discovery import migrate
+                migrate(db)
+            if version in (1, 2) and (write or initialize):
+                from .architecture import migrate
+                migrate(db)
+            if version in (1, 2, 3) and (write or initialize):
+                from .runtime import migrate
+                migrate(db)
+            if version in (1, 2, 3, 4) and (write or initialize):
+                from .planning import migrate
                 migrate(db)
             yield db
             db.commit()
@@ -89,6 +106,12 @@ class Store:
                 self._event(db, 0, "initialized", {"phase": "discovery"})
             from .discovery import migrate
             migrate(db)
+            from .architecture import migrate
+            migrate(db)
+            from .runtime import migrate
+            migrate(db)
+            from .planning import migrate
+            migrate(db)
 
     @staticmethod
     def _event(db, revision, kind, payload):
@@ -101,11 +124,16 @@ class Store:
             state["decisions"] = [dict(row) for row in db.execute("SELECT * FROM decisions ORDER BY id")]
             from .discovery import evaluate_readiness, read_state
             state["discovery"] = read_state(db)
+            from .architecture import read_state as architecture_state
+            state["architecture"] = architecture_state(db)
+            from .planning import read_state as planning_state
+            state["planning"] = planning_state(db)
             discovery = state["discovery"]
             if state["phase"] == "discovery" and discovery["assessment"]:
                 discovery["readiness"] = evaluate_readiness(
                     discovery["knowledge"], discovery["questions"], state["decisions"], discovery["assessment"])
             state["status"] = ("waiting_for_human" if any(d["answer"] is None for d in state["decisions"])
+                               else "blocked" if (state["architecture"]["blockers"] or state["planning"]["blockers"])
                                else "input_pending" if discovery["pending_turn"] is not None
                                else "waiting_for_input" if state["phase"] == "discovery" and discovery["questions"]
                                else "completed" if state["phase"] == "completed" else "ready")
@@ -136,6 +164,10 @@ class Store:
                 raise WorkflowError("Pending human decisions block transitions")
             if target not in TRANSITIONS[phase]:
                 raise WorkflowError(f"Invalid transition: {phase} -> {target}")
+            if phase == "planning":
+                raise WorkflowError("Planning must pass its quality gate through the planning handler")
+            if phase == "architecture":
+                raise WorkflowError("Architecture must pass its quality gate through the architecture handler")
             if phase == "discovery":
                 raise WorkflowError("Discovery must pass its readiness gate through the discovery handler")
             db.execute("UPDATE workflow SET phase = ? WHERE id = 1", (target,))

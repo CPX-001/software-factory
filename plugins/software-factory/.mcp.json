@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "software_factory": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "factory.mcp_server"
+      ]
+    }
+  }
+}

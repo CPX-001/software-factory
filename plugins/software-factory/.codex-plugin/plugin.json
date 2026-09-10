@@ -1,0 +1,23 @@
+{
+  "name": "software-factory",
+  "version": "0.1.0",
+  "description": "Conversational interface to the persistent Software Factory controller.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Software Factory",
+    "shortDescription": "Manage Factory projects from Codex.",
+    "longDescription": "Run discovery and architecture through Factory workers, inspect state and answer decisions.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Continúa mi proyecto de Software Factory.",
+      "¿Qué decisiones necesita mi proyecto?",
+      "Enséñame la arquitectura vigente."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

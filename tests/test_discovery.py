@@ -39,12 +39,12 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(model.contexts[0]["user_message"], "Para fundadores")
         self.assertEqual(next_action(result)["action"], "discovery")
 
-    def test_ready_automatically_completes_and_architecture_remains_unimplemented(self):
+    def test_ready_automatically_completes_and_architecture_is_available(self):
         result = Discovery(self.store, FakeModel(complete_reply())).submit("Complete product brief")
         self.assertEqual(result["phase"], "architecture")
         self.assertTrue(result["discovery"]["readiness"]["ready"])
         self.assertIsNotNone(result["discovery"]["completed_at"])
-        self.assertEqual(next_action(result), {"action": "architecture", "implemented": False})
+        self.assertEqual(next_action(result), {"action": "architecture", "implemented": True, "stage": "not_started", "blockers": []})
         self.assertEqual([e["kind"] for e in self.store.events()],
                          ["initialized", "discovery_input", "discovery_updated", "phase_changed"])
         with self.assertRaises(WorkflowError):
@@ -241,7 +241,7 @@ class DiscoveryTests(unittest.TestCase):
         with patch("builtins.input", side_effect=["Idea", "Complete brief"]), patch("sys.stdout", new=io.StringIO()) as out:
             converse(self.store, model=model)
         self.assertEqual(len(model.contexts), 2)
-        self.assertIn("Arquitectura aún no implementada", out.getvalue())
+        self.assertIn("Ejecuta architecture para continuar", out.getvalue())
         with tempfile.TemporaryDirectory() as project:
             store = Store(project); store.initialize()
             Discovery(store, FakeModel(reply())).submit("Idea")

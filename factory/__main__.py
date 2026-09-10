@@ -4,7 +4,8 @@ import argparse
 import json
 import sqlite3
 
-from .workflow import Store, WorkflowError, next_action
+from .workflow import WorkflowError
+from .application import FactoryService
 
 
 def show_discovery(snapshot):
@@ -25,23 +26,19 @@ def show_discovery(snapshot):
                 if detail["recommendation"]:
                     print(f"  Recomendación: {detail['recommendation']}")
     if snapshot["phase"] != "discovery":
-        print(f"\nDiscovery completado. Fase actual: {snapshot['phase']}. Arquitectura aún no implementada.")
+        print(f"\nDiscovery completado. Fase actual: {snapshot['phase']}. Ejecuta architecture para continuar.")
 
 
 def converse(store, *, message=None, once=False, model=None):
-    from .codex_discovery import CodexDiscovery
-    from .discovery import Discovery
-
-    store.initialize()
-    engine = Discovery(store, model if model is not None else CodexDiscovery())
-    snapshot = store.snapshot()
+    service = store if isinstance(store, FactoryService) else FactoryService.for_local(store.project, discovery_model=model)
+    snapshot = service.initialize_local()
     if snapshot["phase"] != "discovery":
         raise WorkflowError(f"Project is in {snapshot['phase']}; discovery cannot run again")
     if message is not None:
-        snapshot = engine.submit(message)
+        snapshot = service.discovery_turn(message)
     elif snapshot["discovery"]["pending_turn"] is not None:
         print("Reintentando la entrada guardada…", flush=True)
-        snapshot = engine.resume()
+        snapshot = service.discovery_turn()
     show_discovery(snapshot)
     if once or snapshot["phase"] != "discovery":
         return
@@ -56,22 +53,29 @@ def converse(store, *, message=None, once=False, model=None):
             print("Sesión guardada.")
             return
         if answer.strip() == "/estado":
-            snapshot = store.snapshot()
+            snapshot = service.snapshot()
             print(json.dumps(snapshot, ensure_ascii=False, indent=2))
             continue
         if not answer.strip():
             continue
         print("Factory está incorporando tu respuesta…", flush=True)
-        snapshot = engine.submit(answer)
+        snapshot = service.discovery_turn(answer)
         show_discovery(snapshot)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Local deterministic software factory")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "status", "next", "discovery", "skills", "route-skills"):
+    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show"):
         command = commands.add_parser(name)
         command.add_argument("project", nargs="?", default=".")
+        if name == "planning-show":
+            command.add_argument("--view", choices=("plan", "milestones", "next_slice", "requirements", "verification", "markdown"), default="plan")
+        if name == "architecture-show":
+            command.add_argument("--markdown", action="store_true", help="Render the persisted human projection")
+        if name == "answer":
+            command.add_argument("--id", type=int, required=True)
+            command.add_argument("--answer", required=True)
         if name == "discovery":
             command.add_argument("--message", help="Initial idea or one conversational answer")
             command.add_argument("--once", action="store_true", help="Process at most one turn and exit")
@@ -86,36 +90,59 @@ def main():
             command.add_argument("--concern", action="append", default=[])
     args = parser.parse_args()
     try:
+        service = FactoryService.for_local(args.project)
         if args.command in ("skills", "route-skills"):
-            from dataclasses import asdict
-            from .skill_catalog import discover_catalog
-            from .skill_router import SkillRouter, Work, load_config
-
-            roots, policy = load_config(args.project, args.skills_config)
-            catalog = discover_catalog(args.project, (*roots, *args.skill_root))
-            if args.command == "skills":
-                print(json.dumps(catalog.as_dict(), ensure_ascii=False, indent=2))
-                return
-            work = Work(args.domain, args.intent, args.risk, args.ui, tuple(args.concern))
-            routing = SkillRouter(catalog, policy).route(work)
-            print(json.dumps({"work": asdict(work), "routing": routing.as_dict(),
-                              "catalog_errors": catalog.errors, "explicit_roots": catalog.explicit_roots},
-                             ensure_ascii=False, indent=2))
-            if routing.blocked:
+            from .skill_router import Work
+            work = (Work(args.domain, args.intent, args.risk, args.ui, tuple(args.concern))
+                    if args.command == "route-skills" else None)
+            result = service.skill_catalog(roots=args.skill_root, config=args.skills_config, work=work)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            if work and result["routing"]["status"] == "blocked":
                 parser.exit(2)
             return
-        store = Store(args.project)
-        if args.command == "discovery":
-            converse(store, message=args.message, once=args.once)
+        if args.command == "allow-root":
+            result = service.authorize_root(args.project)
+        elif args.command == "discovery":
+            converse(service, message=args.message, once=args.once)
             return
-        if args.command == "init":
-            store.initialize()
-        snapshot = store.snapshot()
-        result = next_action(snapshot) if args.command == "next" else snapshot
+        elif args.command == "planning":
+            result = service.run_planning()["planning"]
+        elif args.command == "planning-show":
+            result = service.get_planning(view=args.view)
+            if args.view == "markdown":
+                print(result or "No accepted roadmap", end="")
+                return
+        elif args.command == "architecture":
+            result = service.run_architecture()["architecture"]
+        elif args.command == "answer":
+            service.answer_decision(args.id, args.answer, continue_run=False)
+            result = service.snapshot()
+        elif args.command == "init":
+            service.initialize_project()
+            result = service.snapshot()
+        elif args.command == "architecture-show":
+            result = service.get_architecture()
+            if result.get("baseline", True) is None:
+                raise WorkflowError("There is no accepted architectural baseline; consult architecture-status")
+            if args.markdown:
+                print(service.get_architecture(view="markdown"), end="")
+                return
+        elif args.command == "architecture-adrs":
+            result = service.get_architecture(view="adrs")
+        elif args.command == "architecture-status":
+            result = service.architecture_diagnostics()
+        elif args.command == "pause":
+            result = service.pause()
+        elif args.command == "resume":
+            result = service.resume()
+        elif args.command == "next":
+            result = service.get_next_action()
+        else:
+            result = service.snapshot()
     except (WorkflowError, sqlite3.Error, OSError) as exc:
         parser.exit(1, f"factory: {exc}\n")
     except KeyboardInterrupt:
-        parser.exit(130, "\nSesión guardada; una entrada pendiente se reintentará al volver a ejecutar discovery.\n")
+        parser.exit(130, "\nSesión guardada; reanuda discovery o architecture con su comando correspondiente.\n")
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

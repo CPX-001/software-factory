@@ -1,2 +1,8 @@
 # Official SDK and bundled local Codex runtime; existing ChatGPT login, no API keys.
 openai-codex==0.147.0
+
+# Official MCP SDK, stdio integration; workers still use the existing Codex SDK.
+mcp==2.2.0
+
+# Plugin-creator validation helper used by the local installer.
+PyYAML==6.0.3

@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -9,6 +10,8 @@ import unittest
 from factory.workflow import Store, WorkflowError, next_action
 from factory.discovery import Discovery
 from tests.discovery_fakes import FakeModel, complete_reply
+from tests.architecture_fakes import finish
+from tests.planning_fakes import finish as finish_planning
 
 
 class WorkflowTests(unittest.TestCase):
@@ -16,6 +19,9 @@ class WorkflowTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.project = Path(self.tmp.name)
+        environment = patch.dict('os.environ', {'FACTORY_HOME': str(self.project / 'registry')})
+        environment.start()
+        self.addCleanup(environment.stop)
         self.store = Store(self.project)
         self.store.initialize()
 
@@ -28,7 +34,9 @@ class WorkflowTests(unittest.TestCase):
 
     def test_valid_progress_and_terminal_state(self):
         Discovery(self.store, FakeModel(complete_reply())).submit("Complete product brief")
-        for phase in ("planning", "execution", "verification", "completed"):
+        finish(self.store)
+        finish_planning(self.store)
+        for phase in ("verification", "completed"):
             self.store.transition(phase, self.store.snapshot()["revision"])
         self.assertEqual(next_action(self.store.snapshot())["action"], "done")
         with self.assertRaises(WorkflowError):
@@ -59,7 +67,9 @@ class WorkflowTests(unittest.TestCase):
 
     def test_verification_can_return_to_execution(self):
         Discovery(self.store, FakeModel(complete_reply())).submit("Complete product brief")
-        for phase in ("planning", "execution", "verification", "execution"):
+        finish(self.store)
+        finish_planning(self.store)
+        for phase in ("verification", "execution"):
             self.store.transition(phase, self.store.snapshot()["revision"])
         self.assertEqual(self.store.snapshot()["phase"], "execution")
 

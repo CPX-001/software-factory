@@ -5,6 +5,7 @@ import tempfile
 
 from .discovery_contract import INSTRUCTIONS, RESPONSE_SCHEMA
 from .workflow import WorkflowError
+from .codex_worker import worker_overrides
 
 
 class CodexDiscovery:
@@ -22,7 +23,7 @@ class CodexDiscovery:
             with tempfile.TemporaryDirectory(prefix="factory-discovery-") as cwd:
                 config = CodexConfig(
                     cwd=cwd,
-                    config_overrides=('forced_login_method="chatgpt"', 'model_provider="openai"'),
+                    config_overrides=worker_overrides(),
                     env={"OPENAI_API_KEY": "", "CODEX_API_KEY": ""},
                 )
                 with Codex(config=config) as codex:

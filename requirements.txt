@@ -1,0 +1,2 @@
+# Official SDK and bundled local Codex runtime; existing ChatGPT login, no API keys.
+openai-codex==0.147.0

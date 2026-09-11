@@ -289,6 +289,13 @@ class PlanningTests(unittest.TestCase):
         self.assertTrue(self.gate()['passed'], self.gate())
         risk['owner'] = 'missing'
         self.assertIn('risk_owner:external_capability', self.gate()['errors'])
+        risk['owner'] = self.source['baseline']['components'][0]['id']
+        self.assertIn('risk_owner:external_capability', self.gate()['errors'])
+        # Moving to a valid milestone ID still needs the reverse ownership link.
+        risk['owner'] = self.plan['milestones'][0]['id']
+        self.assertIn('risk_owner_link:external_capability', self.gate()['errors'])
+        self.plan['milestones'][0]['risks'] = [risk['id']]
+        self.assertTrue(self.gate()['passed'], self.gate())
         risk['owner'] = 's1'; risk['mitigation'] = ''
         self.assertIn('unmitigated_risk:external_capability', self.gate()['errors'])
         risk.update(acceptance_key='accept_risk', validation_slice='')

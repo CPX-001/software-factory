@@ -33,7 +33,8 @@ HARNESS = obj({'id': KEY, 'capability': string(1000), 'why': string(1500),
     'introduced_by': KEY, 'milestone': KEY, 'when': enum(('before_slice', 'during_slice')),
     'needed_by_gates': REFS})
 RISK = obj({'id': KEY, 'description': string(1500), 'severity': enum(('low', 'medium', 'high', 'critical')),
-    'owner': KEY, 'mitigation': string(1500, empty=True), 'acceptance_key': string(64, empty=True),
+    'owner': {**KEY, 'description': 'ID of a milestone or slice in this plan whose risks list includes this risk ID; never a component, person or gate.'},
+    'mitigation': string(1500, empty=True), 'acceptance_key': string(64, empty=True),
     'validation_slice': string(64, empty=True), 'blocks': REFS})
 PLAN_SCHEMA = obj({
     'schema_version': {'type': 'integer', 'enum': [1]}, 'architecture': BINDING,
@@ -145,8 +146,13 @@ Plan harness capabilities, not implementation: why, introducing slice/milestone,
 during that slice, exact gates that require them. Gate.harness and needed_by_gates agree.
 Introduction must precede consuming gates through dependencies (or the same slice before
 the gate); a before_slice gate cannot use harness built during that same slice.
-Preserve ALL baseline risks with the same IDs and at least the same severity; assign owners,
-mitigation/acceptance and a validation slice for high/critical mitigations. Risk.blocks lists
+Preserve ALL baseline risks with the same IDs and at least the same severity. Every risk.owner
+must be the ID of a milestone or slice IN THIS PLAN, and that owner's risks list must contain
+the risk ID. A baseline component, person or gate cannot own a planning risk. Gate error
+risk_owner:<risk_id> means the owner is not a milestone/slice ID; risk_owner_link:<risk_id>
+means the selected owner's risks list does not contain the risk ID. Correct both references
+without removing or downgrading the risk. Assign mitigation/acceptance and a validation slice
+for high/critical mitigations. Risk.blocks lists
 slices dependent on retiring uncertainty, which must depend on validation_slice. Critical
 risk validation must be execution_ready in near_term unless explicitly accepted. Empty scope is allowed for
 outlines, not execution_ready. Components reference baseline component IDs; boundaries

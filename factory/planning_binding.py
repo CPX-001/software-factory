@@ -131,10 +131,18 @@ def compile_binding(plan, source, templates, definition_id, policy, decisions=()
     for slice_ in plan['slices']:
         effective = {**slice_, 'acceptance_criteria': outline_criteria(plan, slice_)}
         errors.extend(check_coverage(plan, effective, value))
+        after = {g['id'] for g in plan['gates'] if g['target'] == slice_['id'] and g['trigger'] == 'after_slice'}
+        mapped = {i for c in value['checks'] if c['gate'] in after for i in c['criteria']}
+        errors.extend('slice_criterion_unmapped:' + slice_['id'] + ':' + str(i) + ':' + text
+                      for i, text in enumerate(effective['acceptance_criteria']) if i not in mapped)
         errors.extend(capability_errors(plan, effective, value, policy, source['baseline']))
     from .milestone import closure_obligations
     for milestone in plan['milestones']:
-        errors.extend(closure_obligations(plan, milestone, value)[2])
+        _, closure_checks, closure_errors = closure_obligations(plan, milestone, value)
+        errors.extend(closure_errors)
+        mapped = {i for c in closure_checks for i in c['criteria']}
+        errors.extend('milestone_criterion_unmapped:' + milestone['id'] + ':' + str(i) + ':' + text
+                      for i, text in enumerate(milestone['success_criteria'] + milestone['closure_conditions']) if i not in mapped)
         strategic = [g for g in plan['gates'] if g['target'] == milestone['id']]
         projected = {**plan, 'gates': [{**g, 'trigger': 'after_slice'} for g in strategic]}
         target = {'id': milestone['id'], 'scope': [], 'verification_expectation': '',

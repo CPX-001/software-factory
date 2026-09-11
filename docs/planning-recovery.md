@@ -72,3 +72,7 @@ contrato ya no exige añadir como contribuyente la milestone usada para situar e
 en el roadmap. Los cierres de las contribuyentes originales siguen siendo obligatorios;
 un check de cierre de otra milestone no obtiene esa excepción. Los diagnósticos identifican
 todos los contratos de requisito inválidos para que la corrección reciba causas concretas.
+También identifican target, índice y texto original de cada criterio sin comprobación,
+incluidas las condiciones de cierre que siguen a los success criteria de una milestone.
+El planner debe justificar la correspondencia con la evidencia; el diagnóstico no asigna
+checks ni cambia el plan automáticamente.

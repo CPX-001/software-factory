@@ -379,6 +379,15 @@ class AutomaticBindingTests(unittest.TestCase):
             if change == 'stale': mapping['definition_id'] = 'obsolete'
             if change == 'browser': bad['gates'][-1]['checks'][0] = 'Run mandatory browser validation'
             with self.subTest(change=change), self.assertRaises(FactoryError): compile(bad)
+        for trigger, prefix in (('after_slice','slice_criterion_unmapped:'),
+                                ('milestone_close','milestone_criterion_unmapped:')):
+            bad = deepcopy(p)
+            gate = next(g for g in bad['gates'] if g['trigger'] == trigger)
+            relevant = {g['id'] for g in bad['gates'] if g['target'] == gate['target'] and g['trigger'] == trigger}
+            for check in bad['execution_binding']['checks']:
+                if check['gate'] in relevant: check['criteria'] = []
+            with self.assertRaises(FactoryError) as error: compile(bad)
+            self.assertTrue(any(e.startswith(prefix + gate['target'] + ':0:') for e in error.exception.details['pending']))
 
     def test_project_close_check_can_revalidate_requirement_from_earlier_milestone(self):
         from factory.execution_contract import validate_verification

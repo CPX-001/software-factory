@@ -86,10 +86,14 @@ El controller se ejecuta después de desconectar el cliente de prueba. La indepe
 del proceso separado respecto al host MCP también conserva sus tests existentes.
 
 El piloto real anterior conserva sus 17 llamadas, commit y recibo. No se atribuye a ese
-recorrido esta vinculación automática: allí hubo una intervención revisada. Probar el
-modo nuevo con modelo real necesita autorización para superar el máximo de un piloto real
-del encargo. La comprobación humana del informe final en otro chat también sigue pendiente.
+recorrido esta vinculación automática: allí hubo una intervención revisada. El usuario
+autorizó después un [segundo piloto real con Fast](automatic-pilot-result.md), que completó
+discovery y arquitectura y quedó bloqueado en el gate de planning. No produjo un binding
+aceptado ni entrega. La comprobación humana del informe final en otro chat sigue pendiente.
 
-La suite completa pasa **321 tests en 533,917 segundos**. La [evidencia de esta corrección](evidence/end-to-end-12-automatic-binding.json)
+La versión inicial de esta corrección pasó **321 tests en 533,917 segundos**. Su [evidencia](evidence/end-to-end-12-automatic-binding.json)
 incluye hashes de fuentes, log, versión instalada del plugin y la consulta al piloto sin
-cambio de commit, recibo o consumo. No hubo inferencia real adicional.
+cambio de commit, recibo o consumo. En esa comprobación inicial no hubo inferencia real adicional.
+Las correcciones posteriores de Fast, esquema y diagnóstico pasan
+[326 tests](evidence/end-to-end-12-auto-checks.json); el segundo piloto real se describe
+por separado en su [informe](automatic-pilot-result.md).

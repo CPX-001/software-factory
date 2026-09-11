@@ -1,0 +1,43 @@
+{
+  "surface": "native MCP tool in this Codex conversation; server process predates the budget classification correction",
+  "ok": true,
+  "project": {
+    "id": "p_ba973102351c9eac",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product"
+  },
+  "phase": "planning",
+  "state": "blocked",
+  "progress": {
+    "knowledge_items": 16,
+    "discovery_ready": true,
+    "architecture_stage": "completed",
+    "architecture_calls": 2,
+    "planning_stage": "blocked",
+    "planning_calls": 7,
+    "roadmap_revision": null
+  },
+  "blockers": [
+    "risk_owner:risk_contract_drift",
+    "risk_owner_link:risk_contract_drift"
+  ],
+  "autonomous_run": {
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+    "status": "blocked",
+    "paused": false,
+    "reason": "blocked"
+  },
+  "project_validation": {
+    "state": "milestones_pending",
+    "candidate_commit": null,
+    "validated_version": null,
+    "contract_id": null,
+    "pending_criteria": [],
+    "checks": [],
+    "blocker": null,
+    "remediation": null,
+    "delivery": null,
+    "exclusions": []
+  },
+  "note": "Budget read from a fresh installed MCP process in end-to-end-12-auto-real.json; this older native process does not know rejected_before_inference."
+}

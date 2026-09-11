@@ -1,0 +1,83 @@
+{
+  "surface": "Native Factory MCP tool in this Codex conversation",
+  "action": "factory_resume",
+  "user_authorized_second_pilot": true,
+  "model_inference_owned_by": "detached Factory controller",
+  "result": {
+    "ok": true,
+    "data": {
+      "project": {
+        "id": "p_ba973102351c9eac",
+        "name": "Records end-to-end pilot",
+        "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product"
+      },
+      "phase": "discovery",
+      "state": "working",
+      "workflow_revision": 1,
+      "current_objective": "Clarify the project vision",
+      "progress": {
+        "knowledge_items": 0,
+        "discovery_ready": false,
+        "architecture_stage": "not_started",
+        "architecture_calls": 0,
+        "planning_stage": "not_started",
+        "planning_calls": 0,
+        "roadmap_revision": null
+      },
+      "last_message": "",
+      "questions": [],
+      "pending_decisions": {
+        "count": 0,
+        "items": []
+      },
+      "blockers": [],
+      "next_action": {
+        "action": "get_status",
+        "reason": "run_in_progress"
+      },
+      "architecture_revision": null,
+      "autonomous_run": {
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+        "status": "queued",
+        "paused": false,
+        "reason": null
+      },
+      "execution": {
+        "enabled": true,
+        "state": "not_started",
+        "continuation_policy": {
+          "enabled": true,
+          "inter_milestone": true,
+          "max_calls": 20,
+          "max_seconds": 1800,
+          "max_slices": 3,
+          "max_tokens": 500000
+        }
+      },
+      "continuation": null,
+      "project_validation": {
+        "state": "milestones_pending",
+        "candidate_commit": null,
+        "validated_version": null,
+        "contract_id": null,
+        "pending_criteria": [],
+        "checks": [],
+        "blocker": null,
+        "remediation": null,
+        "delivery": null,
+        "exclusions": []
+      },
+      "capabilities": {
+        "implemented_phases": [
+          "discovery",
+          "architecture",
+          "planning",
+          "execution"
+        ],
+        "project_validation_implemented": true,
+        "planning_implemented": true,
+        "execution_slice_limit": 3
+      }
+    }
+  }
+}

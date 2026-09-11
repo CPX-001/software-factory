@@ -1,0 +1,555 @@
+{
+  "recorded_at": 1789137547.3953638,
+  "factory_code_commit": "e7d9ba6842afa5aceec783fd15316bb7302d0b49",
+  "scenario": "Same Records Python/std-lib scenario; second explicitly authorized instance; independent oracles committed before discovery",
+  "project": {
+    "id": "p_ba973102351c9eac",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product"
+  },
+  "run": {
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+    "status": "blocked",
+    "paused": false,
+    "reason": "blocked"
+  },
+  "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+  "request_id": "records-v1-discovery-once",
+  "seed_commit": "ce2299d5292d32f0511890c400ef4ebe014141fa",
+  "contract_sha256": "9d001e229733bb2b458d256eba543484b07b800cff1e331bb8300b17ba68f4bd",
+  "authorization": {
+    "user_text": "ok da igual de momento sigue con eso ¿Autorizas una segunda ejecución del mismo escenario, con `gpt-5.6-terra/low`, máximo 20 llamadas, 30 minutos y 500.000 tokens?  meteçle boost de velocidad para ir mas rapido",
+    "reserve_authorization": "Earlier explicit removal of quota reserve retained; no billing/provider change",
+    "recorded_at": 1789136129.1636126
+  },
+  "policy": {
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "service_tier": "priority",
+    "max_attempts": 2,
+    "max_seconds": 600,
+    "max_tokens": 50000,
+    "continuation": {
+      "enabled": true,
+      "inter_milestone": true,
+      "max_calls": 20,
+      "max_seconds": 1800,
+      "max_slices": 3,
+      "max_tokens": 500000
+    },
+    "automatic_plan_binding": true,
+    "final_validation": {
+      "automatic_remediation": false,
+      "enabled": true
+    },
+    "quota_bucket": "codex",
+    "quota_reserve_percent": 0,
+    "write_paths": [
+      "records.py",
+      "category_report.py",
+      "USAGE.md"
+    ]
+  },
+  "original_created_at": 1789136147.1839242,
+  "original_deadline": 1789137947.1839242,
+  "budget_at_observation": {
+    "calls": 10,
+    "tokens": 192145,
+    "usage_unknown_calls": 0,
+    "rejected_before_inference": 1,
+    "analysis_calls": 10,
+    "analysis_tokens": 192145,
+    "implementation_calls": 0,
+    "refinement_calls": 0,
+    "preparation_calls": 0,
+    "remediation_calls": 0,
+    "implementation_tokens": 0,
+    "refinement_tokens": 0,
+    "preparation_tokens": 0,
+    "remediation_tokens": 0,
+    "calls_remaining": 10,
+    "tokens_remaining": 307855,
+    "seconds_remaining": 400.95660877227783,
+    "work_units": 0,
+    "remediations": 0,
+    "units_remaining": 3
+  },
+  "completed_phases": [
+    "discovery",
+    "architecture"
+  ],
+  "usage_by_phase": {
+    "discovery": {
+      "calls": 1,
+      "raw_usage_missing_calls": 0,
+      "rejected_before_inference": 0,
+      "tokens": 9370,
+      "unknown_usage_calls": 0
+    },
+    "architecture": {
+      "calls": 2,
+      "raw_usage_missing_calls": 0,
+      "rejected_before_inference": 0,
+      "tokens": 23585,
+      "unknown_usage_calls": 0
+    },
+    "planning": {
+      "calls": 7,
+      "raw_usage_missing_calls": 1,
+      "rejected_before_inference": 1,
+      "tokens": 159190,
+      "unknown_usage_calls": 0
+    }
+  },
+  "calls": [
+    {
+      "phase": "discovery",
+      "id": "2313edc2-cc1e-4f32-9f5b-4c69e7dc4fb4",
+      "state": "completed",
+      "started_at": 1789136148.6831787,
+      "completed_at": 1789136169.0608609,
+      "tokens": 9370,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d3-18e6-75d3-9c9d-7d12c3e6df2a",
+        "turn_id": "01a090d3-18fc-7a22-80b4-47cb7140788f"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "architecture",
+      "id": "bbca991d-b55a-445c-98e2-1b1426c64092",
+      "state": "completed",
+      "started_at": 1789136171.7729292,
+      "completed_at": 1789136209.8729265,
+      "tokens": 12035,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d3-730e-7d63-811a-9b16e1f27fc6",
+        "turn_id": "01a090d3-7325-7f32-a940-ceb3c4d5226a"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "architecture",
+      "id": "c4039359-1767-4fc2-b62c-de9bca8cec39",
+      "state": "completed",
+      "started_at": 1789136211.0236728,
+      "completed_at": 1789136217.8807178,
+      "tokens": 11550,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d4-0c5e-7681-8484-47ec78fb32ec",
+        "turn_id": "01a090d4-0c75-7781-a070-3e0b93f4b24c"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "ddbfad75-e2b6-40ed-bb2f-72e6a2abcba6",
+      "state": "failed",
+      "started_at": 1789136221.7965562,
+      "completed_at": 1789136224.591142,
+      "tokens": null,
+      "request_rejection": {
+        "code": "invalid_json_schema",
+        "error_sha256": "da09147b4513dd6bbb0059c9d6db721e6ce3c33d6cc15e61b90980d6713ce6ff",
+        "param": "text.format.schema",
+        "provenance": "provider rejection before generation; raw SDK usage remains unreported",
+        "status": 400
+      },
+      "runtime": {
+        "thread_id": "01a090d4-36a3-7113-ac6a-0277ba621c75",
+        "turn_id": "01a090d4-36bf-74e3-9cc9-b210240811e5"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "9e3d114d-df76-4d74-8f29-05c238ee4c5f",
+      "state": "completed",
+      "started_at": 1789136725.400071,
+      "completed_at": 1789136772.0891979,
+      "tokens": 24369,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090db-e5bd-7720-847e-dc05adc1467a",
+        "turn_id": "01a090db-e5e0-7ef2-96b6-4b4977710310"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "1c725773-6468-4e0a-9441-1898c962a6a5",
+      "state": "completed",
+      "started_at": 1789136773.8688781,
+      "completed_at": 1789136791.0246558,
+      "tokens": 24610,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dc-a325-7861-91b2-2bc8fdf257dd",
+        "turn_id": "01a090dc-a344-72a1-8984-266c91384514"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "a1b1c431-6cb7-417f-a710-fe6ee726e2cf",
+      "state": "completed",
+      "started_at": 1789136792.3218217,
+      "completed_at": 1789136856.75557,
+      "tokens": 30235,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dc-eb12-7481-957c-e692fc2f25c1",
+        "turn_id": "01a090dc-eb36-7932-92d0-77ccbd848704"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "28c473ef-ff30-4fea-b1b9-314831ff67bf",
+      "state": "completed",
+      "started_at": 1789136858.1109505,
+      "completed_at": 1789136869.303618,
+      "tokens": 25215,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dd-ec23-78c2-b48a-168a62cd611e",
+        "turn_id": "01a090dd-ec3f-7f32-9874-e1b78e34c3d0"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "d5b04dc3-0d3d-4cc0-b598-bd9b58b9a0be",
+      "state": "completed",
+      "started_at": 1789136870.6724749,
+      "completed_at": 1789136927.3856492,
+      "tokens": 29688,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090de-1d20-7292-9af9-c92034f1f173",
+        "turn_id": "01a090de-1d42-7fa2-a9f3-3d9de76b465f"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "7c103623-06f7-4890-9590-d579c5d10462",
+      "state": "completed",
+      "started_at": 1789136929.207123,
+      "completed_at": 1789136942.2696252,
+      "tokens": 25073,
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090df-01ef-7453-8f67-dc5c9255ac78",
+        "turn_id": "01a090df-0209-78d1-a011-4882ed5bc067"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    }
+  ],
+  "planning_calls": [
+    {
+      "id": 1,
+      "role": "propose",
+      "status": "failed",
+      "proposal_sha256": null,
+      "gate_errors_supplied": []
+    },
+    {
+      "id": 2,
+      "role": "propose",
+      "status": "completed",
+      "proposal_sha256": "fd145698e588d68f36e3a0faf105975ffb0ff1965a1c0a6377a4cb075105e93e",
+      "gate_errors_supplied": []
+    },
+    {
+      "id": 3,
+      "role": "critic",
+      "status": "completed",
+      "proposal_sha256": "5be18d160b5f03ab3173a2137a604a893f6e2ef57c271be2bd5bf2c62f6c15ed",
+      "gate_errors_supplied": []
+    },
+    {
+      "id": 4,
+      "role": "reconcile",
+      "status": "completed",
+      "proposal_sha256": "839846374f18330fc223624d47ff8c331cc27e056b5f9d8058bd2ffe36aa2a9b",
+      "gate_errors_supplied": [
+        "coverage_slice_link:users",
+        "local_gate_missing:sl_ranked_cli",
+        "risk_order:risk_contract_drift:sl_ranked_cli",
+        "risk_owner:risk_contract_drift",
+        "risk_owner_link:risk_contract_drift"
+      ]
+    },
+    {
+      "id": 5,
+      "role": "critic_final",
+      "status": "completed",
+      "proposal_sha256": "3888a09149bf423c0a272c910690e8a02669db2d0d3e4092269439d154e8f430",
+      "gate_errors_supplied": []
+    },
+    {
+      "id": 6,
+      "role": "reconcile",
+      "status": "completed",
+      "proposal_sha256": "70d062423e55242aebae018f375276267856937fd593ccc1dabf73450d4a3a0a",
+      "gate_errors_supplied": [
+        "risk_owner:risk_contract_drift",
+        "risk_owner_link:risk_contract_drift"
+      ]
+    },
+    {
+      "id": 7,
+      "role": "critic_final",
+      "status": "completed",
+      "proposal_sha256": "7a6f27014138221df25e29a57bdc43d5ca8a09922ae18413b3b847f72ffd672a",
+      "gate_errors_supplied": [
+        "risk_owner:risk_contract_drift",
+        "risk_owner_link:risk_contract_drift"
+      ]
+    }
+  ],
+  "stop": {
+    "phase": "planning",
+    "state": "blocked",
+    "blockers": [
+      "risk_owner:risk_contract_drift",
+      "risk_owner_link:risk_contract_drift"
+    ],
+    "risk": {
+      "acceptance_key": "",
+      "blocks": [],
+      "description": "Duplicating validation or category normalization in reporting could diverge from record_rules.py or the reusable summary contract.",
+      "id": "risk_contract_drift",
+      "mitigation": "Keep ranking dependent on summarize, route every category through the shared helper, and use the declared composition checks.",
+      "owner": "cmp_category_report",
+      "severity": "medium",
+      "validation_slice": "sl_ranked_cli"
+    },
+    "allowed_owner_ids": [
+      "ms_validated_summary",
+      "ms_ranked_cli",
+      "sl_summary_core",
+      "sl_ranked_cli"
+    ],
+    "critic_findings": [],
+    "reconciliations_used": 2,
+    "bounded_recovery_used": 1,
+    "planning_call_limit": 8,
+    "recovery_pairs_remaining": 0,
+    "accepted_roadmap": false
+  },
+  "product_result": {
+    "implementation_calls": 0,
+    "accepted_slices": 0,
+    "closed_milestones": 0,
+    "independent_acceptance": {
+      "reason": "No durable accepted-candidate receipt exists",
+      "status": "NOT_RUN"
+    },
+    "validated_commit": null,
+    "receipt": null,
+    "delivery": null
+  },
+  "interventions": [
+    {
+      "kind": "explicit_initial_authorization",
+      "details": "Second pilot, Fast tier, 20 calls / 1800 seconds / 500000 tokens; prior zero-reserve authorization retained."
+    },
+    {
+      "kind": "factory_defect",
+      "details": "Provider rejected oneOf in planning response schema before generation. Replaced with two closed anyOf alternatives without weakening authorization."
+    },
+    {
+      "kind": "recovery",
+      "details": "Classified exact persisted 400 invalid_json_schema rejection and resumed the same run/deadline. The request remains counted; raw usage stays null. Discovery and architecture were not repeated."
+    },
+    {
+      "kind": "factory_contract_ambiguity",
+      "details": "Risk owner semantics were implicit. Schema/prompt now explicitly require a linked milestone/slice ID. Current gate and recovery limits are unchanged; no further real attempt performed."
+    },
+    {
+      "kind": "reporting_defect",
+      "details": "Smoke now includes analysis gate blockers and distinguishes missing raw usage from classified pre-generation rejections."
+    }
+  ],
+  "mcp": {
+    "installed_plugin": "0.1.0+codex.20260911141403",
+    "fresh_installed_tool_schema_checked": true,
+    "native_start_evidence": "end-to-end-12-auto-native-start.json",
+    "native_blocker_evidence": "end-to-end-12-auto-native-blocked.json",
+    "selection_survived_reconnect": true,
+    "same_run_after_reconnect": true,
+    "controller_progress_after_client_disconnect": true,
+    "human_final_delivery_observation": false,
+    "limitation": "This conversation native MCP process predates the usage-classification fix. Budget observations use a fresh installed MCP process; neither is presented as human UI observation."
+  },
+  "speed": {
+    "requested": "priority",
+    "advertised": true,
+    "observed_notification": null,
+    "speedup_measured": false,
+    "note": "Fast requested for each thread and turn. No inference or additional API billing used by the model/list preflight."
+  },
+  "first_pilot_preserved": {
+    "project": "p_3084354cc76d1c23",
+    "state": "project_verified",
+    "validated_version": {
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+      "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+      "current": true
+    },
+    "delivery": "/home/cpx/.local/share/software-factory/pilots/records-v1/product/.factory/deliveries/sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f/REPORT.md",
+    "calls": 17,
+    "tokens": 268679
+  },
+  "goal_complete": false,
+  "pending": [
+    "A real accepted automatically-bound plan and end-to-end execution with no manual binding",
+    "Human observation of an accepted final delivery in Codex App"
+  ],
+  "limitations": [
+    "Python/unittest with declared standard-library resources only",
+    "No product accepted by the second pilot",
+    "Changing prompt/code does not renew persisted planning recovery allowance",
+    "No push, publication or deployment"
+  ],
+  "execution_code_versions": {
+    "start_through_schema_rejection": "85fdd556db2e16e6b5b549938e0670dafcae96fc",
+    "same_run_recovery_and_planning_block": "251e5765936b1cab5f1e49f7dd4efa43f80ed582",
+    "later_risk_contract_clarification_no_real_retry": "11cb926300c2f4ab54334411049ec1cc7a8257d7",
+    "smoke_reporting_correction_verified_read_only": "e7d9ba6842afa5aceec783fd15316bb7302d0b49"
+  },
+  "final_observation": {
+    "recorded_at": 1789138168.6365876,
+    "phase": "planning",
+    "state": "blocked",
+    "blockers": [
+      "risk_owner:risk_contract_drift",
+      "risk_owner_link:risk_contract_drift"
+    ],
+    "run": {
+      "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+      "status": "blocked",
+      "paused": false,
+      "reason": "blocked"
+    },
+    "budget": {
+      "calls": 10,
+      "tokens": 192145,
+      "usage_unknown_calls": 0,
+      "rejected_before_inference": 1,
+      "analysis_calls": 10,
+      "analysis_tokens": 192145,
+      "implementation_calls": 0,
+      "refinement_calls": 0,
+      "preparation_calls": 0,
+      "remediation_calls": 0,
+      "implementation_tokens": 0,
+      "refinement_tokens": 0,
+      "preparation_tokens": 0,
+      "remediation_tokens": 0,
+      "calls_remaining": 10,
+      "tokens_remaining": 307855,
+      "seconds_remaining": 0,
+      "work_units": 0,
+      "remediations": 0,
+      "units_remaining": 3
+    },
+    "note": "The original 30-minute deadline has now elapsed during Factory fixes and deterministic testing. Initial stop was the planning ownership gate and exhausted recovery allowance, not quota."
+  },
+  "normal_suite_evidence": "end-to-end-12-auto-checks.json"
+}

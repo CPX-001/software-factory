@@ -1,4 +1,9 @@
-# Paso 12: producto real validado y entregado; autonomía inicial pendiente
+# Paso 12: primera entrega real; segundo piloto autónomo bloqueado
+
+El [segundo piloto autorizado con Fast](automatic-pilot-result.md) completó discovery y
+arquitectura, pero su planning agotó las correcciones sin superar el gate de propiedad de
+riesgos. No tiene una entrega aceptada. Este documento conserva la evidencia del primer
+piloto, que sí llegó a `project_verified` con la intervención de vinculación registrada.
 
 **El mismo piloto real ha alcanzado `project_verified` y tiene entrega local.** Sus dos
 milestones están cerrados y los tests independientes y el CLI pasaron desde una copia limpia.
@@ -151,8 +156,9 @@ La preparación no precarga arquitectura/planning, no autoriza inferencia y nunc
 un piloto. El plan resultante necesita un binding revisado: el de esta instancia no se
 aplica silenciosamente a otro roadmap. La nueva opción `--automatic-binding` prepara los
 oráculos y la propuesta de autorización para que el planning normal produzca esa vinculación.
-Su ejecución real sigue pendiente; crear otra instancia con inferencia requiere superar
-explícitamente el límite de un único piloto real del encargo.
+Su segunda ejecución real fue autorizada posteriormente y está documentada en
+[el resultado del piloto automático](automatic-pilot-result.md); quedó bloqueada antes de
+aceptar el plan. No hay autorización implícita para crear más instancias con inferencia.
 
 El usuario ya comprobó selección, reenvío pausado e inspección en dos chats; esa
 [evidencia de App](evidence/end-to-end-12-codex-app.json) no necesita repetirse. Las tools

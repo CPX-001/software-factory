@@ -122,7 +122,7 @@ class AnalysisModel:
     def __init__(self, service, store, phase):
         self.service, self.store, self.phase = service, store, phase
 
-    def respond(self, context, *, skill_inputs=()):
+    def respond(self, context, *, skill_inputs=(), _cached_only=False):
         journal, runtime = ContinuationStore(self.store), Runtime(self.store)
         group = journal.latest()
         if not group or not group.get('analysis'):
@@ -150,6 +150,8 @@ class AnalysisModel:
                 return saved['response']  # A crash after saving evidence needs no new model call.
             if saved.get('state') == 'started':
                 raise FactoryError('analysis_recovery_required', 'An interrupted analysis call has no saved final response; inspect its runtime before retrying')
+        if _cached_only:
+            return None
         policy = group['policy']
         sandbox = LinuxSandbox(self.store.path.parent / 'analysis' / str(uuid.uuid4()))
         workspace = sandbox.directory / 'workspace'

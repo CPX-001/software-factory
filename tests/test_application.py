@@ -158,6 +158,30 @@ class AuthorizedAnalysisTests(unittest.TestCase):
         self.assertEqual(self.store.snapshot()['phase'], 'execution')
         self.assertEqual(self.service.get_status(self.identifier)['continuation']['deadline'], before['deadline'] + 1800)
 
+    def test_completed_critic_checkpoint_recovers_at_limit_without_another_call(self):
+        from factory.planning import Planning
+        _, before, policy, request = self.blocked_recovery(schema_rejection=True)
+        self.sdk.responses = [self.repaired_owner, review()]
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        accept = Planning._accept_response
+        def crash(planner, state, *args, **kwargs):
+            if state['stage'] == 'critic_final':
+                raise OSError('Stopped after durable model output and before planning checkpoint')
+            return accept(planner, state, *args, **kwargs)
+        with patch.object(Planning, '_accept_response', crash), self.assertRaises(OSError):
+            self.service.run_pending(*self.jobs[-1])
+        state = self.store.snapshot()['planning']
+        self.assertEqual(state['calls'], state['authorized_recovery']['call_limit'])
+        contexts = len(self.sdk.contexts)
+        self.service.resume(self.identifier); self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(self.store.snapshot()['phase'], 'execution')
+        self.assertEqual(len(self.sdk.contexts), contexts)
+        self.assertEqual(self.service.get_status(self.identifier)['continuation']['budget']['calls'], before['budget']['calls'] + 2)
+        with self.store._connection() as db:
+            call = db.execute('SELECT status,error FROM planning_calls ORDER BY id DESC LIMIT 1').fetchone()
+        self.assertEqual(call['status'], 'completed')
+        self.assertIn('before planning checkpoint', call['error'])
+
     def test_schema_rejection_recovery_retains_call_budget_without_inventing_usage(self):
         from factory.continuation_store import ContinuationStore
         provider_error = {'codex_error_info':'other','message':json.dumps({'status':400,'error':{

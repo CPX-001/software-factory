@@ -657,6 +657,8 @@ class Planning:
                     continue
                 self._complete(snapshot, state)
                 return self.store.snapshot()
+            if self._recover_completed_call(snapshot, state):
+                continue
             limits = call_limits(state)
             if state['calls'] >= limits['calls'] or state['stage'].startswith('critic') and state['critic_calls'] >= limits['critic_passes']:
                 state.update(stage='blocked', blockers=['Planning persistent call/review limit reached; explicit new effort required'])
@@ -725,36 +727,7 @@ class Planning:
                 from .codex_planning import CodexPlanning
                 self.model = CodexPlanning()
             response = self.model.respond(context, skill_inputs=skill_inputs)
-            (validate_review if role.startswith('critic') else validate_plan)(response)
-            bounded(response, MAX_OUTPUT_BYTES)
-            with self.store._connection(write=True) as db:
-                self.store._check(db, revision)
-                db.execute("UPDATE planning_calls SET response=?,status='completed' WHERE id=?", (canonical(response), call_id))
-                if role.startswith('critic'):
-                    targets = {e['id'] for k in ('milestones', 'slices', 'gates', 'harness', 'risks') for e in state['proposal'][k]}
-                    targets.update(r['key'] for r in state['source']['requirements'])
-                    targets.update(e['id'] for k in SECTIONS for e in state['source']['baseline'][k])
-                    findings = response['findings']
-                    if len({f['id'] for f in findings}) != len(findings) or any(not f['targets'] or not set(f['targets']) <= targets for f in findings):
-                        raise WorkflowError('Planning findings require unique IDs and valid targets')
-                    state['review'] = response
-                    state['reviews'].append(response)
-                    if findings and not state['reconciliations']:
-                        state.update(stage='reconcile', reconciliations=1)
-                    elif findings:
-                        state.update(stage='blocked', blockers=['Unresolved review ' + f['id'] + ': ' + f['description'] for f in findings])
-                    else:
-                        state['stage'] = 'gate'
-                else:
-                    state['proposal'] = response
-                    for question in response['unresolved_questions']:
-                        self._request(db, question)
-                    if not response['unresolved_questions']:
-                        classification = classify(state['source'], response)
-                        classification['required'] |= state['classification']['required']
-                        state['classification'] = classification
-                        state['stage'] = ('critic_final' if role == 'reconcile' else 'critic') if classification['required'] else 'gate'
-                self._save(db, state, revision, 'planning_call_completed')
+            self._accept_response(state, call_id, response, revision)
         except BaseException as exc:
             with self.store._connection(write=True) as db:
                 current = db.execute('SELECT revision FROM workflow WHERE id=1').fetchone()[0]
@@ -766,6 +739,63 @@ class Planning:
                 else:
                     self.store._record(db, current + 1, 'planning_stale_call', {'call_id': call_id})
             raise
+
+    def _recover_completed_call(self, snapshot, state):
+        """Finish an interrupted checkpoint from the existing analysis cache, even at its call limit."""
+        from .analysis_execution import AnalysisModel
+        if not isinstance(self.model, AnalysisModel):
+            return False
+        with self.store._connection() as db:
+            row = db.execute('SELECT * FROM planning_calls ORDER BY id DESC LIMIT 1').fetchone()
+        if not row or row['status'] not in ('failed', 'interrupted') or row['role'] != state['stage']:
+            return False
+        saved = json.loads(row['context'])
+        context = saved['input']
+        if (context['source'] != source_snapshot(snapshot) or context['proposal'] != state['proposal'] or
+                context['human_answers'] != self._decisions(snapshot)):
+            return False
+        response = self.model.respond(context, skill_inputs=saved['required_skills'], _cached_only=True)
+        if response is None:
+            return False
+        self._accept_response(state, row['id'], response, snapshot['revision'], recovered=True)
+        return True
+
+    def _accept_response(self, state, call_id, response, revision, *, recovered=False):
+        role = state['stage']
+        (validate_review if role.startswith('critic') else validate_plan)(response)
+        bounded(response, MAX_OUTPUT_BYTES)
+        with self.store._connection(write=True) as db:
+            self.store._check(db, revision)
+            db.execute("UPDATE planning_calls SET response=?,status='completed' WHERE id=?", (canonical(response), call_id))
+            state['blockers'] = []
+            if role.startswith('critic'):
+                targets = {e['id'] for k in ('milestones', 'slices', 'gates', 'harness', 'risks') for e in state['proposal'][k]}
+                targets.update(r['key'] for r in state['source']['requirements'])
+                targets.update(e['id'] for k in SECTIONS for e in state['source']['baseline'][k])
+                if state['proposal'].get('execution_binding'):
+                    targets.add('execution_binding')
+                    targets.update(c['id'] for c in state['proposal']['execution_binding']['checks'])
+                findings = response['findings']
+                if len({f['id'] for f in findings}) != len(findings) or any(not f['targets'] or not set(f['targets']) <= targets for f in findings):
+                    raise WorkflowError('Planning findings require unique IDs and valid targets')
+                state['review'] = response
+                state['reviews'].append(response)
+                if findings and not state['reconciliations']:
+                    state.update(stage='reconcile', reconciliations=1)
+                elif findings:
+                    state.update(stage='blocked', blockers=['Unresolved review ' + f['id'] + ': ' + f['description'] for f in findings])
+                else:
+                    state['stage'] = 'gate'
+            else:
+                state['proposal'] = response
+                for question in response['unresolved_questions']:
+                    self._request(db, question)
+                if not response['unresolved_questions']:
+                    classification = classify(state['source'], response)
+                    classification['required'] |= state['classification']['required']
+                    state['classification'] = classification
+                    state['stage'] = ('critic_final' if role == 'reconcile' else 'critic') if classification['required'] else 'gate'
+            self._save(db, state, revision, 'planning_checkpoint_recovered' if recovered else 'planning_call_completed')
 
     def _complete(self, snapshot, state):
         with self.store._connection(write=True) as db:

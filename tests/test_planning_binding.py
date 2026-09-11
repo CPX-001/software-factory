@@ -179,6 +179,18 @@ class AutomaticBindingTests(unittest.TestCase):
                                          planning_recovery=request['planning_recovery'])
         self.assertEqual(len(self.jobs), 2)
 
+    def test_critic_can_identify_binding_root_and_check_without_losing_real_findings(self):
+        finding = {'id':'mapping_gap','severity':'high','category':'verification',
+            'targets':['execution_binding',self.binding['checks'][0]['id']],
+            'description':'The claimed behavior lacks evidence','recommendation':'Preserve the acceptance gap'}
+        self.model.responses[3:] = [self.propose, review([finding]), self.propose, review([finding]),
+                                   self.propose, review([finding])]
+        self.start(); state = self.drive()
+        self.assertEqual(state['state'], 'blocked')
+        self.assertEqual(self.store.snapshot()['planning']['review']['findings'], [finding])
+        self.assertIn('Unresolved review mapping_gap', state['blockers'][0])
+        self.assertEqual(self.worker.contexts, [])
+
     def test_missing_bindings_stop_within_shared_budget_before_implementation(self):
         self.policy['continuation']['max_calls'] = 5
         original = self.propose

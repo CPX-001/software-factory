@@ -136,7 +136,8 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
         report['full_workflow_limits'] = effective_policy['continuation']
         report['full_workflow_limits_enforced'] = True
         report['integration_gaps'] = [g for g in report['integration_gaps']
-                                    if g['code'] == 'initial_execution_authorization_boundary' and effective_policy.get('analysis_authorized')]
+                                    if g['code'] == 'initial_execution_authorization_boundary' and effective_policy.get('analysis_authorized')
+                                    and not effective_policy.get('automatic_plan_binding')]
     if run:
         from scripts.diagnose_execution import inspect_runtime
         report['quota_preflight'] = await asyncio.to_thread(inspect_runtime,
@@ -270,11 +271,12 @@ def main():
     parser.add_argument('--effort')
     parser.add_argument('--prepared', type=Path, help='Reuse/upgrade the existing unexecuted pilot report')
     parser.add_argument('--from-discovery', action='store_true', help='Create the same small product with only its initial brief and independent oracles')
+    parser.add_argument('--automatic-binding', action='store_true', help='Prepare pinned verification templates for reviewed automatic planning binding; does not authorize or run inference')
     parser.add_argument('--directory', type=Path, help='New persistent pilot directory outside Factory; never overwritten')
     parser.add_argument('--installed', action='store_true', help='Use the locally installed plugin launcher for the from-discovery pilot')
     args = parser.parse_args()
     if args.prepared:
-        if args.from_discovery or args.directory or args.model or args.effort:
+        if args.from_discovery or args.directory or args.model or args.effort or args.automatic_binding:
             parser.error('Resume with --prepared alone; creation and authorization changes are separate operations')
         value = json.loads(args.prepared.read_text())
         prepared = (load_discovery_pilot(args.prepared) if value.get('phase_inputs') == 'discovery_brief'
@@ -284,10 +286,10 @@ def main():
         if not args.directory or not args.model or not args.effort:
             parser.error('From-discovery creation requires --directory, --model and --effort explicitly')
         from scripts.execution_smoke_fixture import prepare_from_discovery
-        prepared = prepare_from_discovery(args.directory, args.model, args.effort)
+        prepared = prepare_from_discovery(args.directory, args.model, args.effort, automatic_binding=args.automatic_binding)
         root = Path(prepared['root'])
     else:
-        if args.directory or args.installed:
+        if args.directory or args.installed or args.automatic_binding:
             parser.error('--directory/--installed belong to the from-discovery pilot')
         if not args.model or not args.effort:
             parser.error('Provide --prepared, or explicit --model and --effort')

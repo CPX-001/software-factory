@@ -25,6 +25,27 @@ def closure_gates(plan, mid):
     return [g for g in plan['gates'] if g['target'] == mid and g['trigger'] in ('milestone_close', 'project_checkpoint')]
 
 
+def closure_obligations(plan, milestone, definition):
+    mid = milestone['id']
+    gates = closure_gates(plan, mid)
+    ids = {g['id'] for g in gates}
+    checks = [c for c in definition['checks'] if c['gate'] in ids]
+    errors = []
+    for g in gates:
+        covered = {i for c in checks if c['gate'] == g['id'] for i in c['gate_checks']}
+        if covered != set(range(len(g['checks']))):
+            errors.append('verification_definition_missing:' + g['id'])
+    covered = {i for c in checks for i in c['criteria']}
+    if covered != set(range(len(criteria(milestone)))):
+        errors.append('milestone_criteria_unmapped')
+    human = {i for c in checks if c['kind'] == 'human_review' for i in c['criteria']}
+    if not set(milestone.get('subjective_criteria', [])) <= human:
+        errors.append('subjective_criteria_require_human_review')
+    if not gates or not set(milestone['verification_gates']) <= ids:
+        errors.append('milestone_gates_missing')
+    return gates, checks, errors
+
+
 def eligible_milestone(plan, closed):
     return next((m for m in plan['milestones'] if m['id'] not in closed and set(m['dependencies']) <= set(closed)), None)
 
@@ -125,24 +146,7 @@ class MilestoneGate:
                 'python_sha256': hashlib.sha256(Path('/usr/bin/python3').read_bytes()).hexdigest()}
 
     def obligations(self):
-        mid = self.milestone['id']
-        gates = closure_gates(self.plan, mid)
-        ids = {g['id'] for g in gates}
-        checks = [c for c in self.definition['checks'] if c['gate'] in ids]
-        errors = []
-        for g in gates:
-            covered = {i for c in checks if c['gate'] == g['id'] for i in c['gate_checks']}
-            if covered != set(range(len(g['checks']))):
-                errors.append('verification_definition_missing:' + g['id'])
-        covered = {i for c in checks for i in c['criteria']}
-        if covered != set(range(len(criteria(self.milestone)))):
-            errors.append('milestone_criteria_unmapped')
-        human = {i for c in checks if c['kind'] == 'human_review' for i in c['criteria']}
-        if not set(self.milestone.get('subjective_criteria', [])) <= human:
-            errors.append('subjective_criteria_require_human_review')
-        if not gates or not set(self.milestone['verification_gates']) <= ids:
-            errors.append('milestone_gates_missing')
-        return gates, checks, errors
+        return closure_obligations(self.plan, self.milestone, self.definition)
 
     def review(self, validation, check):
         with self.store._connection(write=True) as db:

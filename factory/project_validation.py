@@ -15,21 +15,26 @@ from .reproducibility import atomic_text, environment_identity, export_commit
 
 def prior_input_authorizations(store, snapshot, definition):
     """Resolve exact earlier user data; no model output or synthetic human answer."""
+    roadmap = snapshot['planning']['roadmap']
+    return resolve_prior_inputs(store, roadmap['plan'], definition, before=roadmap['created_at'])
+
+
+def resolve_prior_inputs(store, plan, definition, *, before):
+    """Shared by proposed-plan review and publication against the accepted plan."""
     from hashlib import sha256
     result = []
-    roadmap = snapshot['planning']['roadmap']
     for exclusion in definition.get('project_acceptance', {}).get('exclusions', []):
         source = exclusion.get('prior_input')
         if not source:
             continue
-        coverage = next((c for c in roadmap['plan']['coverage'] if c['requirement'] == exclusion['requirement']), None)
+        coverage = next((c for c in plan['coverage'] if c['requirement'] == exclusion['requirement']), None)
         with store._connection() as db:
             row = db.execute('SELECT r.message,r.turn_id,t.created_at,t.status FROM factory_requests r '
                              'JOIN discovery_turns t ON t.id=r.turn_id WHERE r.id=?', (source['request_id'],)).fetchone()
         if (not coverage or coverage['disposition'] not in ('deferred', 'out_of_scope') or
                 not coverage['rationale'] or not row or row['status'] != 'completed' or
                 source['quote'] not in row['message'] or
-                row['created_at'] > roadmap['created_at']):
+                row['created_at'] > before):
             raise FactoryError('prior_exclusion_authorization_missing', 'Exclusion must reference exact user input predating the accepted plan')
         result.append({**exclusion, 'disposition': coverage['disposition'], 'rationale': coverage['rationale'],
                        'message_sha256': sha256(row['message'].encode()).hexdigest(),
@@ -48,6 +53,12 @@ def contract_snapshot(snapshot, definition, definition_id, *, prior_inputs=()):
             'decisions': [d for d in snapshot['decisions'] if any(d['id'] == e.get('decision_id')
                 for e in definition.get('project_acceptance', {}).get('exclusions', []))],
             **({'prior_inputs': list(prior_inputs)} if prior_inputs else {})}
+
+
+def exclusion_decision_authorized(decision, requirement, disposition):
+    return bool(decision and decision.get('answered_at') and
+                (decision.get('answer') or '').strip().lower() == 'accept' and
+                requirement in decision['question'] and disposition in decision['question'])
 
 
 class ProjectGate(MilestoneGate):
@@ -161,9 +172,7 @@ class ProjectGate(MilestoneGate):
                     self.exclusions.append({**coverage, 'authorization': prior})
                     continue
                 decision = decisions.get(exclusions.get(key, {}).get('decision_id'))
-                if (not coverage['rationale'] or not decision or not decision['answered_at'] or
-                        (decision['answer'] or '').strip().lower() != 'accept' or
-                        key not in decision['question'] or disposition not in decision['question']):
+                if not coverage['rationale'] or not exclusion_decision_authorized(decision, key, disposition):
                     errors.append('prior_exclusion_authorization_missing:' + key)
                 else:
                     self.exclusions.append({**coverage, 'authorization': decision})

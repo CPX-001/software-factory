@@ -115,7 +115,7 @@ class RankingAcceptance(unittest.TestCase):
 '''
 
 
-def prepare_from_discovery(root, model, effort, *, registry_home=None):
+def prepare_from_discovery(root, model, effort, *, registry_home=None, automatic_binding=False):
     """A NEW persistent instance of the records scenario, with no generated phase input.
 
     Only normal project initialization/pause are used. No model, enqueue, acceptance,
@@ -141,6 +141,9 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None):
         'PILOT.md': (repo / 'pilots/records-v1/brief.md').read_text(),
         '.gitignore': '.factory/\n__pycache__/\n*.pyc\n',
     }
+    if automatic_binding:
+        for name in ('test_summary_integration.py', 'test_report_integration.py', 'test_delivery_contract.py'):
+            resources[name] = (repo / 'pilots/records-v1' / name).read_text()
     valid = [{'category': 'Books', 'amount': 7}, {'category': ' Food ', 'amount': 10},
              {'category': 'FOOD', 'amount': 2}]
     examples = {'valid.json': valid, 'reordered.json': list(reversed(valid)), 'empty.json': [],
@@ -159,6 +162,13 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None):
                   ('ranking', 'test_category_report.py', 4), ('cli', 'test_product_cli.py', 5)]]
     checks[-1]['entrypoint'] = {'path': 'category_report.py', 'args': ['examples/valid.json'],
         'stdout': '[{"category":"food","count":2,"total":12},{"category":"books","count":1,"total":7}]\n'}
+    if automatic_binding:
+        checks.extend({**deepcopy(checks[0]), 'id': key, 'target': path, 'min_tests': 2}
+            for key, path in (('summary_integration', 'test_summary_integration.py'),
+                              ('report_integration', 'test_report_integration.py'),
+                              ('delivery_contract', 'test_delivery_contract.py')))
+        for check in checks:
+            check.update(clean_copy=True, source_sha256=hashlib.sha256(resources[check['target']].encode()).hexdigest())
     contract = {'id': 'records-v1', 'input_kind': 'pilot_test_data', 'independent_of_implementation_worker': True,
         'factory_source': git(repo, 'rev-parse', 'HEAD'),
         'resource_hashes': {p: hashlib.sha256(t.encode()).hexdigest() for p, t in resources.items()},
@@ -191,6 +201,18 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None):
         'full_workflow_limits_enforced': False,
         'request_id': 'records-v1-discovery-once', 'real_model_requested': False,
         'recovery': 'Use this report with --prepared. Do not recreate or overwrite this directory.'}
+    if automatic_binding:
+        # Proposal only: the normal policy tool still requires execution authorization.
+        policy['automatic_plan_binding'] = True
+        prepared['verification_templates'] = {'schema_version': 1, 'checks': checks, 'harness': [],
+            'resources': [{'path': p, 'sha256': h} for p, h in contract['resource_hashes'].items()] +
+                [{'path': 'pilot-contract.json', 'sha256': prepared['contract_sha256']}],
+            'project_acceptance': {'entry_checks': ['cli'], 'delivery_paths': contract['delivery_paths'],
+                                   'runtime': 'python_stdlib', 'exclusions': []},
+            'scope_authorizations': [{'id': 'initial_exclusions', 'disposition': 'out_of_scope',
+                'prior_input': {'request_id': prepared['request_id'], 'quote':
+                    'No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\n'
+                    'otros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.'}}]}
     atomic_json(root / 'report.json', prepared)
     return prepared
 

@@ -30,6 +30,7 @@ POLICY_SCHEMA['properties']['continuation']['properties']['inter_milestone'] = {
 POLICY_SCHEMA['properties']['final_validation'] = obj({
     'enabled': {'type': 'boolean'}, 'automatic_remediation': {'type': 'boolean'},
 })
+POLICY_SCHEMA['properties']['automatic_plan_binding'] = {'type': 'boolean'}
 
 CHECK_SCHEMA = obj({
     'id': KEY, 'gate': KEY, 'kind': enum(('python_behavior', 'python_unittest', 'specialist', 'human_review')),
@@ -48,6 +49,13 @@ CHECK_SCHEMA['properties']['entrypoint'] = obj({
 VERIFICATION_SCHEMA = obj({'schema_version': {'type': 'integer', 'enum': [1]},
     'checks': array(CHECK_SCHEMA, 100),
     'harness': array(obj({'id': KEY, 'paths': array(string(300), 30)}), 100)})
+VERIFICATION_SCHEMA['properties']['resources'] = array(obj({
+    'path': string(300), 'sha256': {'type': 'string', 'pattern': '^[0-9a-f]{64}$'},
+}), 200)
+VERIFICATION_SCHEMA['properties']['scope_authorizations'] = array(obj({
+    'id': KEY, 'disposition': enum(('deferred', 'out_of_scope')),
+    'prior_input': obj({'request_id': string(128), 'quote': string(6000)}),
+}), 150)
 VERIFICATION_SCHEMA['properties']['requirement_acceptance'] = array(obj({
     'requirement': KEY, 'condition': string(2000), 'milestones': array(KEY, 100),
     'checks': array(KEY, 100),
@@ -121,6 +129,10 @@ def validate_result(result):
 def validate_verification(definition, plan):
     import json
     check_schema(definition, VERIFICATION_SCHEMA)
+    for resource in definition.get('resources', []):
+        relative_path(resource['path'])
+    if len({r['path'] for r in definition.get('resources', [])}) != len(definition.get('resources', [])):
+        raise FactoryError('invalid_verification', 'Duplicate verification resource')
     gates = {g['id']: g for g in plan['gates']}
     slices = {s['id']: s for s in plan['slices']}
     milestones = {m['id']: m for m in plan['milestones']}

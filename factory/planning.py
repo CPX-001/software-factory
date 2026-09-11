@@ -410,6 +410,17 @@ class Planning:
         self.should_stop = should_stop or (lambda: False)
         self.allow_recovery = allow_recovery
 
+    def _gate(self, plan, source, decisions=(), review_passed=True):
+        gate = quality_gate(plan, source, decisions, review_passed)
+        if gate['passed']:
+            from .planning_binding import gate_errors
+            errors, binding = gate_errors(self.store, plan, source)
+            gate['errors'].extend(errors)
+            gate['passed'] = not gate['errors']
+            if binding:
+                gate['verification_binding'] = binding
+        return gate
+
     def queue_recovery(self):
         """One additional plan correction, charged to an explicitly authorized workflow.
 
@@ -507,6 +518,9 @@ class Planning:
                          'source': source, 'source_fingerprint': fingerprint(source),
                          'proposal': None, 'review': None, 'reviews': [], 'reconciliations': 0,
                          'classification': classify(source), 'routing': None}
+                from .execution_store import ExecutionStore
+                if ExecutionStore(self.store).policy().get('automatic_plan_binding'):
+                    state['classification']['required'] = True
                 self._mutate(snapshot, state, 'planning_started')
                 continue
             state = {k: deepcopy(v) for k, v in planning.items() if k not in ('roadmap', 'decision_details')}
@@ -528,7 +542,7 @@ class Planning:
             if state['stage'] == 'gate':
                 decisions = self._decisions(snapshot)
                 review_passed = not state['classification']['required'] or bool(state['reviews']) and not state['reviews'][-1]['findings']
-                gate = quality_gate(state['proposal'], state['source'], decisions, review_passed)
+                gate = self._gate(state['proposal'], state['source'], decisions, review_passed)
                 state['gate'] = gate
                 if not gate['passed']:
                     if not state['reconciliations']:
@@ -573,7 +587,7 @@ class Planning:
             state['routing'] = routing.as_dict()
             gate_errors = state.get('gate', {}).get('errors', [])
             if role == 'reconcile' and state['proposal']:
-                gate_errors = quality_gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
+                gate_errors = self._gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
             context = bounded({'role': role, 'source': state['source'],
                 'runtime_semantics': {'version': 1,
                     'milestone_dependencies': 'Factory closes prerequisite milestones before selecting ANY slice from a dependent milestone.',
@@ -584,6 +598,11 @@ class Planning:
                 'gate_errors': gate_errors, 'skills': routing.context(),
                 'limits': {'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
                            'reconciliations': 1 + state.get('recovery_attempts', 0), 'calls': MAX_CALLS, 'detailed_slices': 3}})
+            from .planning_binding import context as binding_context
+            automatic = binding_context(self.store)
+            if automatic:
+                context['automatic_plan_binding'] = automatic
+                bounded(context)
         except WorkflowError as exc:
             state['blockers'] = [str(exc)]
             self._mutate(snapshot, state, 'planning_preflight_failed')

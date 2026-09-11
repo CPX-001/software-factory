@@ -45,6 +45,21 @@ PLAN_SCHEMA = obj({
     'unresolved_questions': array(QUESTION, 3), 'decision_keys': REFS,
     'blockers': TEXTS, 'rationale': string(4000),
 })
+# References only. The planner cannot supply replacement test code, cases, commands,
+# minima, timeouts, permissions, approvals or a new definition of success.
+PLAN_SCHEMA['properties']['execution_binding'] = obj({
+    'definition_id': string(80),
+    'checks': array(obj({'id': KEY, 'template': KEY, 'gate': KEY,
+        'criteria': array({'type': 'integer', 'minimum': 0}, 100),
+        'gate_checks': array({'type': 'integer', 'minimum': 0}, 100)}), 100),
+    'harness': array(obj({'id': KEY, 'paths': array(string(300), 30)}), 100),
+    'requirements': array(obj({'requirement': KEY, 'milestones': REFS, 'checks': REFS}), 150),
+    'exclusions': array(obj({'requirement': KEY}), 150),
+})
+EXCLUSION_BINDING = PLAN_SCHEMA['properties']['execution_binding']['properties']['exclusions']['items']
+EXCLUSION_BINDING['properties'].update(authorization=KEY, decision_id={'type': 'integer', 'minimum': 1})
+EXCLUSION_BINDING['oneOf'] = [{'required': ['authorization'], 'not': {'required': ['decision_id']}},
+                            {'required': ['decision_id'], 'not': {'required': ['authorization']}}]
 REVIEW_SCHEMA = obj({'findings': array(obj({'id': KEY, 'severity': enum(('high', 'critical')),
     'category': enum(('coverage', 'milestones', 'slice_size', 'horizontal_slice', 'dependencies',
                       'risk_order', 'verification', 'architecture')),
@@ -106,6 +121,26 @@ use before_slice/after_slice. Milestone gates use milestone_close. System gates 
 project_checkpoint for intermediate checkpoints or project_close for final acceptance
 after all milestones. Every milestone references its milestone gate. A slice with verification
 triggers must have an integration gate matching those signals at that slice.
+
+When automatic_plan_binding is supplied, include execution_binding referencing exactly its
+definition_id and the authorized templates. Never supply new procedures or alter tests,
+cases, minima, entrypoints, delivery conditions or permissions. Reuse a template under
+distinct check IDs for distinct gates; preserve each original template ID in at least one
+binding. Map every planned criterion and gate check to appropriate evidence, not blanket
+index coverage. Requirements map to strategic checks for FULL acceptance; a transversal
+requirement needs a project_close check as well as all contributing milestone references.
+Its acceptance text will be copied verbatim from the authoritative requirement by Factory.
+Only scope_authorizations already supplied by the operator, or an actual recorded human
+decision, may authorize exclusions with the same disposition. A new exclusion decision must
+explicitly name the requirement key and disposition and receive the user's exact 'accept'.
+An unrelated quote cannot justify an exclusion. Otherwise retain the gap and ask the real
+scope decision; never manufacture consent. Harness paths can reference
+only the declared pinned resources. The clean_copy runner is an existing Factory capability;
+do not create product work to rebuild it. Product files/tests not covered by authorized
+procedures remain an acceptance gap, not an invitation to write an easier oracle.
+The ordinary planning critic MUST assess these bindings against the supplied immutable
+verification resources and original conditions. Flag a mapping that covers indices but does
+not actually test the claimed behavior. Do not rerun discovery or architecture for binding.
 
 Plan harness capabilities, not implementation: why, introducing slice/milestone, before or
 during that slice, exact gates that require them. Gate.harness and needed_by_gates agree.

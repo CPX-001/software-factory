@@ -47,9 +47,17 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
 - Before planning, the same `factory_execution_policy` accepts an explicitly authorized
   finite continuation policy and predeclared check templates. This enables bounded analysis
   with the existing worker and shared ledger, including discovery, architecture and planning.
-  It does not claim those templates are already bound to a plan. Inspect the accepted plan
-  before binding its concrete verification; the original checks, run and consumed budget
-  remain fixed. `factory_resume` reuses this analysis run, including after human input.
+  It does not claim those templates are already bound to a plan. Automatic binding needs
+  the separate pre-planning opt-in `policy.automatic_plan_binding=true`, a project acceptance
+  contract, and committed independent oracle resources outside worker write permissions.
+  Declare auxiliary resources by path/hash and prior scope authorizations by exact user input.
+  The existing planner proposes only references and its ordinary critic reviews their meaning
+  against the pinned resources. Factory compiles the accepted mapping and continues the same
+  detached run automatically. Never create that mapping yourself in the conversation or
+  equate index coverage with behavioral coverage. Missing or unsupported checks remain blockers.
+  Without this opt-in, inspect the accepted plan before its separately reviewed binding;
+  the original checks, run and consumed budget remain fixed. `factory_resume` reuses this
+  analysis run, including after human input.
   At the binding boundary, a previously authorized increase may extend finite aggregate
   limits through the same policy tool: Factory records the delta and retains all consumption.
   This is an explicit policy amendment, never a reset on resume. Pinned independent unittest

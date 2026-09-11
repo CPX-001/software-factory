@@ -49,6 +49,10 @@ class Controller:
                         from .continuation import Continuation
                         continuation = Continuation(self.service, store)
                         group = continuation.journal.latest()
+                        if group and group['runtime_id'] == run_id and group.get('analysis') and group['policy'].get('automatic_plan_binding'):
+                            from .planning_binding import adopt
+                            adopt(store, run_id)
+                            group = continuation.journal.latest()
                         if group and group['runtime_id'] == run_id and not group.get('analysis'):
                             continuation.run(run_id)
                             return

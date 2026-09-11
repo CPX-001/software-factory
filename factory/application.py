@@ -137,12 +137,21 @@ class FactoryService:
                 except FactoryError as exc:
                     execution['diagnostic'] = {'code': exc.code, 'message': str(exc), **exc.details}
                     action.update(action='inspect_execution', reason=str(exc))
-                if ExecutionStore(store).policy().get('analysis_authorized'):
+                policy = ExecutionStore(store).policy()
+                if policy.get('analysis_authorized') and not policy.get('automatic_plan_binding'):
                     execution['diagnostic'] = {'code': 'verification_binding_pending',
                         'message': 'Accepted planning still needs concrete verification bindings; analysis authorization is not an executable gate mapping.',
                         'gates': [g['id'] for g in snapshot['planning']['roadmap']['plan']['gates']],
                         'next_step': 'Bind the accepted plan without weakening the predeclared checks, delivery conditions or exclusion approvals; preserve consumed workflow budgets.'}
                     action.update(action='authorize_execution', reason=execution['diagnostic']['message'])
+                elif policy.get('analysis_authorized'):
+                    from .continuation_store import ContinuationStore
+                    group = ContinuationStore(store).latest() or {}
+                    execution['diagnostic'] = group.get('diagnostic') or {
+                        'code': 'automatic_verification_binding_pending',
+                        'message': 'The owning controller will publish the reviewed binding within the existing authorization.'}
+                    action.update(action='get_status' if runtime['status'] in ACTIVE else 'resume',
+                                  reason=execution['diagnostic']['message'])
             if (execution.get('diagnostic') or {}).get('next_step'):
                 action['next_step'] = execution['diagnostic']['next_step']
         from .continuation_store import ContinuationStore, TERMINAL
@@ -339,6 +348,15 @@ class FactoryService:
         project = self._project(project)['id']
         store = self._store(project)
         store.initialize()
+        if request_id is not None:
+            with store._connection() as db:
+                previous = db.execute('SELECT r.message,t.status FROM factory_requests r '
+                    'JOIN discovery_turns t ON t.id=r.turn_id WHERE r.id=?', (request_id,)).fetchone()
+            if previous:
+                if previous['message'] != message:
+                    raise FactoryError('request_id_conflict', 'Request ID already used for different input')
+                if previous['status'] == 'completed':
+                    return self.get_status(project)  # Never reinterpret a replay as a later human answer.
         runtime = Runtime(store)
         with runtime.lock('launch'), runtime.lock():
             if runtime.state()['status'] == 'queued':
@@ -405,7 +423,13 @@ class FactoryService:
             controller = Continuation(self, store)
             group = controller.journal.latest()
             if group and group.get('analysis'):
-                return self.get_status(project)  # Accepted planning still needs the concrete check binding.
+                if group['policy'].get('automatic_plan_binding'):
+                    with runtime.lock('launch'):
+                        runtime.unpause()
+                        if runtime.state()['status'] not in ACTIVE and not runtime.live():
+                            runtime.update(group['runtime_id'], 'queued', 'Recover the accepted planning binding on the same workflow')
+                            self._launch_registered(project, group['runtime_id'], runtime)
+                return self.get_status(project)
             if group and group['state'] == 'execution_authorized':
                 controller.start('analysis-handoff-' + group['id'])
                 return self.get_status(project)

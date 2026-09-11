@@ -32,6 +32,8 @@ class Continuation:
             if prior:
                 return prior[0]
             if data and data['state'] == 'execution_authorized':
+                if self.runtime.live() or self.runtime.state()['status'] in ACTIVE:
+                    return data['id']  # The owning controller may be completing automatic binding.
                 with self.store._connection() as db:
                     check_budget(db, data['id'], dispatch=True)
                 data['integrated'] = reconcile(self.store)

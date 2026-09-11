@@ -6,6 +6,11 @@ No se declara completado el goal de autonomía general desde una idea nueva: la 
 inicial de las pruebas al roadmap todavía necesitó una intervención revisada. También está
 pendiente la observación humana del informe final en otro chat de Codex App.
 
+La [corrección posterior de esa vinculación](planning-binding.md) está implementada con
+autorización previa y revisión en el planning existente. Sus pruebas usan modelos simulados
+y el mismo escenario de dos milestones. No se atribuye esa transición automática al piloto
+real ya completado ni se han reiniciado sus contadores para volver a probarlo.
+
 La [evidencia real final](evidence/end-to-end-12-real-delivery.json) conserva commits,
 recibos, uso, intervenciones y recuperación. La [consulta nativa y repetición](evidence/end-to-end-12-delivery-native.json)
 demuestra acceso al resultado mediante las tools de esta conversación, sin nuevo consumo.
@@ -143,8 +148,11 @@ Para recrear únicamente la preparación, usa un directorio que todavía no exis
 ```
 
 La preparación no precarga arquitectura/planning, no autoriza inferencia y nunca sobrescribe
-un piloto. El plan resultante necesitará un binding revisado: el de esta instancia no se
-aplica silenciosamente a otro roadmap.
+un piloto. El plan resultante necesita un binding revisado: el de esta instancia no se
+aplica silenciosamente a otro roadmap. La nueva opción `--automatic-binding` prepara los
+oráculos y la propuesta de autorización para que el planning normal produzca esa vinculación.
+Su ejecución real sigue pendiente; crear otra instancia con inferencia requiere superar
+explícitamente el límite de un único piloto real del encargo.
 
 El usuario ya comprobó selección, reenvío pausado e inspección en dos chats; esa
 [evidencia de App](evidence/end-to-end-12-codex-app.json) no necesita repetirse. Las tools
@@ -152,17 +160,24 @@ nativas de esta conversación consultaron ejecución activa y resultado final. E
 MCP instalado se desconectó mientras el controller avanzaba entre slices, milestones y
 validación. Esto no equivale a observar todos los pasos en la UI humana.
 
-El plugin está actualizado a `0.1.0+codex.20260911131027`. Para la comprobación humana final,
+El piloto real utilizó el plugin `0.1.0+codex.20260911131027`. Para la comprobación humana final,
 el mensaje pendiente en otro chat es:
 
 > Usa Software Factory. Consulta el proyecto p_3084354cc76d1c23. Muestra la versión
 > validada, sus exclusiones y la ruta del informe de entrega local. No inicies ni
 > reanudes ejecuciones.
 
-La suite completa pasa **310 tests en 505,201 segundos**, sin fallos, errores ni omisiones
+Antes de la corrección de vinculación, la suite completa pasó **310 tests en 505,201 segundos**, sin fallos, errores ni omisiones
 y sin inferencia. Se conservan el [log](evidence/end-to-end-12-final-tests.txt) y el
 [manifiesto de fuentes](evidence/end-to-end-12-final-checks.json). También pasan compilación,
 whitespace e instalación/validación del plugin. Los tests con modelos simulados cubren
 además fallo integrado, remediación global acotada, obsolescencia, ausencia de capacidades
 y recuperación. Esos casos no se atribuyen al piloto real, que no necesitó una remediación
 final del producto.
+
+La corrección posterior de vinculación pasa **321 tests en 533,917 segundos**, sin fallos,
+errores ni omisiones y sin inferencia real. Se conservan el [nuevo log](evidence/end-to-end-12-automatic-binding-tests.txt)
+y la [evidencia con hashes](evidence/end-to-end-12-automatic-binding.json). El plugin instalado
+`0.1.0+codex.20260911135342` expone la nueva autorización. El mismo smoke instalado, en modo
+consulta, mantiene el commit, recibo y consumo del piloto real. No completa la validación
+real de la nueva transición ni sustituye la comprobación humana pendiente.

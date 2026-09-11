@@ -108,8 +108,20 @@ def harness_errors(plan, slice_, definition, worktree, *, after=False):
 
 def protected_harness(definition, inventory):
     paths = {p for h in definition['harness'] for p in h['paths']}
+    paths.update(r['path'] for r in definition.get('resources', []))
     paths.update(c['target'] for c in definition['checks'] if c['kind'] == 'python_unittest')
     return {p: inventory[p] for p in paths if p in inventory}
+
+
+def verify_resources(definition, root):
+    expected = {r['path']: r['sha256'] for r in definition.get('resources', [])}
+    expected.update({c['target']: c['source_sha256'] for c in definition['checks'] if c.get('source_sha256')})
+    if not expected:
+        return
+    inventory = files(root)
+    for path, digest in expected.items():
+        if inventory.get(path, {}).get('sha256') != digest:
+            raise FactoryError('verification_weakened', 'Pinned verification resource changed or disappeared: ' + path)
 
 
 class Verifier:
@@ -119,6 +131,7 @@ class Verifier:
         self.results = {}
 
     def run(self, plan, slice_, definition, worktree, *, trigger, should_stop, on_process, remaining):
+        verify_resources(definition, worktree)
         identity = code_identity(worktree)
         gates = {g['id'] for g in gates_for(plan, slice_['id'], trigger)}
         evidence = []

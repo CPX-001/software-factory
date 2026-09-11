@@ -66,7 +66,7 @@ def select_slice(snapshot, accepted):
     return None, reasons or [{'reason': 'all_prepared_slices_accepted'}]
 
 
-def configure(store, policy, verification):
+def configure(store, policy, verification, *, owner_run_id=None):
     validate_policy(policy)
     if store.snapshot()['phase'] in ('discovery', 'architecture', 'planning'):
         from .analysis_execution import configure_analysis
@@ -74,6 +74,8 @@ def configure(store, policy, verification):
     sources = current_sources(store.snapshot())
     plan = store.snapshot()['planning']['roadmap']['plan']
     validate_verification(verification, plan)
+    from .verification import verify_resources
+    verify_resources(verification, store.project)
     from hashlib import sha256
     for check in verification['checks']:
         if check.get('source_sha256'):
@@ -116,6 +118,8 @@ def configure(store, policy, verification):
                          'deadline': continuation['deadline'] + new_limits['max_seconds'] - old_limits['max_seconds'],
                          'authorized_at': authorized['authorized_at']}
         original = journal.definition(continuation['policy']['definition_id'])['verification']
+        if any(original.get(k) != verification.get(k) for k in ('resources', 'scope_authorizations')):
+            raise FactoryError('acceptance_contract_frozen', 'Plan binding must preserve pinned resources and prior scope authorizations')
         mapped = {c['id']: c for c in verification['checks']}
         for c in original['checks']:
             if c['id'] not in mapped or any(mapped[c['id']].get(k) != v for k, v in c.items()
@@ -125,13 +129,20 @@ def configure(store, policy, verification):
         if before_project != after_project and (not before_project or not after_project or
                 any(after_project.get(k) != v for k, v in before_project.items() if k != 'exclusions') or
                 any(e not in after_project['exclusions'] for e in before_project['exclusions']) or
-                any('prior_input' not in e for e in after_project['exclusions'] if e not in before_project['exclusions'])):
+                any('prior_input' not in e and not _approved_exclusion(store.snapshot(), e) for e in
+                    after_project['exclusions'] if e not in before_project['exclusions'])):
             raise FactoryError('acceptance_contract_frozen', 'Plan binding must preserve delivery and exclusion conditions')
     prior_inputs = []
     if verification.get('project_acceptance'):
         from .project_validation import prior_input_authorizations
         prior_inputs = prior_input_authorizations(store, store.snapshot(), verification)
     with store._connection(write=True) as db:
+        if owner_run_id:
+            control = db.execute('SELECT run_id,paused FROM factory_control WHERE id=1').fetchone()
+            if control['run_id'] != owner_run_id:
+                raise FactoryError('stale_run', 'Automatic binding publication lost its process owner')
+            if control['paused']:
+                raise FactoryError('paused', 'Pause prevents automatic binding publication')
         db.execute('INSERT OR IGNORE INTO execution_definitions VALUES (?,?,?)',
                    (identifier, canonical(definition), time.time()))
         if verification.get('project_acceptance'):
@@ -162,6 +173,14 @@ def configure(store, policy, verification):
     return {'policy': authorized, 'definition_id': identifier, 'slice_limit': limit}
 
 
+def _approved_exclusion(snapshot, exclusion):
+    from .project_validation import exclusion_decision_authorized
+    decision = next((d for d in snapshot['decisions'] if d['id'] == exclusion.get('decision_id')), None)
+    coverage = next((c for c in snapshot['planning']['roadmap']['plan']['coverage'] if c['requirement'] == exclusion['requirement']), None)
+    return bool(coverage and coverage['disposition'] in ('deferred', 'out_of_scope') and
+                exclusion_decision_authorized(decision, coverage['requirement'], coverage['disposition']))
+
+
 class Execution:
     def __init__(self, service, store):
         self.service, self.store = service, store
@@ -188,6 +207,8 @@ class Execution:
         definition = {**definition, 'verification': execution_definition(snapshot['planning']['roadmap']['plan'], definition['verification'])}
         if data and (data['policy'] != policy or data['definition_id'] != policy['definition_id']):
             raise FactoryError('policy_changed', 'Execution authorization changed')
+        from .verification import verify_resources
+        verify_resources(definition['verification'], data['worktree'] if data and Path(data['worktree']).exists() else self.store.project)
         selected = data['slice'] if data else select_slice(snapshot, self.journal.acceptances())[0] if check_selected else None
         if data and data.get('refinement_id'):
             from .refinement import effective_slice

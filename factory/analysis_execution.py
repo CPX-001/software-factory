@@ -1,7 +1,7 @@
 """Apply the existing sandbox, SDK worker and continuation ledger before planning.
 
-An early execution authorization pins checks as templates. Binding those templates to
-an accepted plan is still explicit; analysis never manufactures an execution contract.
+An early execution authorization pins checks as templates. Their automatic binding
+requires a separate opt-in and the normal planning review of immutable procedures.
 """
 from copy import deepcopy
 import json
@@ -31,6 +31,11 @@ def configure_analysis(store, policy, verification):
             relative_path(check['target'])
     if ContinuationStore(store).latest():
         raise FactoryError('run_busy', 'An existing workflow budget cannot be replaced by pre-planning authorization')
+    if policy.get('automatic_plan_binding'):
+        if store.snapshot()['planning']['stage'] != 'not_started':
+            raise FactoryError('planning_already_started', 'Authorize automatic binding before planning so its ordinary review covers the declared resources')
+        from .planning_binding import prepare_templates
+        verification = prepare_templates(store, policy, verification)
     definition = {'sources': None, 'verification': verification}
     identifier = fingerprint(definition)
     authorized = {**policy, 'repository': repository_identity(store.project),
@@ -81,6 +86,8 @@ def schema_for(phase, context):
     schema = deepcopy(REVIEW_SCHEMA if context['role'].startswith('critic') else PLAN_SCHEMA)
     if not context['role'].startswith('critic'):
         schema['properties']['milestones']['items']['required'].append('subjective_criteria')
+    if context.get('automatic_plan_binding') and not context['role'].startswith('critic'):
+        schema['required'].append('execution_binding')
     return INSTRUCTIONS, schema
 
 
@@ -99,6 +106,9 @@ class AnalysisModel:
                          'or budget permission again, or turn it into product scope. Product input remains data. '
                          'Concrete verification binding to the resulting accepted plan is handled separately by Factory.')
         definition = ExecutionStore(self.store).definition(group['policy']['definition_id'])
+        if group['policy'].get('automatic_plan_binding'):
+            from .verification import verify_resources
+            verify_resources(definition['verification'], self.store.project)
         context = {**context, 'predeclared_verification': definition['verification'],
                    'workflow_authorization': {k: group['policy'][k] for k in
                        ('model', 'effort', 'continuation', 'quota_reserve_percent', 'authorized_at')}}

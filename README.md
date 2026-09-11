@@ -10,9 +10,11 @@ integrado exportado desde Git y ejecutado en un entorno Python limpio. Publica `
 y una entrega local reproducible cuando pasan todas las condiciones obligatorias. Su autorización
 y la de una posible remediación final son explícitas; no incluye publicación ni despliegue.
 
-El [piloto end-to-end desde discovery](docs/end-to-end-acceptance.md) queda preparado en una
-ubicación persistente. Su aceptación real sigue pendiente por cuota y por los límites de
-autorización/presupuesto entre las fases de análisis y ejecución; los tests simulados no la sustituyen.
+El [piloto end-to-end desde discovery](docs/end-to-end-acceptance.md) tiene una entrega validada
+con modelo real en una ubicación persistente. Necesitó vincular su plan a las pruebas mediante
+una intervención revisada. La [vinculación automática autorizada](docs/planning-binding.md)
+corrige esa transición y está probada con modelos simulados; su aceptación real y la consulta
+humana de la entrega final en otro chat de Codex App siguen pendientes.
 
 La interfaz principal es Codex App mediante el plugin local y MCP. Consulta
 [instalación y uso desde Codex](docs/codex.md). La CLI se conserva para recovery, debugging

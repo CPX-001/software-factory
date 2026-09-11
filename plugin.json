@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "software-factory",
+  "version": "0.1.0",
+  "description": "Develop projects with persistent Codex memory and autonomous continuity.",
+  "author": { "name": "CPX-001" },
+  "repository": "https://github.com/CPX-001/software-factory"
+}

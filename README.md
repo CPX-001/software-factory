@@ -11,7 +11,35 @@ de tests impuestos. Codex elige las comprobaciones apropiadas y continúa hasta 
 alcance o necesitar una respuesta real del usuario. Las mejoras futuras quedan diferidas.
 Consulta [cómo funciona](docs/adaptive-workflow.md).
 
-La interfaz principal es el plugin de Codex App. En una conversación nueva:
+La interfaz principal es el plugin de Codex App. Para instalarlo, puedes pedirle a
+Codex en una conversación con acceso a terminal:
+
+> Instala el plugin Software Factory desde https://github.com/CPX-001/software-factory.
+> Sigue las instrucciones de instalación del README.
+
+El repositorio incluye su propio marketplace; no necesita publicarse en el catálogo
+de OpenAI. Puede ser privado: el ordenador que instala debe tener acceso a GitHub
+con tu cuenta. La instalación nativa utiliza:
+
+```bash
+codex plugin marketplace add https://github.com/CPX-001/software-factory.git
+codex plugin add software-factory@software-factory-git --json
+```
+
+Requiere Python 3.11+, Git y una versión de Codex compatible con plugins portables
+(comprobado con 0.147.0). **Para el agente que instala:** usa `installedPath` del
+resultado JSON y ejecuta `python3 <installedPath>/scripts/plugin_mcp.py --prepare`.
+Esto descarga las dependencias antes del primer chat, sin llamadas al modelo ni
+publicación, y evita que la descarga agote el tiempo de arranque del MCP. Si ya hay
+otra copia personal activa, comprueba la nueva antes de desinstalar la anterior.
+
+El motor se prepara en una carpeta del usuario. Codex gestiona la copia del plugin; no necesitas clonar el
+repositorio, abrirlo ni preparar `.venv` a mano. La instalación se hace en cada equipo.
+Si la CLI no está disponible en el terminal, el agente puede clonar temporalmente
+este repositorio y ejecutar `python3 scripts/install_codex_plugin.py`: ese instalador
+incluye su propia CLI. También hay un [ZIP privado instalable](docs/private-plugin.md).
+
+Después de instalar, abre una conversación nueva:
 
 > Usa Software Factory. Trabajemos en /ruta/a/mi-proyecto. Mi idea es […]. Ayúdame a concretarla
 > y desarrolla lo acordado; pregúntame cuando una decisión necesite mi criterio.

@@ -16,11 +16,7 @@
     "defaultPrompt": [
       "Continúa mi proyecto de Software Factory.",
       "¿Qué decisiones necesita mi proyecto?",
-      "Enséñame la arquitectura vigente.",
-      "Desarrolla la idea conmigo y construye lo acordado.",
-      "Revisa esta decisión y actualiza lo que corresponda.",
-      "Continúa el proyecto y pregúntame cuando necesites mi criterio.",
-      "Valida el proyecto terminado y prepara su entrega local."
+      "Desarrolla la idea conmigo y construye lo acordado."
     ]
   },
   "mcpServers": "./.mcp.json"

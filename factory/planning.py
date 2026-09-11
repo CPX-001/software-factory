@@ -704,10 +704,12 @@ class Planning:
             if role == 'reconcile' and state['proposal']:
                 gate_errors = self._gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
             context = bounded({'role': role, 'source': state['source'],
-                'runtime_semantics': {'version': 1,
+                'runtime_semantics': {'version': 2,
                     'milestone_dependencies': 'Factory closes prerequisite milestones before selecting ANY slice from a dependent milestone.',
                     'slice_dependencies': 'Slice dependencies reference slice IDs only; cross-milestone closure is enforced separately by the controller.',
-                    'project_close': 'Runs only after all required milestones close; it cannot be a milestone closure prerequisite.'},
+                    'project_close': 'Runs only after all required milestones close; it cannot be a milestone closure prerequisite.',
+                    'closure_evidence': 'requirement_acceptance.milestones are mandatory closed-receipt prerequisites in ProjectGate.obligations, not labels. MilestoneGate.publish requires every declared member slice to have a durable acceptance for the same sources. Slice and milestone dependencies are enforced before selection.',
+                    'receipt_references': 'The final receipt binding.milestones references the immutable milestone receipts and commits; each milestone receipt.slices references its accepted slice execution IDs and commits. These prove Factory delivery order and closure. Product behavior still needs the declared product checks on the final candidate.'},
                 'source_fingerprint': state['source_fingerprint'], 'proposal': state['proposal'],
                 'review': state['review'], 'human_answers': self._decisions(snapshot),
                 'gate_errors': gate_errors, 'skills': routing.context(),

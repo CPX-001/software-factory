@@ -134,6 +134,14 @@ binding. Map every planned criterion and gate check to appropriate evidence, not
 index coverage. Requirements map to strategic checks for FULL acceptance; a transversal
 requirement needs a project_close check as well as all contributing milestone references.
 Its acceptance text will be copied verbatim from the authoritative requirement by Factory.
+Those milestone references are mandatory closure evidence, not mere coverage labels:
+Factory verifies their durable receipts, accepted member slices and dependency ordering,
+and binds them into the final receipt. For a requirement combining delivery through dependent
+slices with product behavior, assess BOTH this existing controller evidence and the declared
+product checks. Bind all contributing milestones plus the relevant project_close product
+checks. Do not demand a product unittest that reimplements Factory or reads its private state
+to establish a delivery/closure guarantee already enforced by those preconditions. These
+receipts cannot replace product behavior, integration or main-entry checks.
 Only scope_authorizations already supplied by the operator, or an actual recorded human
 decision, may authorize exclusions with the same disposition. A new exclusion decision must
 explicitly name the requirement key and disposition and receive the user's exact 'accept'.

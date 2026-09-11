@@ -48,3 +48,13 @@ checkpoint, planning reutiliza la respuesta del ledger de análisis con el mismo
 esquema, instrucciones, fuentes y autorizaciones. No repite inferencia ni incrementa
 contadores; los errores anteriores siguen registrados. Esto también funciona si esa
 respuesta consumió la última llamada de fase.
+
+El contexto de planning también explicita la evidencia que ya exige el controller:
+`requirement_acceptance.milestones` son recibos de cierre obligatorios, no etiquetas.
+`MilestoneGate.publish` exige aceptaciones de todas las slices; `ProjectGate.obligations`
+exige las milestones contribuyentes cerradas, además de las comprobaciones finales del
+producto. El recibo final conserva sus referencias en `binding.milestones`, y los recibos
+de milestone conservan ejecuciones y commits de sus slices. Esto acredita orden/cierre
+de la entrega; no sustituye el comportamiento integrado ni el recorrido principal.
+La regresión comprueba las referencias reales y que retirar un cierre vuelve a bloquear
+la aceptación. No se añade otro runner ni un test del producto que lea estado de Factory.

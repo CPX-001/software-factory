@@ -220,6 +220,27 @@ class ProjectValidationTests(unittest.TestCase):
         self.assertEqual(len(MilestoneStore(self.store).receipts()), 2)
         self.assertEqual(self.journal.receipts(), [])
 
+    def test_delivery_closure_evidence_is_bound_and_required_alongside_product_checks(self):
+        from factory.continuation import Continuation
+        self.product(broken=False)
+        data = self.run_product()
+        self.assertEqual(data['state'], 'project_verified')
+        receipt = self.journal.receipts()[0]
+        closed = MilestoneStore(self.store).closed(data['sources'])
+        self.assertEqual({m['receipt'] for m in receipt['binding']['milestones']}, {m['id'] for m in closed.values()})
+        accepted = {a['slice_id']:a for a in self.executions.acceptances()}
+        for milestone in closed.values():
+            for member in milestone['slices']:
+                self.assertEqual(member['commit'], accepted[member['slice_id']]['commit'])
+                self.assertEqual(member['execution_id'], accepted[member['slice_id']]['execution_id'])
+        definition = self.executions.definition(data['policy']['definition_id'])['verification']
+        gate = ProjectGate(Continuation(self.service,self.store), data, self.store.snapshot(), definition)
+        missing = dict(closed); missing.pop(next(iter(missing)))
+        with patch.object(MilestoneStore, 'closed', return_value=missing):
+            _, _, errors = gate.obligations()
+        self.assertTrue(any(e.startswith('milestone_not_closed:') for e in errors))
+        self.assertTrue(any(e.startswith('requirement_contributions_pending:') for e in errors))
+
     def test_recovery_after_verification_reuses_evidence(self):
         self.product(broken=False)
         with patch.object(ProjectGate, 'publish', side_effect=RuntimeError('crash before receipt')), self.assertRaises(RuntimeError):

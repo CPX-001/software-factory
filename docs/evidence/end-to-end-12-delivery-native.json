@@ -1,0 +1,23 @@
+{
+  "surface": "Native Software Factory tools in this conversation; not a claim of new-chat human UI observation",
+  "project": "p_3084354cc76d1c23",
+  "state": "project_verified",
+  "run": "13f67813-17e6-408b-8230-c385fa5b451f",
+  "continuation": "b5774d1c-550d-49da-89df-a40749fa6e97",
+  "version": {
+    "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+    "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+    "current": true
+  },
+  "delivery": "/home/cpx/.local/share/software-factory/pilots/records-v1/product/.factory/deliveries/sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f/REPORT.md",
+  "calls": 17,
+  "tokens": 268679,
+  "repeated_request": {
+    "action": "validate_project",
+    "request_id": "records-v1-final-repeat-once",
+    "same_runtime": true,
+    "same_continuation": true,
+    "same_calls": true,
+    "same_tokens": true
+  }
+}

@@ -137,6 +137,20 @@ class AuthorizedAnalysisTests(unittest.TestCase):
         self.assertEqual(before['budget']['calls'], after['budget']['calls'])
         self.assertEqual(before['budget']['tokens'], after['budget']['tokens'])
 
+    def test_resume_after_binding_reuses_original_analysis_run(self):
+        self.start(); self.service.run_pending(*self.jobs[-1])
+        before = self.service.get_status(self.identifier)['autonomous_run']['run_id']
+        definition = deepcopy(self.verification)
+        for check in definition['checks']:
+            check.update(gate='milestone_gate', criteria=[0, 1])
+        self.service.configure_execution(self.policy, definition, self.identifier)
+        status = self.service.resume(self.identifier)
+        self.assertEqual(status['autonomous_run']['run_id'], before)
+        self.assertEqual(self.jobs[-1][1], before)
+        self.assertEqual(len(self.jobs), 2)
+        self.service.resume(self.identifier)
+        self.assertEqual(len(self.jobs), 2)
+
     def test_missing_usage_blocks_the_next_phase_without_an_extra_inference(self):
         self.sdk.usage = None
         self.start()
@@ -144,6 +158,43 @@ class AuthorizedAnalysisTests(unittest.TestCase):
             self.service.run_pending(*self.jobs[-1])
         self.assertEqual(exc.exception.code, 'usage_unknown')
         self.assertEqual(len(self.sdk.contexts), 1)
+
+    def test_binding_extension_records_delta_without_resetting_run_or_consumption(self):
+        self.start(); self.service.run_pending(*self.jobs[-1])
+        from factory.continuation_store import ContinuationStore
+        before = ContinuationStore(self.store).latest()
+        definition = deepcopy(self.verification)
+        for check in definition['checks']:
+            check.update(gate='milestone_gate', criteria=[0, 1])
+        self.policy['continuation'].update(max_slices=3, max_seconds=3600, max_calls=30, max_tokens=500000)
+        self.service.configure_execution(self.policy, definition, self.identifier)
+        after = ContinuationStore(self.store).latest()
+        self.assertEqual(after['deadline'], before['deadline'] + 1800)
+        self.assertEqual(after['created_at'], before['created_at'])
+        self.assertEqual(after['runtime_id'], before['runtime_id'])
+        self.assertEqual(after['budget_amendments'][0]['before'], before['limits'])
+        self.assertEqual(self.service.get_status(self.identifier)['continuation']['budget']['analysis_calls'], 5)
+        with self.assertRaises(FactoryError):
+            self.service.configure_execution(self.policy, definition, self.identifier)
+
+    def test_prior_input_exclusions_require_exact_completed_preplanning_input(self):
+        from factory.project_validation import prior_input_authorizations
+        self.start(); self.service.run_pending(*self.jobs[-1])
+        snapshot = self.store.snapshot()
+        snapshot['planning']['roadmap']['plan']['coverage'][0].update(disposition='out_of_scope', rationale='Explicit pilot scope')
+        key = snapshot['planning']['roadmap']['plan']['coverage'][0]['requirement']
+        item = {'requirement': key, 'prior_input': {'request_id': 'analysis-once', 'quote': 'No quiero UI, red'}}
+        definition = {'project_acceptance': {'exclusions': [item]}}
+        proofs = prior_input_authorizations(self.store, snapshot, definition)
+        self.assertEqual(proofs[0]['turn_id'], 1)
+        self.assertEqual(self.store.snapshot()['decisions'], [])
+        item['prior_input']['quote'] = 'Fabricated permission'
+        with self.assertRaises(FactoryError):
+            prior_input_authorizations(self.store, snapshot, definition)
+        item['prior_input']['quote'] = 'No quiero UI, red'
+        snapshot['planning']['roadmap']['created_at'] = '2000-01-01T00:00:00.000Z'
+        with self.assertRaises(FactoryError):
+            prior_input_authorizations(self.store, snapshot, definition)
 
     def test_one_planning_recovery_retains_history_and_cannot_repeat(self):
         from tests.planning_fakes import dynamic

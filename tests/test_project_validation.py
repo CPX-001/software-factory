@@ -410,6 +410,21 @@ class ProjectValidationTests(unittest.TestCase):
         with self.store._connection() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM factory_control_events WHERE kind='project_verified'").fetchone()[0], 1)
 
+    def test_report_renders_prior_input_authorization_without_a_synthetic_decision(self):
+        from factory.project_delivery import deliver
+        self.product(broken=False)
+        self.run_product()
+        receipt = self.journal.receipts()[0]
+        projection = deepcopy(receipt)
+        projection['exclusions'] = [{'requirement': 'scope', 'disposition': 'out_of_scope',
+            'rationale': 'External services excluded in the prior input',
+            'authorization': {'prior_input': {'request_id': 'initial-brief', 'quote': 'No external services'}}}]
+        with patch.object(Verifier, 'run', side_effect=AssertionError('Report recovery must not run checks')):
+            report = Path(deliver(self.store, projection)).read_text()
+        self.assertIn('mensaje previo initial-brief', report)
+        self.assertNotIn('(decisión', report)
+        self.assertEqual(self.journal.receipts(), [receipt])
+
     def test_prior_authorized_exclusion_preserved_and_late_reclassification_rejected(self):
         def plan(p):
             key = 'out_of_scope'

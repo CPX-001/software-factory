@@ -195,6 +195,79 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None):
     return prepared
 
 
+def bind_discovery_plan(prepared, snapshot):
+    """Reviewed binding for the saved REAL pilot plan, not a fabricated replacement plan.
+
+    A different roadmap needs its own reviewed binding. Unknown criteria fail closed;
+    no fuzzy text matching or LLM can quietly reinterpret a condition here.
+    """
+    import hashlib
+    import json
+    from factory.execution import current_sources
+    from factory.registry import FactoryError
+    from factory.execution_contract import validate_verification
+    from factory.verification import check_coverage
+    resources = Path(__file__).resolve().parent.parent / 'pilots/records-v1'
+    reviewed = json.loads((resources / 'accepted-plan.json').read_text())
+    if current_sources(snapshot) != reviewed['sources'] or snapshot['planning']['roadmap']['plan'] != reviewed['plan']:
+        raise FactoryError('verification_binding_pending', 'This reviewed binding belongs to a different accepted roadmap')
+    product = Path(prepared['project']['path'])
+    if hashlib.sha256((product / 'pilot-contract.json').read_bytes()).hexdigest() != prepared['contract_sha256']:
+        raise FactoryError('verification_weakened', 'Original pilot contract changed')
+    templates = {c['id']: deepcopy(c) for c in prepared['contract']['checks']}
+    for key, path in [('summary_composition', 'test_summary_integration.py'),
+                      ('report_composition', 'test_report_integration.py'), ('delivery', 'test_delivery_contract.py')]:
+        templates[key] = dict(id=key, gate='pending', kind='python_unittest', target=path, cases=[],
+            min_tests=2, timeout_seconds=30, criteria=[], gate_checks=[0], integration_mode='local')
+    for c in templates.values():
+        c.update(source_sha256=hashlib.sha256((product / c['target']).read_bytes()).hexdigest(), clean_copy=True)
+    checks = []
+    def add(key, gate, criteria, gate_checks, *, identifier=None):
+        checks.append({**deepcopy(templates[key]), 'id': identifier or gate + '_' + key,
+                       'gate': gate, 'criteria': criteria, 'gate_checks': gate_checks})
+    for gate in ('g_s_summary_local', 'g_s_summary_api'):
+        add('summary', gate, [0, 1], [0, 1])
+        add('summary_composition', gate, [2], [1])
+    add('summary', 'g_m_summary', [0, 1, 2, 4], [0, 1], identifier='summary')
+    add('summary_composition', 'g_m_summary', [0, 1, 3, 4], [1])
+    add('ranking', 'g_s_rank_local', [0, 3], [0], identifier='ranking')
+    add('cli', 'g_s_rank_local', [1, 2, 3], [0, 1])
+    add('report_composition', 'g_s_rank_integration', [0], [0])
+    add('ranking', 'g_s_rank_integration', [0, 3], [0])
+    add('cli', 'g_s_rank_integration', [1, 2, 3], [1])
+    for gate in ('g_s_acceptance_local', 'g_s_acceptance_integration'):
+        for key in ('summary', 'ranking', 'cli'):
+            add(key, gate, [0], [1] if gate.endswith('local') else [0, 1] if key == 'cli' else [0])
+        add('delivery', gate, [1, 2], [0, 1] if gate.endswith('local') else [2])
+    for gate in ('g_m_report', 'g_project_close'):
+        add('summary', gate, [4, 5], [0, 1] if gate == 'g_m_report' else [2])
+        add('ranking', gate, [0, 4, 5], [0, 1] if gate == 'g_m_report' else [2])
+        add('cli', gate, [1, 2, 4, 5], [0, 1] if gate == 'g_m_report' else [0, 1, 2],
+            identifier='cli' if gate == 'g_project_close' else None)
+        add('report_composition', gate, [0], [0] if gate == 'g_m_report' else [2])
+        add('delivery', gate, [3, 4, 5], [0, 2] if gate == 'g_m_report' else [1, 2])
+    plan = reviewed['plan']
+    strategic = [c['id'] for c in checks if c['gate'] in ('g_m_summary', 'g_m_report', 'g_project_close')]
+    requirements = {r['key']: r['text'] for r in reviewed['requirements']}
+    definition = {'schema_version': 1, 'checks': checks,
+        'harness': [{'id': 'h_clean_copy_acceptance',
+                     'paths': sorted({c['target'] for c in checks} | {'pilot-contract.json', 'record_rules.py'})}],
+        'requirement_acceptance': [{'requirement': c['requirement'], 'condition': requirements[c['requirement']],
+            'milestones': [m['id'] for m in plan['milestones']], 'checks': strategic}
+            for c in plan['coverage'] if c['disposition'] == 'covered'],
+        'project_acceptance': {'entry_checks': ['cli'], 'delivery_paths': prepared['contract']['delivery_paths'],
+            'runtime': 'python_stdlib', 'exclusions': [
+                {'requirement': 'out_of_scope', 'prior_input': {'request_id': prepared['request_id'],
+                    'quote': 'No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\notros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.'}},
+                {'requirement': 'quota_planning', 'prior_input': {'request_id': 'records-v1-user-authorize-real-1',
+                    'quote': 'el tema de cuotas ya se analizara despues'}}]}}
+    validate_verification(definition, plan)
+    errors = [e for slice_ in plan['slices'] for e in check_coverage(plan, slice_, definition)]
+    if errors:
+        raise FactoryError('verification_definition_missing', 'Reviewed binding is incomplete', details={'errors': errors})
+    return definition
+
+
 def prepare(root, model, effort, *, continuation=False):
     root = Path(root)
     product = root / 'product'; product.mkdir()

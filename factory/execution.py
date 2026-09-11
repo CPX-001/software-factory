@@ -74,6 +74,13 @@ def configure(store, policy, verification):
     sources = current_sources(store.snapshot())
     plan = store.snapshot()['planning']['roadmap']['plan']
     validate_verification(verification, plan)
+    from hashlib import sha256
+    for check in verification['checks']:
+        if check.get('source_sha256'):
+            target = store.project / check['target']
+            if (allowed(check['target'], policy['write_paths']) or not target.is_file() or
+                    target.is_symlink() or sha256(target.read_bytes()).hexdigest() != check['source_sha256']):
+                raise FactoryError('verification_weakened', 'Independent oracle must exist at its authorized hash outside worker write permissions')
     journal = ExecutionStore(store)
     existing = journal.latest()
     from .continuation_store import ContinuationStore, TERMINAL
@@ -91,27 +98,49 @@ def configure(store, policy, verification):
             any(c['sources'] == sources and c['definition_id'] != identifier for c in frozen_contracts)):
         raise FactoryError('acceptance_contract_frozen', 'Accepted work freezes project criteria and exclusions; changes require a separately approved planning revision')
     authorized = {**policy, 'repository': identity, 'definition_id': identifier, 'authorized_at': time.time()}
+    amendment = None
     if continuation and continuation.get('analysis'):
-        if any(policy.get(k) != continuation['policy'].get(k) for k in policy):
-            raise FactoryError('policy_changed', 'Binding the accepted plan must preserve the already authorized workflow policy and budgets')
+        if any(policy.get(k) != continuation['policy'].get(k) for k in policy if k not in ('continuation', 'context_paths')):
+            raise FactoryError('policy_changed', 'Plan binding preserves model, permissions and individual limits')
+        before_context, after_context = set(continuation['policy']['context_paths']), set(policy['context_paths'])
+        resources = {c['target'] for c in verification['checks'] if c.get('source_sha256')}
+        if not before_context <= after_context or not after_context - before_context <= resources | set(policy['write_paths']):
+            raise FactoryError('policy_changed', 'Added binding context is limited to pinned oracles and already authorized product paths')
+        old_limits, new_limits = continuation['limits'], policy['continuation']
+        if any(new_limits.get(k) != old_limits.get(k) for k in ('enabled', 'inter_milestone')) or any(
+                new_limits[k] < old_limits[k] for k in ('max_slices', 'max_calls', 'max_seconds', 'max_tokens')):
+            raise FactoryError('policy_changed', 'Binding may explicitly extend aggregate limits, never reset usage or alter continuation permissions')
+        if new_limits != old_limits:
+            amendment = {'continuation_id': continuation['id'], 'before': old_limits, 'after': new_limits,
+                         'previous_deadline': continuation['deadline'],
+                         'deadline': continuation['deadline'] + new_limits['max_seconds'] - old_limits['max_seconds'],
+                         'authorized_at': authorized['authorized_at']}
         original = journal.definition(continuation['policy']['definition_id'])['verification']
         mapped = {c['id']: c for c in verification['checks']}
         for c in original['checks']:
             if c['id'] not in mapped or any(mapped[c['id']].get(k) != v for k, v in c.items()
                                           if k not in ('gate', 'criteria', 'gate_checks')):
                 raise FactoryError('acceptance_contract_frozen', 'Plan binding cannot weaken predeclared acceptance checks')
-        if original.get('project_acceptance') != verification.get('project_acceptance'):
+        before_project, after_project = original.get('project_acceptance'), verification.get('project_acceptance')
+        if before_project != after_project and (not before_project or not after_project or
+                any(after_project.get(k) != v for k, v in before_project.items() if k != 'exclusions') or
+                any(e not in after_project['exclusions'] for e in before_project['exclusions']) or
+                any('prior_input' not in e for e in after_project['exclusions'] if e not in before_project['exclusions'])):
             raise FactoryError('acceptance_contract_frozen', 'Plan binding must preserve delivery and exclusion conditions')
+    prior_inputs = []
+    if verification.get('project_acceptance'):
+        from .project_validation import prior_input_authorizations
+        prior_inputs = prior_input_authorizations(store, store.snapshot(), verification)
     with store._connection(write=True) as db:
         db.execute('INSERT OR IGNORE INTO execution_definitions VALUES (?,?,?)',
                    (identifier, canonical(definition), time.time()))
         if verification.get('project_acceptance'):
             from .project_validation import contract_snapshot
-            contract = contract_snapshot(store.snapshot(), verification, identifier)
+            contract = contract_snapshot(store.snapshot(), verification, identifier, prior_inputs=prior_inputs)
             db.execute('INSERT OR IGNORE INTO project_contracts VALUES (?,?)', (fingerprint(contract), canonical(contract)))
         db.execute('UPDATE execution_policy SET data=? WHERE id=1', (canonical(authorized),))
         Runtime.event(db, 'execution_authorized' if policy['enabled'] else 'execution_disabled',
-                      {'definition_id': identifier, 'repository': identity})
+                      {'definition_id': identifier, 'repository': identity, 'policy': authorized})
         if continuation and continuation.get('analysis'):
             from .milestone import eligible_milestone
             # Publish binding on the SAME logical run. No deadline/call/token reset.
@@ -120,6 +149,10 @@ def configure(store, policy, verification):
                 raise FactoryError('milestone_gate_pending', 'No initial milestone is eligible')
             continuation.update(analysis=False, state='execution_authorized', policy=authorized,
                                 sources=sources, milestone=milestone['id'], reason=None, diagnostic=None)
+            if amendment:
+                continuation.update(limits=policy['continuation'], deadline=amendment['deadline'])
+                continuation.setdefault('budget_amendments', []).append(amendment)
+                Runtime.event(db, 'workflow_budget_extended', amendment)
             if policy.get('final_validation', {}).get('enabled'):
                 continuation['final_authorization'] = {**policy['final_validation'], 'sources': sources,
                     'definition_id': identifier, 'authorized_at': authorized['authorized_at']}

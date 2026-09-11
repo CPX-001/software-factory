@@ -80,7 +80,8 @@ def check_coverage(plan, slice_, definition):
         errors.append('acceptance_coverage_missing')
     constructed = {h['id'] for h in plan['harness'] if h['introduced_by'] == slice_['id'] and h['when'] == 'during_slice'}
     if any(constructed & set(g['harness']) for g in applicable):
-        independent = {i for c in checks if c['kind'] == 'python_behavior' and
+        independent = {i for c in checks if (c['kind'] == 'python_behavior' or
+                       c['kind'] == 'python_unittest' and c.get('source_sha256')) and
                        c['gate'] in {g['id'] for g in applicable if g['trigger'] == 'after_slice'} for i in c['criteria']}
         if independent != set(range(len(slice_['acceptance_criteria']))):
             errors.append('independent_acceptance_oracle_missing')
@@ -115,6 +116,7 @@ class Verifier:
     def __init__(self, sandbox, *, clean=False):
         self.sandbox = sandbox
         self.clean = clean
+        self.results = {}
 
     def run(self, plan, slice_, definition, worktree, *, trigger, should_stop, on_process, remaining):
         identity = code_identity(worktree)
@@ -129,17 +131,44 @@ class Verifier:
                     'started_at': time.time(),
                     'runner_sha256': hashlib.sha256(Path(__file__).with_name('verification_runner.py').read_bytes()).hexdigest(),
                     'python_sha256': hashlib.sha256(Path('/usr/bin/python3').read_bytes()).hexdigest()}
+            clean = self.clean or c.get('clean_copy', False)
+            procedure = {k: v for k, v in c.items() if k not in ('id', 'gate', 'criteria', 'gate_checks', 'clean_copy')}
+            cache_key = (identity, clean, base['runner_sha256'], base['python_sha256'], json.dumps(procedure, sort_keys=True))
+            if c.get('source_sha256'):
+                target = Path(worktree) / c['target']
+                if not target.is_file() or target.is_symlink() or hashlib.sha256(target.read_bytes()).hexdigest() != c['source_sha256']:
+                    raise FactoryError('verification_weakened', 'Independent unittest source no longer matches its authorized hash')
+            if cache_key in self.results and not should_stop():
+                if code_identity(worktree) != identity:
+                    raise FactoryError('stale_evidence', 'Product changed before evidence reuse')
+                previous = self.results[cache_key]
+                evidence.append({**previous, **base, 'reused_from': previous['check_id']})
+                continue
             if c['kind'] in ('specialist', 'human_review'):
                 evidence.append({**base, 'status': 'NOT_RUN', 'reason': c['kind'] + '_pending'})
                 continue
             with tempfile.TemporaryDirectory(prefix='check-', dir=self.sandbox.directory) as tmp:
+                workspace = worktree
+                reproducibility = None
+                if clean and not self.clean:
+                    # Freeze the exact pending product tree without publishing a commit.
+                    # Final project acceptance still exports its accepted commit normally.
+                    from .execution_workspace import tree_object
+                    from .reproducibility import export_commit
+                    tree = tree_object(worktree, Path(tmp) / 'candidate.index')
+                    reproducibility = export_commit(worktree, tree, Path(tmp) / 'source')
+                    if reproducibility['code_id'] != identity:
+                        raise FactoryError('stale_evidence', 'Product changed while freezing clean verification input')
+                    workspace = reproducibility['path']
                 spec = Path(tmp) / 'check.json'
                 spec.write_text(json.dumps(c))
-                result = self.sandbox.run(['/usr/bin/python3', '-I', *(['-S'] if self.clean else []), '/verification_runner.py'],
-                    [(str(worktree), '/workspace', False), (str(spec), '/check.json', False),
+                result = self.sandbox.run(['/usr/bin/python3', '-I', *(['-S'] if clean else []), '/verification_runner.py'],
+                    [(str(workspace), '/workspace', False), (str(spec), '/check.json', False),
                      (str(Path(__file__).with_name('verification_runner.py')), '/verification_runner.py', False)],
                     timeout=max(.01, min(c['timeout_seconds'], remaining())),
-                    should_stop=should_stop, on_process=on_process, clean=self.clean)
+                    should_stop=should_stop, on_process=on_process, clean=clean)
+                if reproducibility:
+                    result['reproducibility'] = {k: v for k, v in reproducibility.items() if k != 'path'}
             if result['exit_code'] == 124 and not result.get('reason'):
                 result.update(status='NOT_RUN', reason='missing_dependency_or_tests')
             if result['status'] == 'PASS' and 'FACTORY_CHECK_COMPLETED_V1' not in result['log'].splitlines():
@@ -147,6 +176,8 @@ class Verifier:
             evidence.append({**base, **result})
             if code_identity(worktree) != identity:
                 raise FactoryError('stale_evidence', 'Code changed during verification; old PASS cannot accept new code')
+            if result['status'] in ('PASS', 'FAIL'):
+                self.results[cache_key] = evidence[-1]
             if should_stop():
                 break
         return evidence

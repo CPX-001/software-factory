@@ -133,6 +133,44 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(data['attempt'], 2)
         self.assertIn('test_app.py', data['protected_files'])
 
+    def test_frozen_unittest_oracle_supports_clean_slice_harness_and_detects_tampering(self):
+        import hashlib
+        from factory.verification import check_coverage
+        self.setup_product(harness_during=True)
+        test = self.store.project / 'test_app.py'
+        test.write_text('import unittest\nfrom app import add\nclass Test(unittest.TestCase):\n def test_sum(self): self.assertEqual(add(1, 2), 3)\n')
+        self.git('add', 'test_app.py'); self.git('commit', '-qm', 'Independent predeclared oracle')
+        policy = {k: v for k, v in self.journal.policy().items() if k not in ('repository', 'definition_id', 'authorized_at')}
+        policy['write_paths'] = ['app.py']
+        definition = self.journal.definition(self.journal.policy()['definition_id'])['verification']
+        check = deepcopy(next(c for c in definition['checks'] if c['kind'] == 'python_unittest'))
+        check.update(source_sha256=hashlib.sha256(test.read_bytes()).hexdigest(), clean_copy=True, criteria=[0])
+        definition['checks'] = [check]
+        plan = self.store.snapshot()['planning']['roadmap']['plan']
+        self.assertNotIn('independent_acceptance_oracle_missing', check_coverage(plan, plan['slices'][0], definition))
+        self.service.configure_execution(policy, definition)
+        data = self.run_product()
+        self.assertEqual(data['state'], 'checkpoint', data)
+        evidence = data['verification'][0]
+        self.assertEqual(evidence['reproducibility']['code_id'], evidence['code_id'])
+        self.assertEqual(self.git('rev-parse', data['commit'] + '^{tree}'), evidence['reproducibility']['commit'])
+        test.write_text(test.read_text().replace('add(1, 2), 3', 'True, True'))
+        with self.assertRaises(FactoryError) as exc:
+            self.service.configure_execution(policy, definition)
+        self.assertEqual(exc.exception.code, 'verification_weakened')
+
+    def test_identical_procedure_reuses_only_same_code_and_profile(self):
+        from factory.verification import Verifier
+        self.setup_product()
+        policy = self.journal.policy()
+        definition = self.journal.definition(policy['definition_id'])['verification']
+        check = deepcopy(next(c for c in definition['checks'] if c['kind'] == 'python_behavior'))
+        definition['checks'] = [check, {**check, 'id': 'same_procedure'}]
+        self.service.configure_execution({k:v for k,v in policy.items() if k not in ('repository','definition_id','authorized_at')}, definition)
+        data = self.run_product()
+        self.assertEqual(data['state'], 'checkpoint', data)
+        self.assertEqual(data['verification'][1]['reused_from'], check['id'])
+
     def test_duplicate_mcp_intent_and_finished_request_are_idempotent(self):
         self.setup_product()
         from factory.mcp_server import FactoryTools

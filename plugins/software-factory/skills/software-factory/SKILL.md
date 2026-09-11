@@ -50,6 +50,15 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   It does not claim those templates are already bound to a plan. Inspect the accepted plan
   before binding its concrete verification; the original checks, run and consumed budget
   remain fixed. `factory_resume` reuses this analysis run, including after human input.
+  At the binding boundary, a previously authorized increase may extend finite aggregate
+  limits through the same policy tool: Factory records the delta and retains all consumption.
+  This is an explicit policy amendment, never a reset on resume. Pinned independent unittest
+  resources use `source_sha256`; `clean_copy=true` reuses the offline clean runner. A planned
+  exclusion already explicitly stated in earlier user input may reference its exact
+  `prior_input.request_id` and `quote`; never infer authorization from unrelated text.
+  New or reclassified exclusions still require the applicable human decision. Bindings remain
+  immutable once product work is accepted. Resume after a complete binding starts the existing
+  authorized execution without another phase-by-phase instruction.
 - For “implement the next prepared slice”, use `factory_execute` with a new stable request_id.
   Factory chooses the slice. Reuse that ID on transport retries; do not call it repeatedly to
   supervise work. Present execution ID and current stage, then let the detached process work.

@@ -1,0 +1,744 @@
+{
+  "provenance": "Real model accepted roadmap; sanitized immutable planning artifact, no implementation supplied",
+  "sources": {
+    "architecture": {
+      "revision": 1,
+      "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf"
+    },
+    "plan": {
+      "revision": 1,
+      "fingerprint": "sha256:f5683f58596774ef87fc42e9c0ded9f8ae895f800ee90da059e908c0b0a33ce2"
+    }
+  },
+  "plan": {
+    "architecture": {
+      "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+      "revision": 1
+    },
+    "blockers": [],
+    "coverage": [
+      {
+        "disposition": "covered",
+        "milestone": "m_report_cli",
+        "rationale": "Clean-copy immutable-oracle acceptance is verified in the final delivery slice.",
+        "requirement": "acceptance_verification",
+        "slices": [
+          "s_acceptance_evidence"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_report_cli",
+        "rationale": "The report/CLI slice implements ranking, ordering, serialization, and failure behavior.",
+        "requirement": "capability_ranking_cli",
+        "slices": [
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "The first slice establishes the validated reusable summary API.",
+        "requirement": "capability_summary",
+        "slices": [
+          "s_summary_contract"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_report_cli",
+        "rationale": "Usage documentation is created only from commands verified in acceptance.",
+        "requirement": "documentation_requirement",
+        "slices": [
+          "s_acceptance_evidence"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "Both library and CLI remain local Python and local JSON-file based.",
+        "requirement": "integrations_local_files_python",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "The summary slice preserves record_rules.py strip().casefold() normalization.",
+        "requirement": "normalization_helper",
+        "slices": [
+          "s_summary_contract"
+        ]
+      },
+      {
+        "disposition": "out_of_scope",
+        "milestone": "m_summary",
+        "rationale": "m_summary owns the exclusion constraint; report and delivery slices preserve the same exclusions.",
+        "requirement": "out_of_scope",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli",
+          "s_acceptance_evidence"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "Summary and ranking slices solve local validation, aggregation, and classification.",
+        "requirement": "problem_record_review",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "deferred",
+        "milestone": "m_report_cli",
+        "rationale": "Quota, budget, and consumption analysis is explicitly deferred and no mechanism is added.",
+        "requirement": "quota_planning",
+        "slices": [
+          "s_acceptance_evidence"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "The implementation remains an in-memory single-process utility for small datasets.",
+        "requirement": "scale_small_local_datasets",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_report_cli",
+        "rationale": "The ordered slices deliver reusable summary first, then report/CLI and verified documentation.",
+        "requirement": "scope_deliverables_milestones",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli",
+          "s_acceptance_evidence"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "Local untrusted-input correctness and no retained data are enforced within the declared posture.",
+        "requirement": "security_local_synthetic_data",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "The roadmap serves one developer running locally.",
+        "requirement": "users_developer_local",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "m_summary",
+        "rationale": "The staged library and terminal experience realizes the local utility vision.",
+        "requirement": "vision_local_records_utility",
+        "slices": [
+          "s_summary_contract",
+          "s_rank_cli"
+        ]
+      }
+    ],
+    "decision_keys": [],
+    "gates": [
+      {
+        "checks": [
+          "Run focused test_records.py unittest cases.",
+          "Check records.summarize returns the required empty and aggregate shapes."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "g_s_summary_local",
+        "kind": "local",
+        "rationale": "Cheap feedback is sufficient for routine implementation checks.",
+        "signals": [
+          "routine"
+        ],
+        "target": "s_summary_contract",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Exercise ctr_summary_api valid and invalid inputs.",
+          "Confirm normalization, nonmutation, reconciliation, and ValueError boundary behavior."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "g_s_summary_api",
+        "kind": "integration",
+        "rationale": "The slice establishes a public reusable contract and input-validation boundary.",
+        "signals": [
+          "public_api",
+          "boundary"
+        ],
+        "target": "s_summary_contract",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Run test_records.py with at least 10 tests.",
+          "Verify every m_summary success criterion against ctr_summary_api."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "g_m_summary",
+        "kind": "milestone",
+        "rationale": "Milestone closure must prove the reusable contract before dependent reporting work is accepted.",
+        "signals": [
+          "milestone"
+        ],
+        "target": "m_summary",
+        "trigger": "milestone_close"
+      },
+      {
+        "checks": [
+          "Run focused ranking and CLI unittest cases.",
+          "Check prescribed valid JSON serialization locally."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "g_s_rank_local",
+        "kind": "local",
+        "rationale": "Fast local feedback catches ordinary implementation defects.",
+        "signals": [
+          "routine"
+        ],
+        "target": "s_rank_cli",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Verify report consumes summary aggregates without semantic duplication.",
+          "Run exact valid CLI output and invalid-input exit-code/stderr/empty-stdout checks."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "g_s_rank_integration",
+        "kind": "integration",
+        "rationale": "The report crosses the summary API, CLI boundary, public API, and strict output-security boundary.",
+        "signals": [
+          "cross_component",
+          "boundary",
+          "public_api",
+          "security"
+        ],
+        "target": "s_rank_cli",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Check USAGE.md lists only commands executed during the slice.",
+          "Check independent evidence names the clean-copy suites and prescribed CLI invocation."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "g_s_acceptance_local",
+        "kind": "local",
+        "rationale": "A routine local completeness check prevents avoidable documentation and evidence omissions before clean-copy verification.",
+        "signals": [
+          "routine"
+        ],
+        "target": "s_acceptance_evidence",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "From a clean copy run test_records.py, test_category_report.py, and test_product_cli.py.",
+          "Run python category_report.py examples/valid.json and compare exact stdout.",
+          "Confirm pilot-contract.json and its oracles were not changed to obtain PASS."
+        ],
+        "cost": "moderate",
+        "harness": [
+          "h_clean_copy_acceptance"
+        ],
+        "id": "g_s_acceptance_integration",
+        "kind": "integration",
+        "rationale": "Independent clean-copy evidence is required for the public delivery contract.",
+        "signals": [
+          "cross_component",
+          "boundary",
+          "public_api"
+        ],
+        "target": "s_acceptance_evidence",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Verify all m_report_cli success criteria.",
+          "Confirm required test minima: 10 summary, 4 ranking, and 5 CLI tests.",
+          "Confirm USAGE.md contains only actually verified commands."
+        ],
+        "cost": "moderate",
+        "harness": [
+          "h_clean_copy_acceptance"
+        ],
+        "id": "g_m_report",
+        "kind": "milestone",
+        "rationale": "Report milestone closure requires integrated evidence across library, CLI, documentation, and immutable acceptance conditions.",
+        "signals": [
+          "milestone"
+        ],
+        "target": "m_report_cli",
+        "trigger": "milestone_close"
+      },
+      {
+        "checks": [
+          "After m_summary and m_report_cli close, run the approved category_report.py examples/valid.json entrypoint.",
+          "Confirm records.py, category_report.py, and USAGE.md delivery paths, strict CLI contract, and clean-copy evidence.",
+          "Confirm all required milestone success and closure criteria remain satisfied without altered acceptance oracles."
+        ],
+        "cost": "moderate",
+        "harness": [
+          "h_clean_copy_acceptance"
+        ],
+        "id": "g_project_close",
+        "kind": "system",
+        "rationale": "This post-milestone project-close gate verifies the integrated approved entrypoint and delivery conditions without participating in milestone closure.",
+        "signals": [
+          "release"
+        ],
+        "target": "m_report_cli",
+        "trigger": "project_close"
+      }
+    ],
+    "harness": [
+      {
+        "capability": "Clean-copy execution environment with independent evidence capture for declared unittest suites and real CLI invocation.",
+        "id": "h_clean_copy_acceptance",
+        "introduced_by": "s_acceptance_evidence",
+        "milestone": "m_report_cli",
+        "needed_by_gates": [
+          "g_s_acceptance_integration",
+          "g_m_report",
+          "g_project_close"
+        ],
+        "when": "during_slice",
+        "why": "Required to detect oracle drift and prove integrated acceptance outside the working copy."
+      }
+    ],
+    "milestones": [
+      {
+        "architecture": {
+          "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+          "revision": 1
+        },
+        "closure_conditions": [
+          "G-M-SUMMARY verifies all summary success criteria and the required summary unittest minimum."
+        ],
+        "dependencies": [],
+        "id": "m_summary",
+        "objective": "Provide the authoritative local summary API for normalized record aggregation.",
+        "observable_outcome": "Library callers can obtain a validated normalized summary from an in-memory list.",
+        "requirements": [
+          "capability_summary",
+          "normalization_helper",
+          "integrations_local_files_python",
+          "problem_record_review",
+          "scale_small_local_datasets",
+          "security_local_synthetic_data",
+          "users_developer_local",
+          "vision_local_records_utility",
+          "scope_deliverables_milestones",
+          "out_of_scope"
+        ],
+        "risks": [
+          "risk_semantic_duplication"
+        ],
+        "status": "open",
+        "subjective_criteria": [],
+        "success_criteria": [
+          "records.summarize validates the record-list contract, does not mutate input, and raises ValueError for invalid input.",
+          "Valid summaries use strip().casefold() categories and reconcile top-level and per-category counts and totals.",
+          "Empty input returns count 0, total 0, and by_category {}.",
+          "The implementation remains local, transient, and standard-library-only."
+        ],
+        "title": "Validated reusable record summary",
+        "verification_gates": [
+          "g_m_summary"
+        ]
+      },
+      {
+        "architecture": {
+          "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+          "revision": 1
+        },
+        "closure_conditions": [
+          "G-M-REPORT verifies all report and delivery success criteria."
+        ],
+        "dependencies": [
+          "m_summary"
+        ],
+        "id": "m_report_cli",
+        "objective": "Expose ranking through the summary-dependent API and strict machine-readable CLI.",
+        "observable_outcome": "A developer can rank a local JSON record list from Python or the terminal without infrastructure or retained data.",
+        "requirements": [
+          "capability_ranking_cli",
+          "acceptance_verification",
+          "documentation_requirement",
+          "scope_deliverables_milestones",
+          "out_of_scope",
+          "quota_planning",
+          "integrations_local_files_python",
+          "problem_record_review",
+          "scale_small_local_datasets",
+          "security_local_synthetic_data",
+          "users_developer_local",
+          "vision_local_records_utility"
+        ],
+        "risks": [
+          "risk_contract_oracle_drift",
+          "risk_semantic_duplication",
+          "risk_cli_machine_output_violation"
+        ],
+        "status": "open",
+        "subjective_criteria": [],
+        "success_criteria": [
+          "category_report.rank_categories derives category, count, and total rows from the summary and sorts by total descending then category ascending.",
+          "The CLI emits exactly compact ASCII key-sorted JSON plus newline for valid input.",
+          "Invalid CLI input exits 2, writes diagnostics only to stderr, and emits no stdout.",
+          "records.py, category_report.py, and USAGE.md are delivered; USAGE.md documents only commands actually verified.",
+          "The required suites, valid example invocation, clean-copy verification, and independent evidence satisfy the immutable acceptance protocol."
+        ],
+        "title": "Deterministic ranking report and CLI",
+        "verification_gates": [
+          "g_m_report"
+        ]
+      }
+    ],
+    "near_term": [
+      "s_summary_contract",
+      "s_rank_cli",
+      "s_acceptance_evidence"
+    ],
+    "objective": "Deliver a local standard-library Python utility with an authoritative validated summary library and a deterministic ranking CLI.",
+    "rationale": "Reconciled the project-close closure cycle by removing the post-milestone system gate from m_report_cli closure and changing it to the required project_close trigger. Added the missing cheap local gate for s_acceptance_evidence. The accepted architectural baseline is unchanged.",
+    "risks": [
+      {
+        "acceptance_key": "acceptance_verification",
+        "blocks": [],
+        "description": "Implementation or documentation could appear to pass only because acceptance oracles change, or verification is not run from a clean copy.",
+        "id": "risk_contract_oracle_drift",
+        "mitigation": "Keep pilot-contract.json outside product implementation; run declared suites and real CLI from a clean copy and preserve independent evidence.",
+        "owner": "m_report_cli",
+        "severity": "high",
+        "validation_slice": "s_acceptance_evidence"
+      },
+      {
+        "acceptance_key": "capability_summary",
+        "blocks": [],
+        "description": "Reimplementing normalization, aggregation, or by_category interpretation in ranking could create library/CLI disagreement.",
+        "id": "risk_semantic_duplication",
+        "mitigation": "Require cmp_category_report_cli to consume ctr_summary_api and test aggregate-to-rank derivation through both paths.",
+        "owner": "m_summary",
+        "severity": "medium",
+        "validation_slice": "s_rank_cli"
+      },
+      {
+        "acceptance_key": "capability_ranking_cli",
+        "blocks": [],
+        "description": "Formatting, partial stdout, or misplaced diagnostics could break script consumers despite correct totals.",
+        "id": "risk_cli_machine_output_violation",
+        "mitigation": "Test exact valid-example stdout and invalid-input stdout/stderr/exit-code separation.",
+        "owner": "m_report_cli",
+        "severity": "medium",
+        "validation_slice": "s_rank_cli"
+      }
+    ],
+    "schema_version": 1,
+    "slices": [
+      {
+        "acceptance_criteria": [
+          "At least 10 unittest cases cover aggregation, normalization, empty input, invalid shapes/categories/amounts, nonmutation, ValueError, and by_category aggregate shape.",
+          "Summary invariants match ctr_summary_api.",
+          "Only standard-library local processing is used."
+        ],
+        "architecture": {
+          "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+          "revision": 1
+        },
+        "architecture_impact": "expected_within_baseline",
+        "boundaries": [
+          "ctr_summary_api",
+          "data_invocation_records",
+          "sec_local_input_boundary"
+        ],
+        "components": [
+          "cmp_records_summary"
+        ],
+        "dependencies": [],
+        "id": "s_summary_contract",
+        "impact_reason": "Implements the existing authoritative summary boundary without changing its contract.",
+        "kind": "vertical",
+        "maturity": "execution_ready",
+        "milestone": "m_summary",
+        "objective": "Establish the single authoritative validation, normalization, and aggregation boundary.",
+        "out_of_scope": [
+          "Ranking, CLI serialization, persistence, third-party dependencies, and nonlocal infrastructure."
+        ],
+        "requirements": [
+          "capability_summary",
+          "normalization_helper",
+          "integrations_local_files_python",
+          "problem_record_review",
+          "scale_small_local_datasets",
+          "security_local_synthetic_data",
+          "users_developer_local",
+          "vision_local_records_utility",
+          "scope_deliverables_milestones",
+          "out_of_scope"
+        ],
+        "risks": [
+          "risk_semantic_duplication"
+        ],
+        "scope": [
+          "Implement records.py using record_rules.py normalization.",
+          "Return the specified summary aggregate shape and reject invalid records.",
+          "Add test_records.py coverage meeting the required minimum."
+        ],
+        "title": "Implement verified summary contract",
+        "verification_expectation": "Run focused unittest checks and a public-API boundary check after the slice.",
+        "verification_triggers": [
+          "public_api",
+          "boundary"
+        ]
+      },
+      {
+        "acceptance_criteria": [
+          "Ranking rows are one-for-one derived from summary by_category aggregates with required ordering.",
+          "Valid CLI output matches the prescribed compact ASCII key-sorted JSON newline protocol.",
+          "Invalid input produces exit code 2, stderr diagnostics, and empty stdout.",
+          "test_category_report.py has at least 4 tests and test_product_cli.py has at least 5 tests."
+        ],
+        "architecture": {
+          "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+          "revision": 1
+        },
+        "architecture_impact": "expected_within_baseline",
+        "boundaries": [
+          "ctr_summary_api",
+          "ctr_rank_and_cli_output",
+          "flow_library_ranking",
+          "flow_cli_success",
+          "flow_cli_invalid_input",
+          "sec_no_partial_machine_output"
+        ],
+        "components": [
+          "cmp_records_summary",
+          "cmp_category_report_cli"
+        ],
+        "dependencies": [
+          "s_summary_contract"
+        ],
+        "id": "s_rank_cli",
+        "impact_reason": "Consumes the declared summary dependency and implements the existing reporting/CLI contract.",
+        "kind": "vertical",
+        "maturity": "execution_ready",
+        "milestone": "m_report_cli",
+        "objective": "Build report behavior strictly from the reusable summary API.",
+        "out_of_scope": [
+          "Duplicating summary validation or aggregation, persistence, network access, package installation, and deployment."
+        ],
+        "requirements": [
+          "capability_ranking_cli",
+          "scope_deliverables_milestones",
+          "integrations_local_files_python",
+          "problem_record_review",
+          "scale_small_local_datasets",
+          "security_local_synthetic_data",
+          "users_developer_local",
+          "vision_local_records_utility",
+          "out_of_scope"
+        ],
+        "risks": [
+          "risk_semantic_duplication",
+          "risk_cli_machine_output_violation"
+        ],
+        "scope": [
+          "Implement category_report.rank_categories by consuming records.summarize output.",
+          "Implement local JSON-file CLI success and invalid-input protocol.",
+          "Add ranking and CLI tests, including examples/valid.json."
+        ],
+        "title": "Derive ranking and expose strict CLI",
+        "verification_expectation": "Run focused report and CLI tests plus exact-output integration checks after the slice.",
+        "verification_triggers": [
+          "cross_component",
+          "boundary",
+          "public_api",
+          "security"
+        ]
+      },
+      {
+        "acceptance_criteria": [
+          "Clean-copy execution confirms the required test minima and real examples/valid.json output.",
+          "Acceptance evidence demonstrates unmodified oracle-based verification.",
+          "USAGE.md contains only commands verified during this slice."
+        ],
+        "architecture": {
+          "fingerprint": "sha256:552e451b037dfdc32673f17ced5fcbfac5400f17a6e730f0ad1a933d60d702bf",
+          "revision": 1
+        },
+        "architecture_impact": "none",
+        "boundaries": [
+          "ctr_rank_and_cli_output",
+          "flow_cli_success",
+          "flow_cli_invalid_input"
+        ],
+        "components": [
+          "cmp_records_summary",
+          "cmp_category_report_cli"
+        ],
+        "dependencies": [
+          "s_rank_cli"
+        ],
+        "id": "s_acceptance_evidence",
+        "impact_reason": "This validates and documents the accepted baseline rather than changing it.",
+        "kind": "risk_probe",
+        "maturity": "execution_ready",
+        "milestone": "m_report_cli",
+        "objective": "Validate immutable-oracle acceptance from a clean copy and document only proven commands.",
+        "out_of_scope": [
+          "Changing architecture, contract oracles, quota mechanisms, residual product files, and additional product capabilities."
+        ],
+        "requirements": [
+          "acceptance_verification",
+          "documentation_requirement",
+          "scope_deliverables_milestones",
+          "out_of_scope",
+          "quota_planning"
+        ],
+        "risks": [
+          "risk_contract_oracle_drift",
+          "risk_cli_machine_output_violation"
+        ],
+        "scope": [
+          "Create USAGE.md from successfully verified commands only.",
+          "Run declared suites and the real prescribed CLI command from a clean copy.",
+          "Preserve independent evidence without editing pilot-contract.json or its oracles."
+        ],
+        "title": "Verify clean-copy delivery and document proven use",
+        "verification_expectation": "Use the clean-copy acceptance harness after the slice and before milestone closure.",
+        "verification_triggers": [
+          "cross_component",
+          "boundary",
+          "public_api"
+        ]
+      }
+    ],
+    "unresolved_questions": []
+  },
+  "requirements": [
+    {
+      "basis": "Mensaje del usuario y verificación predeclarada.",
+      "category": "success",
+      "key": "acceptance_verification",
+      "status": "known",
+      "text": "La aceptación exige al menos los 10 tests de `test_records.py`, 4 de `test_category_report.py` y los tests de `test_product_cli.py`, incluidos ejemplos en `examples/` y la salida CLI indicada para `examples/valid.json`. La validación final debe ejecutarse integrada desde una copia limpia, repetir entrada real y conservar evidencia independiente; los oráculos definidos en `pilot-contract.json` no pueden editarse para lograr PASS."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "capabilities",
+      "key": "capability_ranking_cli",
+      "status": "known",
+      "text": "`category_report.rank_categories(records)` reutiliza el resumen y devuelve objetos category/count/total, ordenados por total descendente y categoría ascendente en empates. El CLI recibe un archivo JSON con lista y emite el ranking JSON compacto, claves ordenadas, ASCII y salto de línea; ante archivo inválido sale con código 2 y diagnóstico solo en stderr, sin salida parcial."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "capabilities",
+      "key": "capability_summary",
+      "status": "known",
+      "text": "`records.summarize(records)` valida una lista de diccionarios, no la muta y devuelve `count`, `total` y `by_category`; agrupa por `strip().casefold()`. Categorías: string no vacío tras espacios. Importes: int/float finito, no negativo y no bool. Entradas inválidas lanzan ValueError; vacío devuelve 0, 0 y {}."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "scope",
+      "key": "documentation_requirement",
+      "status": "known",
+      "text": "`USAGE.md` debe documentar los comandos que se hayan comprobado realmente antes del commit final."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "integrations",
+      "key": "integrations_local_files_python",
+      "status": "known",
+      "text": "Solo integra módulos Python locales, el helper `record_rules.py` y archivos JSON locales de entrada; no requiere integraciones externas."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "constraints",
+      "key": "normalization_helper",
+      "status": "known",
+      "text": "Debe conservarse la normalización existente de `record_rules.py`: `strip().casefold()`. La solución usa solo biblioteca estándar de Python."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "out_of_scope",
+      "key": "out_of_scope",
+      "status": "known",
+      "text": "Quedan excluidos UI, red, dependencias de terceros, instalación de paquetes, persistencia, otros lenguajes, despliegue, publicación, base de datos, archivos residuales y cambios automáticos de arquitectura."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "problem",
+      "key": "problem_record_review",
+      "status": "known",
+      "text": "Se necesita validar, resumir por categoría normalizada y clasificar registros sin servicios externos."
+    },
+    {
+      "basis": "Mensaje actual del usuario: “el tema de cuotas ya se analizara despues”.",
+      "category": "constraints",
+      "key": "quota_planning",
+      "status": "known",
+      "text": "El análisis de cuotas, presupuesto o límites de consumo se difiere para una fase posterior; no condiciona el alcance del piloto local actual."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "scale",
+      "key": "scale_small_local_datasets",
+      "status": "known",
+      "text": "El producto está destinado a pequeños conjuntos de registros sintéticos en una máquina local; no se declaran requisitos de alto volumen ni latencia."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "scope",
+      "key": "scope_deliverables_milestones",
+      "status": "known",
+      "text": "Entregables: `records.py`, `category_report.py` y `USAGE.md`. Hay dos hitos dependientes: primero resumen validado y reutilizable; después informe ordenado y CLI basado en él. Ambos deben cerrar sus comprobaciones."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "security",
+      "key": "security_local_synthetic_data",
+      "status": "known",
+      "text": "Los datos son sintéticos y se procesan localmente, sin servicios externos ni persistencia; no se indican datos sensibles ni acceso multiusuario."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "users",
+      "key": "users_developer_local",
+      "status": "known",
+      "text": "Un desarrollador que revisa registros sintéticos en su propia máquina."
+    },
+    {
+      "basis": "Mensaje del usuario.",
+      "category": "vision",
+      "key": "vision_local_records_utility",
+      "status": "known",
+      "text": "Utilidad Python local para resumir y ordenar pequeños conjuntos de registros sintéticos, utilizable como biblioteca y desde terminal."
+    }
+  ]
+}

@@ -13,15 +13,41 @@ from .registry import FactoryError
 from .reproducibility import atomic_text, environment_identity, export_commit
 
 
-def contract_snapshot(snapshot, definition, definition_id):
+def prior_input_authorizations(store, snapshot, definition):
+    """Resolve exact earlier user data; no model output or synthetic human answer."""
+    from hashlib import sha256
+    result = []
+    roadmap = snapshot['planning']['roadmap']
+    for exclusion in definition.get('project_acceptance', {}).get('exclusions', []):
+        source = exclusion.get('prior_input')
+        if not source:
+            continue
+        coverage = next((c for c in roadmap['plan']['coverage'] if c['requirement'] == exclusion['requirement']), None)
+        with store._connection() as db:
+            row = db.execute('SELECT r.message,r.turn_id,t.created_at,t.status FROM factory_requests r '
+                             'JOIN discovery_turns t ON t.id=r.turn_id WHERE r.id=?', (source['request_id'],)).fetchone()
+        if (not coverage or coverage['disposition'] not in ('deferred', 'out_of_scope') or
+                not coverage['rationale'] or not row or row['status'] != 'completed' or
+                source['quote'] not in row['message'] or
+                row['created_at'] > roadmap['created_at']):
+            raise FactoryError('prior_exclusion_authorization_missing', 'Exclusion must reference exact user input predating the accepted plan')
+        result.append({**exclusion, 'disposition': coverage['disposition'], 'rationale': coverage['rationale'],
+                       'message_sha256': sha256(row['message'].encode()).hexdigest(),
+                       'turn_id': row['turn_id'], 'created_at': row['created_at'],
+                       'provenance': 'operator-bound prior user input; not a generated human decision'})
+    return result
+
+
+def contract_snapshot(snapshot, definition, definition_id, *, prior_inputs=()):
     """Only references and verbatim approved conditions; never infer a new success test."""
     plan = snapshot['planning']['roadmap']['plan']
     return {'schema_version': 1, 'sources': current_sources(snapshot),
             'requirements': snapshot['planning']['roadmap']['source']['requirements'],
             'definition_id': definition_id, 'verification': definition,
             'milestones': plan['milestones'], 'coverage': plan['coverage'], 'gates': plan['gates'],
-            'decisions': [d for d in snapshot['decisions'] if any(d['id'] == e['decision_id']
-                for e in definition.get('project_acceptance', {}).get('exclusions', []))]}
+            'decisions': [d for d in snapshot['decisions'] if any(d['id'] == e.get('decision_id')
+                for e in definition.get('project_acceptance', {}).get('exclusions', []))],
+            **({'prior_inputs': list(prior_inputs)} if prior_inputs else {})}
 
 
 class ProjectGate(MilestoneGate):
@@ -127,6 +153,13 @@ class ProjectGate(MilestoneGate):
                     else:
                         by_id[check_id]['criteria'].append(index)
             elif disposition in ('deferred', 'out_of_scope'):
+                prior = next((a for a in self.contract.get('prior_inputs', []) if
+                    a['requirement'] == key and a['disposition'] == disposition and
+                    a['rationale'] == coverage['rationale'] and
+                    a['prior_input'] == exclusions.get(key, {}).get('prior_input')), None)
+                if prior:
+                    self.exclusions.append({**coverage, 'authorization': prior})
+                    continue
                 decision = decisions.get(exclusions.get(key, {}).get('decision_id'))
                 if (not coverage['rationale'] or not decision or not decision['answered_at'] or
                         (decision['answer'] or '').strip().lower() != 'accept' or

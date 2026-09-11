@@ -406,6 +406,9 @@ class FactoryService:
             group = controller.journal.latest()
             if group and group.get('analysis'):
                 return self.get_status(project)  # Accepted planning still needs the concrete check binding.
+            if group and group['state'] == 'execution_authorized':
+                controller.start('analysis-handoff-' + group['id'])
+                return self.get_status(project)
             if group and (group['state'] not in TERMINAL or
                           runtime.state()['run_id'] == group['runtime_id']):
                 controller.resume()

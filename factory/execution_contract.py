@@ -40,6 +40,8 @@ CHECK_SCHEMA = obj({
     'gate_checks': array({'type': 'integer', 'minimum': 0}, 100),
 })
 CHECK_SCHEMA['properties']['integration_mode'] = enum(('local', 'simulated', 'external_service'))
+CHECK_SCHEMA['properties']['source_sha256'] = {'type': 'string', 'pattern': '^[0-9a-f]{64}$'}
+CHECK_SCHEMA['properties']['clean_copy'] = {'type': 'boolean'}
 CHECK_SCHEMA['properties']['entrypoint'] = obj({
     'path': string(300), 'args': array(string(4000, empty=True), 30), 'stdout': string(8000, empty=True),
 })
@@ -56,6 +58,15 @@ VERIFICATION_SCHEMA['properties']['project_acceptance'] = obj({
     'runtime': enum(('python_stdlib',)),
     'exclusions': array(obj({'requirement': KEY, 'decision_id': {'type': 'integer', 'minimum': 1}}), 150),
 })
+# An operator may bind an exclusion to the actual earlier discovery input instead
+# of fabricating an "accept" decision for a choice the user already made.
+EXCLUSION_SCHEMA = VERIFICATION_SCHEMA['properties']['project_acceptance']['properties']['exclusions']['items']
+EXCLUSION_SCHEMA['required'] = ['requirement']
+EXCLUSION_SCHEMA['properties']['prior_input'] = obj({
+    'request_id': string(128), 'quote': string(6000),
+})
+EXCLUSION_SCHEMA['oneOf'] = [{'required': ['decision_id'], 'not': {'required': ['prior_input']}},
+                             {'required': ['prior_input'], 'not': {'required': ['decision_id']}}]
 
 RESULT_SCHEMA = obj({
     'summary': string(3000),
@@ -118,6 +129,8 @@ def validate_verification(definition, plan):
         if c['id'] in ids or c['gate'] not in gates:
             raise FactoryError('invalid_verification', 'Duplicate check or unknown gate')
         ids.add(c['id'])
+        if c.get('source_sha256') and c['kind'] != 'python_unittest':
+            raise FactoryError('invalid_verification', 'Independent source hashes identify exact unittest files')
         if c.get('entrypoint'):
             relative_path(c['entrypoint']['path'])
             if c['kind'] != 'python_unittest' or not c['entrypoint']['path'].endswith('.py'):

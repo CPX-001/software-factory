@@ -1,165 +1,168 @@
-# Paso 12: análisis con modelo real; aceptación integral pendiente
+# Paso 12: producto real validado y entregado; autonomía inicial pendiente
 
-**El piloto ha completado discovery, arquitectura y planning con modelo real.** Todavía
-no ha implementado el producto ni alcanzado `project_verified`. El bloqueo actual es
-`verification_binding_pending`: los oráculos iniciales aún no están vinculados a todas
-las condiciones del plan aceptado. La reserva de cuota dejó de bloquear este piloto
-cuando el usuario autorizó expresamente retirarla.
+**El mismo piloto real ha alcanzado `project_verified` y tiene entrega local.** Sus dos
+milestones están cerrados y los tests independientes y el CLI pasaron desde una copia limpia.
+No se declara completado el goal de autonomía general desde una idea nueva: la vinculación
+inicial de las pruebas al roadmap todavía necesitó una intervención revisada. También está
+pendiente la observación humana del informe final en otro chat de Codex App.
 
-La [evidencia del recorrido real](evidence/end-to-end-12-real-model.json) contiene versiones,
-identificadores, llamadas, consumo, intervenciones y limitaciones. Los resultados históricos
-con reserva del 25 % se conservan en [preflight](evidence/end-to-end-12-quota.json),
-[piloto inicial](evidence/end-to-end-12-pilot.json) y [reconexión](evidence/end-to-end-12-reconnect.json).
-No son el estado actual del piloto.
+La [evidencia real final](evidence/end-to-end-12-real-delivery.json) conserva commits,
+recibos, uso, intervenciones y recuperación. La [consulta nativa y repetición](evidence/end-to-end-12-delivery-native.json)
+demuestra acceso al resultado mediante las tools de esta conversación, sin nuevo consumo.
+Los [análisis anteriores](evidence/end-to-end-12-real-model.json) y bloqueos se conservan
+como historia; ya no describen el estado actual.
 
-La suite completa sobre los últimos cambios pasa **304 tests en 444,215 segundos**, sin
-fallos, errores ni skips. Se conservan el [log](evidence/end-to-end-12-real-model-tests.txt)
-y el [manifiesto de fuentes](evidence/end-to-end-12-real-model-checks.json). También pasan
-compilación y comprobación de whitespace. Esta suite no consume cuota LLM.
-
-## Instancia y reproducción
-
-El piloto anterior `p_1f2f88a25a7f899c` apuntaba a
-`/tmp/factory-continuation-smoke-bc7lwhrv/product`; faltaban tanto ese repositorio como su
-registro. La búsqueda de registros en `/home/cpx`, `/tmp` y `/var/tmp` no encontró una
-instancia recuperable. Se reutilizó el escenario de registros para crear una única
-instancia nueva persistente, sin copiar estado de otro host:
+## Instancia y resultado
 
 - Proyecto: `p_3084354cc76d1c23`, Records end-to-end pilot.
-- Directorio: `/home/cpx/.local/share/software-factory/pilots/records-v1`.
-- Producto: `product/`; registro: `/home/cpx/.local/state/software-factory/registry.sqlite3`.
-- Commit de fixtures: `9af30b4ae36f421f6a41eb2b77011b9fbb303a65`; sigue siendo el HEAD del producto.
-- Run: `9a2490b3-508b-4b60-bbb2-7aacf45d2901`.
-- Continuation: `b5774d1c-550d-49da-89df-a40749fa6e97`.
-- Estado: `execution` / `implementation_boundary`; no hay worker activo.
+- Producto: `/home/cpx/.local/share/software-factory/pilots/records-v1/product`.
+- Run lógico/continuation: `b5774d1c-550d-49da-89df-a40749fa6e97`.
+- Proceso de análisis e implementación: `9a2490b3-508b-4b60-bbb2-7aacf45d2901`.
+- Proceso de recuperación del informe: `13f67813-17e6-408b-8230-c385fa5b451f`.
+- Commit aceptado: `d2cd9261e0a09cf7a644d2eef85c006a4303da96`, en `factory/accepted`.
+- Recibo: `sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f`.
+- Entrega: `product/.factory/deliveries/<recibo>/REPORT.md`, con código en `source/`.
 
-Para recrear la preparación **solo si el directorio no existe**:
+El HEAD de la rama inicial sigue en el commit de recursos independientes
+`4cb7db9823a10caceba52512d490d7fcd7942364`. Factory no cambió esa rama a la implementación:
+el código entregado está en el commit aceptado y la copia de entrega. No hay push,
+publicación, despliegue ni cambios de arquitectura automáticos.
+
+El piloto anterior `p_1f2f88a25a7f899c` apuntaba a un directorio temporal de otro entorno
+que no pudo recuperarse. Se creó una sola instancia persistente del escenario existente,
+sin copiar estado ni credenciales de otra máquina. No se creó otro piloto para eludir un fallo.
+
+## Recorrido real y consumo
+
+| Fase | Llamadas | Tokens | Resultado |
+| --- | ---: | ---: | --- |
+| Discovery | 2 | 15.737 | Completado con modelo real |
+| Arquitectura | 4 | 48.022 | Baseline aceptada, revisión 1 |
+| Planning | 7 | 120.882 | Roadmap real: 2 milestones, 3 slices, 9 gates |
+| Implementación | 4 | 84.038 | 3 slices aceptadas; incluye una corrección de respuesta |
+| Refinamiento/preparación | 0 | 0 | Las slices ya estaban preparadas |
+| Validación final y recuperación del informe | 0 | 0 | Checks deterministas, recibo y entrega |
+| Total | **17** | **268.679** | Sin consumo desconocido |
+
+Modelo `gpt-5.6-terra`, esfuerzo `low`, OpenAI, autenticación ChatGPT y runtime/SDK 0.147.0.
+El usuario autorizó explícitamente retirar la reserva y ampliar lo necesario. La misma
+continuation registra una ampliación de 20 a 30 llamadas, 250.000 a 500.000 tokens, dos a
+tres slices y de 1.800 a 14.400 segundos desde su inicio original. Conserva las 13 llamadas
+ya consumidas y su deadline anterior. Los límites individuales siguen en dos intentos,
+600 segundos y 50.000 tokens. La reserva efectiva es 0 %; agotamiento real y telemetría
+desconocida siguen bloqueando. No hubo cambio de proveedor, facturación alternativa ni
+reinicio de contadores. Factory no gestionó refills de la cuenta.
+
+## Aceptación independiente y reproducibilidad
+
+Los 19 tests originales preceden a cualquier implementación: diez del resumen, cuatro
+del ranking y cinco del CLI. Sus hashes en `pilot-contract.json` permanecen intactos.
+Se añadieron antes de implementar seis tests para condiciones ya exigidas por el roadmap:
+reutilizar los módulos reales, conservar los oráculos y ejecutar los comandos de `USAGE.md`.
+No se sustituyeron las pruebas originales ni se escribió el producto fuera del worker.
+La integración local observa las funciones reales; no usa mocks de servicios.
+
+El [roadmap real congelado](../pilots/records-v1/accepted-plan.json) y su
+[contrato de verificación](../pilots/records-v1/verification-binding.json) están versionados.
+La aceptación final acredita 33 criterios mediante 21 bindings de seis procedimientos
+distintos. Quince bindings reutilizan resultados idénticos sobre el mismo código, runner,
+intérprete y perfil. Los recibos históricos de milestones no sustituyen la ejecución final.
+
+Los gates reutilizan `Verifier`, `export_commit` y `LinuxSandbox`. Una slice congela su
+árbol Git exacto sin publicarlo; el cierre final exporta el commit aceptado. Python de sistema
+usa `-I -S`, solo biblioteca estándar, red deshabilitada, workspace de solo lectura y entorno
+temporal vacío. No hereda `.venv`, secretos, bases residuales ni estado interno de Factory.
+Los oráculos independientes están fijados por hash y fuera de los permisos de escritura.
+Cambios de código, definición o entorno pertinente invalidan la evidencia correspondiente.
+
+Los comandos documentados se ejecutaron durante la slice de entrega. Desde su `source/`,
+la entrada comprobada es:
 
 ```bash
-.venv/bin/python scripts/smoke_continuation.py --from-discovery \
-  --directory "$HOME/.local/share/software-factory/pilots/records-v1" \
-  --model gpt-5.6-terra --effort low
+/usr/bin/python3 -S category_report.py examples/valid.json
 ```
 
-La creación rechaza sobrescritura y rutas dentro de Factory. No carga arquitectura ni
-planning ficticios. Sus fuentes son el [brief](../pilots/records-v1/brief.md), el
-[fixture existente](../scripts/execution_smoke_fixture.py) y los
-[tests de CLI](../pilots/records-v1/test_product_cli.py). `pilot-contract.json` fija sus hashes.
-Las excepciones de presupuesto autorizadas para esta instancia no cambian los valores
-predeterminados de una nueva preparación.
+Salida exacta:
 
-Para inspeccionar **esta misma instancia**, sin iniciar inferencia:
+```json
+[{"category":"food","count":2,"total":12},{"category":"books","count":1,"total":7}]
+```
+
+El informe incluye procedimientos para repetir las pruebas. La entrega contiene código,
+fixtures declaradas, contrato, recibo y runner versionado; no contiene credenciales, bases
+internas ni transcripts. El informe queda fuera del código aceptado y no modifica el commit.
+El recibo garantiza esas condiciones y versión, sin prometer despliegue, ausencia universal
+de vulnerabilidades ni soporte para otros stacks.
+
+## Intervenciones y recuperación
+
+Las correcciones anteriores de discovery/planning están en la evidencia de análisis:
+autorización efectiva en el contexto, rechazo de ciclos de cierre y revisión acotada de la
+misma propuesta con las garantías reales del controller.
+
+Esta continuación corrigió los bloqueos restantes:
+
+1. La vinculación conserva ahora la ampliación autorizada como delta sobre el mismo ledger.
+   Reanudar no amplía límites. El primer inicio tras el binding conserva el proceso de análisis.
+2. Los gates de slice y milestone pueden reutilizar el runner limpio cuando lo exige el
+   contrato. Un unittest independiente fijado por hash puede acreditar el harness sin exigir
+   otro sistema de tests.
+3. Las exclusiones ya expresadas por el usuario pueden referenciar mensajes exactos de
+   discovery anteriores al plan, congelados en el contrato. No se creó un `accept` ficticio.
+4. El worker de documentación solo declaró un criterio aunque los checks pasaron. Factory
+   rechazó el cierre y corrigió la respuesta dentro del segundo intento autorizado.
+5. Tras guardar el recibo, el informe falló al asumir que toda autorización tenía un ID de
+   decisión. Se corrigió el proyector y recuperó por `factory_resume`: cero inferencias,
+   verificaciones repetidas o cierres duplicados. El nuevo ID de proceso protege frente al
+   worker antiguo y conserva el mismo run lógico, consumo y deadline.
+
+La vinculación revisada al roadmap fue una intervención de integración registrada. El helper
+del piloto rechaza un plan diferente y no presenta su mapping como una solución general
+automática. Los criterios originales permanecieron fijos. La remediación final automática
+no estaba autorizada y no se utilizó; su límite general sigue siendo un único ciclo
+persistente cuando se autoriza por separado.
+
+## Reproducción y Codex App
+
+Para inspeccionar esta instancia sin iniciar inferencia:
 
 ```bash
 .venv/bin/python scripts/smoke_continuation.py \
   --prepared "$HOME/.local/share/software-factory/pilots/records-v1/report.json" --installed
 ```
 
-`report.json` proyecta el último estado y `observations/` conserva cada observación. Añadir
-`--run` consulta el preflight y solicita reanudar el trabajo autorizado mediante Factory.
-La comprobación de identidad/contrato impide reconstruir el piloto como una reanudación.
-En el estado actual, reanudar conserva la parada por falta de bindings; no vuelve a
-hacer discovery, arquitectura o planning ni crea otro presupuesto.
+El mismo smoke informa del PASS independiente a partir de las pruebas del recibo y verifica
+selección/reconexión. `report.json` proyecta el estado; `observations/` conserva cada observación.
+Una petición repetida de validación conserva recibo, commit, proceso y consumo.
 
-## Alcance y aceptación independiente
+Para recrear únicamente la preparación, usa un directorio que todavía no exista:
 
-Utilidad Python de biblioteca estándar para resumir y ordenar registros JSON. El helper
-existente `record_rules.py` conserva `strip().casefold()`. Los oráculos independientes
-preceden a la implementación: 10 tests del resumen, 4 del ranking y 5 del CLI, con entradas
-válidas, vacías, desordenadas, negativas, bool, JSON malformado, Unicode, NaN/infinito,
-no mutación y resultados exactos. El brief comunica estos criterios al workflow.
+```bash
+.venv/bin/python scripts/smoke_continuation.py --from-discovery \
+  --directory /ruta/nueva/records-v1 --model gpt-5.6-terra --effort low
+```
 
-La entrada prevista es `python category_report.py examples/valid.json`. Aún falta
-`category_report.py`: **este comando no se presenta como un producto entregado o ejecutado**.
-También faltan `records.py` y `USAGE.md`. La aceptación independiente sigue en **NOT_RUN**;
-no hay commits de implementación aceptados, recibos de milestones, recibo final ni entrega.
+La preparación no precarga arquitectura/planning, no autoriza inferencia y nunca sobrescribe
+un piloto. El plan resultante necesitará un binding revisado: el de esta instancia no se
+aplica silenciosamente a otro roadmap.
 
-## Recorrido y consumo observados
+El usuario ya comprobó selección, reenvío pausado e inspección en dos chats; esa
+[evidencia de App](evidence/end-to-end-12-codex-app.json) no necesita repetirse. Las tools
+nativas de esta conversación consultaron ejecución activa y resultado final. El cliente
+MCP instalado se desconectó mientras el controller avanzaba entre slices, milestones y
+validación. Esto no equivale a observar todos los pasos en la UI humana.
 
-| Fase | Llamadas reales | Tokens observados | Resultado |
-| --- | ---: | ---: | --- |
-| Discovery | 2 | 15.737 | 14 elementos de conocimiento; completado |
-| Arquitectura | 4 | 48.022 | Baseline aceptada, revisión 1 |
-| Planning | 7 | 120.882 | Roadmap aceptado, revisión 1: 2 milestones, 3 slices, 9 gates |
-| Implementación y refinamiento | 0 | 0 | No iniciados |
-| Total | **13** | **184.641** | Sin llamadas con consumo desconocido al terminar el análisis |
+El plugin está actualizado a `0.1.0+codex.20260911131027`. Para la comprobación humana final,
+el mensaje pendiente en otro chat es:
 
-Modelo efectivo `gpt-5.6-terra`, esfuerzo `low`, proveedor OpenAI, autenticación ChatGPT,
-SDK/runtime 0.147.0. Los workers usan el mismo adaptador aislado de ejecución, sin tools
-recursivas de Factory. No se ha cambiado de proveedor ni usado facturación alternativa.
-Los tokens del worker se distinguen de la cuota compartida de la cuenta.
+> Usa Software Factory. Consulta el proyecto p_3084354cc76d1c23. Muestra la versión
+> validada, sus exclusiones y la ruta del informe de entrega local. No inicies ni
+> reanudes ejecuciones.
 
-El usuario autorizó reserva **0 %** y ampliar el presupuesto. Se registraron 20 llamadas,
-1.800 segundos y 250.000 tokens agregados; 600 segundos y 50.000 tokens por llamada.
-El límite inicial de unidades conserva 2; el roadmap real contiene 3 y esa diferencia debe
-resolverse expresamente al vincular la ejecución. Se mantiene el mismo ledger para fases
-iniciales y ejecución posterior. Las reanudaciones no reinician llamadas, tokens ni deadline.
-Factory no ha consumido refills o reinicios de cuenta; el agotamiento real y la telemetría
-no disponible siguen impidiendo inferencia.
-
-## Intervenciones y correcciones
-
-1. Se aplicó la autorización del usuario a las fases iniciales mediante el mismo
-   `factory_execution_policy`, con los checks aún como plantillas. El controller reutiliza
-   `CodexExecution`, su sandbox, watchdog y ledger de continuation; no hay otro supervisor.
-2. Discovery volvió a pedir permiso porque no recibía la política efectiva. Se añadió la
-   autorización al contexto y se reenvió la instrucción real del usuario con un request ID
-   nuevo. Las decisiones de producto no se sustituyeron por respuestas inventadas.
-3. Planning creó un ciclo entre cierre del milestone y cierre del proyecto. Se corrigió
-   la instrucción contradictoria sobre `project_close`, se añadió rechazo determinista de
-   esa dependencia y una reparación adicional acotada bajo el presupuesto global.
-4. Una revisión objetó después una dependencia que el controller ya impone. Se documentaron
-   esas garantías en el contexto y se volvió a revisar **la misma propuesta**, conservando
-   todas las revisiones anteriores. Esa actualización de contexto puede solicitar una sola
-   revisión adicional; no crea una nueva ronda de reconciliación ni supera ocho llamadas
-   totales de planning. El análisis real terminó con siete.
-5. El estado diferencia ahora el binding pendiente de una revisión de fuentes obsoleta.
-   Vincular el plan no puede debilitar los oráculos iniciales ni renovar el presupuesto.
-
-Estas intervenciones de desarrollo/reanudación quedan registradas: el recorrido real
-**todavía no demuestra autonomía completa desde la idea hasta la entrega**.
-
-## Bloqueo de integración conservado
-
-El plan aceptado contiene nueve gates. Los tres oráculos predeclarados no constituyen por
-sí solos un contrato completo que pruebe cada condición de esos gates. Quedan pendientes:
-
-- Bindings concretos para criterios, integraciones y aceptación completa de requisitos
-  transversales, conservando las fuentes y pruebas originales.
-- Evidencia de que los comandos de `USAGE.md` se ejecutaron realmente y del harness de
-  copia limpia exigido por la slice de entrega. Ese harness se ha planificado como trabajo
-  de producto, aunque Factory ya posee el runner de reproducibilidad: falta resolver esa
-  integración sin presentar tests ordinarios como prueba de todas esas condiciones.
-- Referencias durables de autorización previa para `out_of_scope` y `quota_planning`, tal
-  como exige el contrato final. La intención está en los datos/instrucciones, pero el flujo
-  actual no la ha materializado en el formato de aceptación que requiere el cierre.
-- Continuidad automática desde planning hasta una ejecución con ese contrato completo.
-
-Resolverlo requiere integrar el binding y sus evidencias con el workflow existente. No se
-ha publicado un contrato parcialmente cubierto ni marcado el proyecto como validado.
-El presupuesto agotable del mismo run tampoco desaparece mientras se resuelve este hueco.
-
-## Codex App, MCP y comprobaciones
-
-El usuario realizó selección, reenvío pausado e inspección del proyecto activo en dos
-chats. Se conserva la [evidencia de Codex App](evidence/end-to-end-12-codex-app.json), que
-identifica esas pruebas como aportadas por el usuario y añade consultas nativas directas.
-
-El launcher MCP instalado inició el worker real y se desconectó; otra conexión observó el
-mismo run y su progreso. Tras completar planning, `factory_status` nativo en esta conversación
-confirmó también el mismo run, `implementation_boundary` y las 13 llamadas. Sigue pendiente
-la observación humana de trabajo activo/decisiones/entrega en la UI. No existe informe final
-del producto que pueda abrirse todavía.
-
-El plugin está actualizado: `software-factory@personal`, caché
-`0.1.0+codex.20260911120741`. No hace falta reinstalarlo manualmente. Para consultar el estado
-en un chat nuevo del mismo host:
-
-> Usa Software Factory. Consulta el proyecto p_3084354cc76d1c23 y muestra su fase, run,
-> presupuesto consumido y el binding de verificaciones que falta. No crees otro proyecto
-> ni reinicies su presupuesto.
-
-Las pruebas anteriores de selección/reenvío no necesitan repetirse. El `blockers: []` de
-un cliente antiguo no refresca cuota ni elimina el diagnóstico de binding de la versión
-actualizada del servicio. La suite normal utiliza modelos simulados y repositorios
-desechables; sus recibos `project_verified` no se atribuyen a este piloto real.
+La suite completa pasa **310 tests en 505,201 segundos**, sin fallos, errores ni omisiones
+y sin inferencia. Se conservan el [log](evidence/end-to-end-12-final-tests.txt) y el
+[manifiesto de fuentes](evidence/end-to-end-12-final-checks.json). También pasan compilación,
+whitespace e instalación/validación del plugin. Los tests con modelos simulados cubren
+además fallo integrado, remediación global acotada, obsolescencia, ausencia de capacidades
+y recuperación. Esos casos no se atribuyen al piloto real, que no necesitó una remediación
+final del producto.

@@ -54,8 +54,12 @@ def deliver(store, receipt):
     lines += ['- ' + e['check_id'] + ': ' + e['status'] + ' (' + e.get('integration_mode', 'human_review') + ')' for e in receipt['evidence']]
     lines += ['', '## Límites y trabajo diferido', '']
     lines += ['- ' + x for x in receipt['limitations']]
-    lines += ['- ' + e['requirement'] + ': ' + e['disposition'] + ' — ' + e['rationale'] +
-              ' (decisión ' + str(e['authorization']['id']) + ')' for e in receipt['exclusions']]
+    for exclusion in receipt['exclusions']:
+        authorization = exclusion['authorization']
+        reference = ('mensaje previo ' + authorization['prior_input']['request_id']
+                     if authorization.get('prior_input') else 'decisión ' + str(authorization['id']))
+        lines.append('- ' + exclusion['requirement'] + ': ' + exclusion['disposition'] + ' — ' +
+                     exclusion['rationale'] + ' (' + reference + ')')
     report = '\n'.join(lines) + '\n'
     atomic_text(root / 'REPORT.md', report)
     return str(root / 'REPORT.md')

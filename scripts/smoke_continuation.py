@@ -51,6 +51,31 @@ def installed_parameters(prepared):
     return StdioServerParameters(command=server['command'], args=args)
 
 
+def independent_result(prepared, final):
+    """Project checks already ran the predeclared oracles in Factory's clean runner."""
+    receipts = final.get('receipts', [])
+    if not receipts:
+        return {'status': 'NOT_RUN', 'reason': 'No durable accepted-candidate receipt exists'}
+    receipt = receipts[-1]
+    definition = receipt['contract']['verification']
+    checks = {c['id']: c for c in definition['checks']}
+    matched = []
+    for original in prepared['contract']['checks']:
+        candidates = [e for e in receipt['evidence'] if e['status'] == 'PASS' and
+            e['code_id'] == receipt['code_id'] and e.get('commit') == receipt['commit'] and
+            all(checks[e['check_id']].get(k) == v for k, v in original.items()
+                if k not in ('id', 'gate', 'criteria', 'gate_checks')) and
+            receipt['reproducibility']['files'][original['target']]['sha256'] ==
+                prepared['contract']['resource_hashes'][original['target']]]
+        if not candidates:
+            return {'status': 'NOT_RUN', 'reason': 'No matching final independent evidence: ' + original['id']}
+        matched.append({'oracle': original['id'], 'target': original['target'], 'min_tests': original['min_tests'],
+                        'evidence': candidates[0]['check_id'], 'status': 'PASS'})
+    return {'status': 'PASS' if receipt['reproducibility']['status'] == 'PASS' else 'NOT_RUN',
+            'commit': receipt['commit'], 'receipt': receipt['id'], 'checks': matched,
+            'method': 'Original independent oracles executed by the existing clean project runner'}
+
+
 async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
     """Prepare/inspect through the normal MCP surface without faking phase progress.
 
@@ -111,7 +136,7 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
         report['full_workflow_limits'] = effective_policy['continuation']
         report['full_workflow_limits_enforced'] = True
         report['integration_gaps'] = [g for g in report['integration_gaps']
-                                    if g['code'] == 'initial_execution_authorization_boundary']
+                                    if g['code'] == 'initial_execution_authorization_boundary' and effective_policy.get('analysis_authorized')]
     if run:
         from scripts.diagnose_execution import inspect_runtime
         report['quota_preflight'] = await asyncio.to_thread(inspect_runtime,
@@ -161,10 +186,15 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
                 'unknown_usage_calls': sum(not c.get('usage') for c in phase_calls)}
     from factory.project_store import ProjectStore
     final = ProjectStore(store).inspect(full=True)
-    report['independent_acceptance'] = {'status': 'NOT_RUN', 'reason': 'Independent accepted-candidate checks have not run in this driver'}
+    report['independent_acceptance'] = independent_result(prepared, final)
     report['final_commit'] = (final['validated_version'] or {}).get('commit')
     report['final_receipt'] = (final['validated_version'] or {}).get('receipt')
     report['delivery'] = final['delivery']
+    report['completed_after_disconnect'] = (final['state'] == 'project_verified' and final.get('delivery_ready') and
+                                           report['independent_acceptance']['status'] == 'PASS')
+    report['implementation_status'] = final['state']
+    if final['validated_version']:
+        report['phases_really_completed'].extend(['execution', 'milestone_closure', 'project_validation'])
     report['finished_at'] = time.time()
     return report
 

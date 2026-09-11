@@ -16,7 +16,9 @@ fuentes, autorización, recibos y contadores; reconstruir una fixture no prueba 
 
 La entrada en validación final conserva el deadline original. Es correcto que una autorización
 tardía no renueve tiempo ni llamadas, pero hoy un run agotado necesita una intervención fuera
-del recorrido automático para disponer de más presupuesto. Una futura operación explícita
+del recorrido automático para disponer de más presupuesto. El paso 12 permite una ampliación
+explícita al vincular el plan, antes de aceptar implementación: registra el delta y conserva
+el consumo. No constituye una ampliación general después del cierre. Una futura operación explícita
 podría añadir una concesión auditada, mostrando presupuesto inicial, ampliación y consumo
 acumulado. No debería reiniciar contadores ni el ciclo global de remediación final.
 
@@ -42,7 +44,9 @@ Completar el mismo escenario de dos milestones con modelo real y verificar su in
 Codex App. Los tests con modelos simulados y transporte MCP real no lo sustituyen. El diagnóstico
 histórico del paso 11 conserva `quota_reserve`. En el paso 12, una autorización explícita retiró
 la reserva para el único piloto y se completaron discovery, arquitectura y planning con modelo
-real. El [recorrido actual](end-to-end-acceptance.md) está pendiente de vincular la verificación
-del plan antes de implementar; la aceptación del producto continúa sin ejecutar.
+real. El [recorrido actual](end-to-end-acceptance.md) ya tiene producto, dos milestones
+cerrados, validación limpia y entrega. Quedan la vinculación inicial automática para planes
+nuevos y la observación humana de la entrega final en otro chat; la vinculación de este
+roadmap fue una intervención revisada y no se presenta como autonomía general.
 No propongo en este paso nuevos lenguajes,
 paralelismo, despliegue ni resolución automática de propuestas arquitectónicas.

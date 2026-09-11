@@ -1,0 +1,549 @@
+{
+  "recorded_at": 1789132474.2682638,
+  "factory_base_commit": "02a3c34dd2d9a50cb5bc3688a089e0bd02fde60c",
+  "project": {
+    "id": "p_3084354cc76d1c23",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-v1/product"
+  },
+  "scenario": "Same records-v1 persistent pilot, no second real instance",
+  "state": "project_verified",
+  "fully_autonomous_from_new_project": false,
+  "remaining_work": [
+    "General planning-to-verification binding requires a reviewed concrete contract; this real roadmap used the documented intervention",
+    "Human observation of the final delivery in another Codex App chat is pending"
+  ],
+  "logical_run": "b5774d1c-550d-49da-89df-a40749fa6e97",
+  "runtime_history": [
+    {
+      "id": "9a2490b3-508b-4b60-bbb2-7aacf45d2901",
+      "status": "failed",
+      "reason": "Worker stopped; resume explicitly to retry",
+      "error": "'id'"
+    },
+    {
+      "id": "13f67813-17e6-408b-8230-c385fa5b451f",
+      "status": "project_verified",
+      "reason": "Accepted version and local report recovered without repeating verification",
+      "error": null
+    }
+  ],
+  "phase_usage": {
+    "discovery": {
+      "calls": 2,
+      "tokens": 15737
+    },
+    "architecture": {
+      "calls": 4,
+      "tokens": 48022
+    },
+    "planning": {
+      "calls": 7,
+      "tokens": 120882
+    },
+    "implementation": {
+      "calls": 4,
+      "tokens": 84038
+    },
+    "refinement": {
+      "calls": 0,
+      "tokens": 0,
+      "reason": "Accepted slices were execution_ready; no real refinement was needed"
+    }
+  },
+  "budget": {
+    "calls": 17,
+    "tokens": 268679,
+    "usage_unknown_calls": 0,
+    "analysis_calls": 13,
+    "analysis_tokens": 184641,
+    "implementation_calls": 4,
+    "refinement_calls": 0,
+    "preparation_calls": 0,
+    "remediation_calls": 0,
+    "implementation_tokens": 84038,
+    "refinement_tokens": 0,
+    "preparation_tokens": 0,
+    "remediation_tokens": 0,
+    "calls_remaining": 13,
+    "tokens_remaining": 231321,
+    "seconds_remaining": 9936.873834133148,
+    "work_units": 3,
+    "remediations": 0,
+    "units_remaining": 0
+  },
+  "limits": {
+    "enabled": true,
+    "inter_milestone": true,
+    "max_calls": 30,
+    "max_seconds": 14400,
+    "max_slices": 3,
+    "max_tokens": 500000
+  },
+  "budget_amendments": [
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 30,
+        "max_seconds": 14400,
+        "max_slices": 3,
+        "max_tokens": 500000
+      },
+      "authorized_at": 1789131985.5817614,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 20,
+        "max_seconds": 1800,
+        "max_slices": 2,
+        "max_tokens": 250000
+      },
+      "continuation_id": "b5774d1c-550d-49da-89df-a40749fa6e97",
+      "deadline": 1789142410.428239,
+      "previous_deadline": 1789129810.428239
+    }
+  ],
+  "runtime": {
+    "authentication": "chatgpt",
+    "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+    "configuration": "private_chatgpt_read_only_no_tools",
+    "effort": "low",
+    "initialized": true,
+    "model": "gpt-5.6-terra",
+    "provider": "openai",
+    "runtime_selection": "sdk_pinned_dependency",
+    "sdk_version": "0.147.0",
+    "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)"
+  },
+  "accepted_slices": [
+    {
+      "execution_id": "0bb37cc8-1ead-4a7f-a054-0ca63a394527",
+      "slice_id": "s_summary_contract",
+      "base_commit": "4cb7db9823a10caceba52512d490d7fcd7942364",
+      "commit": "4fae74e2ae35e9efb10170e453c29550dceec9c2",
+      "changed_paths": [
+        "records.py"
+      ],
+      "accepted_at": 1789132049.6967416,
+      "attempts": [
+        {
+          "status": "completed",
+          "verification": "PASS",
+          "criteria": [
+            0,
+            1,
+            2
+          ],
+          "last_tokens": 19046,
+          "cumulative_tokens": 19046
+        }
+      ]
+    },
+    {
+      "execution_id": "fa497aec-62e0-4ce5-b383-95b6c4bb8811",
+      "slice_id": "s_rank_cli",
+      "base_commit": "4fae74e2ae35e9efb10170e453c29550dceec9c2",
+      "commit": "9248827c88ae3e302df32044c3871901c1300d10",
+      "changed_paths": [
+        "USAGE.md",
+        "category_report.py"
+      ],
+      "accepted_at": 1789132073.3179445,
+      "attempts": [
+        {
+          "status": "completed",
+          "verification": "PASS",
+          "criteria": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "last_tokens": 19853,
+          "cumulative_tokens": 19853
+        }
+      ]
+    },
+    {
+      "execution_id": "9359dd61-39f1-430c-8559-e806d43c66f4",
+      "slice_id": "s_acceptance_evidence",
+      "base_commit": "9248827c88ae3e302df32044c3871901c1300d10",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+      "changed_paths": [
+        "USAGE.md"
+      ],
+      "accepted_at": 1789132102.197609,
+      "attempts": [
+        {
+          "status": "completed",
+          "verification": "PASS",
+          "criteria": [
+            2
+          ],
+          "last_tokens": 19491,
+          "cumulative_tokens": 19491
+        },
+        {
+          "status": "completed",
+          "verification": "PASS",
+          "criteria": [
+            0,
+            1,
+            2
+          ],
+          "last_tokens": 25648,
+          "cumulative_tokens": 45139
+        }
+      ]
+    }
+  ],
+  "milestone_receipts": [
+    {
+      "id": "sha256:7c5b832347d2125ff80ebe2de609a83be7d9056e3c8cb82df20545178006d88f",
+      "milestone": "m_summary",
+      "commit": "4fae74e2ae35e9efb10170e453c29550dceec9c2"
+    },
+    {
+      "id": "sha256:7946aa91b79a70a6690e1966b530108b263a4d55da3373edfa6b00620afaa610",
+      "milestone": "m_report_cli",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    }
+  ],
+  "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+  "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+  "definition": "sha256:39c868f334932f582c1a38aa844b72cabbea09fde66a8a01b8cb4371b4e7f83d",
+  "contract": "sha256:bce315a612a143618fdf0d2bce883388e7b881573f3ad279788b8e544883463c",
+  "criteria": 33,
+  "independent_acceptance": {
+    "checks": [
+      {
+        "evidence": "g_s_summary_api_summary",
+        "min_tests": 10,
+        "oracle": "summary",
+        "status": "PASS",
+        "target": "test_records.py"
+      },
+      {
+        "evidence": "g_s_rank_integration_ranking",
+        "min_tests": 4,
+        "oracle": "ranking",
+        "status": "PASS",
+        "target": "test_category_report.py"
+      },
+      {
+        "evidence": "g_s_rank_integration_cli",
+        "min_tests": 5,
+        "oracle": "cli",
+        "status": "PASS",
+        "target": "test_product_cli.py"
+      }
+    ],
+    "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+    "method": "Original independent oracles executed by the existing clean project runner",
+    "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+    "status": "PASS"
+  },
+  "final_checks": [
+    {
+      "check_id": "g_s_summary_api_summary",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_summary_api_summary_composition",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "summary",
+      "status": "PASS",
+      "reused_from": "g_s_summary_api_summary",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_summary_summary_composition",
+      "status": "PASS",
+      "reused_from": "g_s_summary_api_summary_composition",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_rank_integration_report_composition",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_rank_integration_ranking",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_rank_integration_cli",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_acceptance_integration_summary",
+      "status": "PASS",
+      "reused_from": "g_s_summary_api_summary",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_acceptance_integration_ranking",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_ranking",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_acceptance_integration_cli",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_cli",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_s_acceptance_integration_delivery",
+      "status": "PASS",
+      "reused_from": null,
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_report_summary",
+      "status": "PASS",
+      "reused_from": "g_s_summary_api_summary",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_report_ranking",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_ranking",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_report_cli",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_cli",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_report_report_composition",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_report_composition",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_m_report_delivery",
+      "status": "PASS",
+      "reused_from": "g_s_acceptance_integration_delivery",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_project_close_summary",
+      "status": "PASS",
+      "reused_from": "g_s_summary_api_summary",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_project_close_ranking",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_ranking",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "cli",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_cli",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_project_close_report_composition",
+      "status": "PASS",
+      "reused_from": "g_s_rank_integration_report_composition",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    },
+    {
+      "check_id": "g_project_close_delivery",
+      "status": "PASS",
+      "reused_from": "g_s_acceptance_integration_delivery",
+      "integration_mode": "local",
+      "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+    }
+  ],
+  "reproducibility": {
+    "method": "git-regular-blobs-v1",
+    "status": "PASS",
+    "code_id": "sha256:1b99b4b164b27271fb1e9cc8b9da5c691ab29b2fc02c03f1848033ee081edd89",
+    "environment": "linux-namespaces-seccomp-python-stdlib-v1",
+    "python_flags": [
+      "-I",
+      "-S"
+    ],
+    "network": false,
+    "installation": false,
+    "unique_procedures": 6,
+    "bindings": 21,
+    "reused_bindings": 15
+  },
+  "delivery": "/home/cpx/.local/share/software-factory/pilots/records-v1/product/.factory/deliveries/sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f/REPORT.md",
+  "delivery_source_files": [
+    ".gitignore",
+    "PILOT.md",
+    "USAGE.md",
+    "category_report.py",
+    "examples/boolean.json",
+    "examples/empty.json",
+    "examples/malformed.json",
+    "examples/negative.json",
+    "examples/reordered.json",
+    "examples/valid.json",
+    "pilot-contract.json",
+    "record_rules.py",
+    "records.py",
+    "test_category_report.py",
+    "test_delivery_contract.py",
+    "test_product_cli.py",
+    "test_records.py",
+    "test_report_integration.py",
+    "test_summary_integration.py"
+  ],
+  "exclusions": [
+    {
+      "requirement": "out_of_scope",
+      "disposition": "out_of_scope",
+      "rationale": "m_summary owns the exclusion constraint; report and delivery slices preserve the same exclusions.",
+      "authorization": {
+        "created_at": "2026-09-11T10:34:38.346Z",
+        "disposition": "out_of_scope",
+        "message_sha256": "1d0ea08bd94d205301f872529db41f02239c2df6d2dd14ef80d6acc41076cd9f",
+        "prior_input": {
+          "quote": "No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\notros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.",
+          "request_id": "records-v1-discovery-once"
+        },
+        "provenance": "operator-bound prior user input; not a generated human decision",
+        "rationale": "m_summary owns the exclusion constraint; report and delivery slices preserve the same exclusions.",
+        "requirement": "out_of_scope",
+        "turn_id": 1
+      }
+    },
+    {
+      "requirement": "quota_planning",
+      "disposition": "deferred",
+      "rationale": "Quota, budget, and consumption analysis is explicitly deferred and no mechanism is added.",
+      "authorization": {
+        "created_at": "2026-09-11T12:02:53.902Z",
+        "disposition": "deferred",
+        "message_sha256": "0c60a7bbbd5f1c78ddff5de92f7797e701e100bce0790bc582c5d5a407c6dab9",
+        "prior_input": {
+          "quote": "el tema de cuotas ya se analizara despues",
+          "request_id": "records-v1-user-authorize-real-1"
+        },
+        "provenance": "operator-bound prior user input; not a generated human decision",
+        "rationale": "Quota, budget, and consumption analysis is explicitly deferred and no mechanism is added.",
+        "requirement": "quota_planning",
+        "turn_id": 2
+      }
+    }
+  ],
+  "factory_events": [
+    {
+      "kind": "workflow_budget_extended",
+      "data": {
+        "continuation_id": "b5774d1c-550d-49da-89df-a40749fa6e97",
+        "before": {
+          "enabled": true,
+          "inter_milestone": true,
+          "max_calls": 20,
+          "max_seconds": 1800,
+          "max_slices": 2,
+          "max_tokens": 250000
+        },
+        "after": {
+          "enabled": true,
+          "inter_milestone": true,
+          "max_calls": 30,
+          "max_seconds": 14400,
+          "max_slices": 3,
+          "max_tokens": 500000
+        },
+        "previous_deadline": 1789129810.428239,
+        "deadline": 1789142410.428239,
+        "authorized_at": 1789131985.5817614
+      }
+    },
+    {
+      "kind": "project_verified",
+      "data": {
+        "milestone": "project",
+        "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+        "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96"
+      }
+    }
+  ],
+  "recovery": {
+    "trigger": "Report assumed a decision ID for prior-input authorization",
+    "fix": "Format prior-input reference and recover via factory_resume",
+    "additional_model_calls": 0,
+    "duplicate_acceptances": 0
+  },
+  "user_branch": {
+    "name": "master",
+    "head": "4cb7db9823a10caceba52512d490d7fcd7942364",
+    "accepted_ref": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+    "status": ""
+  },
+  "operations": {
+    "push": false,
+    "publication": false,
+    "deployment": false,
+    "provider_switch": false,
+    "alternative_billing": false,
+    "factory_managed_itself": false
+  },
+  "credentials_retained_in_worker_homes": 0,
+  "native_evidence": "end-to-end-12-delivery-native.json"
+}

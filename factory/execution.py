@@ -66,8 +66,11 @@ def select_slice(snapshot, accepted):
     return None, reasons or [{'reason': 'all_prepared_slices_accepted'}]
 
 
-def configure(store, policy, verification, *, owner_run_id=None):
+def configure(store, policy, verification, *, owner_run_id=None, planning_recovery=None):
     validate_policy(policy)
+    if planning_recovery is not None:
+        from .planning import authorize_recovery
+        return authorize_recovery(store, policy, verification, planning_recovery)
     if store.snapshot()['phase'] in ('discovery', 'architecture', 'planning'):
         from .analysis_execution import configure_analysis
         return configure_analysis(store, policy, verification)

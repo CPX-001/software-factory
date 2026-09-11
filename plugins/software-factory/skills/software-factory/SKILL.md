@@ -58,6 +58,17 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   Without this opt-in, inspect the accepted plan before its separately reviewed binding;
   the original checks, run and consumed budget remain fixed. `factory_resume` reuses this
   analysis run, including after human input.
+  A blocked, unaccepted plan may receive one separately authorized operator recovery
+  through the same policy tool's `planning_recovery` argument. Inspect `plan` for its
+  `proposal_fingerprint` and `execution` for the exact pinned definition/policy. Supply
+  a stable request_id, current run_id, proposal_fingerprint and authorization reason.
+  This grants exactly one correction/review pair, preserving all previous calls,
+  criteria and history. Only aggregate max_seconds may increase explicitly; model,
+  effort, call/token budgets, permissions and checks stay fixed. Repeating the request
+  or renaming a later failure cannot grant another pair. Existing session authorization
+  applies; do not ask again when it already covers recovery and the concrete extension.
+  Authorization continues the same detached run unless paused. A normal resume alone
+  never extends a budget. Recovery is unavailable after planning/work has been accepted.
   At the binding boundary, a previously authorized increase may extend finite aggregate
   limits through the same policy tool: Factory records the delta and retains all consumption.
   This is an explicit policy amendment, never a reset on resume. Pinned independent unittest

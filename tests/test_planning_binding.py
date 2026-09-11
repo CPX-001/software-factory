@@ -134,6 +134,51 @@ class AutomaticBindingTests(unittest.TestCase):
         with self.store._connection() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM factory_control_events WHERE kind='automatic_verification_bound'").fetchone()[0], 1)
 
+    def test_mcp_operator_recovery_after_exhausted_planning_reaches_delivery_after_disconnect(self):
+        from mcp import Client
+        from factory.mcp_server import build_server
+        def invalid(context):
+            p = self.propose(context)
+            p['risks'] = [{'id':'contract_drift','severity':'medium','description':'Shared contract risk',
+                'owner':'app','mitigation':'Use the shared module','acceptance_key':'',
+                'validation_slice':p['slices'][0]['id'],'blocks':[]}]
+            p['slices'][0]['risks'] = ['contract_drift']
+            return p
+        self.model.responses[3:] = [invalid, review(), invalid, review(), invalid, review()]
+        self.start(); self.drive()
+        initial = self.service.get_status(self.pid)
+        self.assertEqual(initial['state'], 'blocked')
+        self.assertEqual(self.worker.contexts, [])
+        def repair(context):
+            p = deepcopy(context['proposal']); p['risks'][0]['owner'] = p['slices'][0]['id']
+            return p
+        self.model.responses = [repair, review()]
+        async def recover():
+            async with Client(build_server(self.service)) as client:
+                plan = (await client.call_tool('factory_inspect', {'project':self.pid,'view':'plan'})).structured_content['data']
+                execution = (await client.call_tool('factory_inspect', {'project':self.pid,'view':'execution'})).structured_content['data']
+                policy = {k:v for k,v in execution['policy'].items() if k in POLICY_SCHEMA['properties']}
+                request = {'project':self.pid,'policy':policy,'verification':execution['definition']['verification'],
+                    'planning_recovery':{'request_id':'operator-recovery-once','run_id':initial['autonomous_run']['run_id'],
+                        'proposal_fingerprint':plan['proposal_fingerprint'],'reason':'Authorize one correction and independent review within existing aggregate limits'}}
+                result = (await client.call_tool('factory_execution_policy', request)).structured_content
+                self.assertTrue(result['ok'], result)
+                return request
+        request = asyncio.run(recover())
+        # The client has closed; only the existing detached-work entrypoint drives phases.
+        self.drive()
+        final = self.service.get_status(self.pid)
+        self.assertEqual(final['state'], 'project_verified', final)
+        self.assertEqual(final['autonomous_run']['run_id'], initial['autonomous_run']['run_id'])
+        self.assertEqual(len(ProjectStore(self.store).receipts()), 1)
+        self.assertEqual(len(final['continuation']['closed_milestones']), 2)
+        self.assertEqual(final['continuation']['budget']['calls'], 14)
+        self.assertEqual(len(self.model.contexts), 11)
+        self.assertEqual(len(self.worker.contexts), 3)
+        self.service.configure_execution(request['policy'], request['verification'], self.pid,
+                                         planning_recovery=request['planning_recovery'])
+        self.assertEqual(len(self.jobs), 2)
+
     def test_missing_bindings_stop_within_shared_budget_before_implementation(self):
         self.policy['continuation']['max_calls'] = 5
         original = self.propose

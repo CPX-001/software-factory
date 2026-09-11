@@ -224,7 +224,10 @@ class FactoryService:
                     'revision': roadmap['revision'] if roadmap else None,
                     'architecture': plan['architecture'] if plan else None}
         if view == 'plan':
-            return {**metadata, 'plan': plan, 'blockers': state['blockers']}
+            from .architecture import fingerprint
+            return {**metadata, 'plan': plan, 'blockers': state['blockers'],
+                    'proposal_fingerprint': fingerprint(plan) if plan else None,
+                    'recovery': state.get('authorized_recovery'), 'gate': state.get('gate')}
         if view == 'refinement':
             result = refinement_snapshot(snapshot, slice_id)
             with self._store(project)._connection() as db:
@@ -413,10 +416,12 @@ class FactoryService:
             controller.pause(continuation)
         return self.get_status(project)
 
-    def resume(self, project=None):
+    def resume(self, project=None, *, _preserve_pause=False):
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
         runtime = Runtime(store)
+        if _preserve_pause and store.snapshot()['phase'] != 'planning':
+            return self.get_status(project)
         if store.snapshot()['phase'] == 'execution':
             from .continuation import Continuation
             from .continuation_store import TERMINAL
@@ -439,7 +444,11 @@ class FactoryService:
                 return self.get_status(project)
             return self._resume_execution(project)
         with runtime.lock('launch'):
-            runtime.unpause()
+            if _preserve_pause:
+                if runtime.paused():
+                    return self.get_status(project)
+            else:
+                runtime.unpause()
             if runtime.state()['status'] in ACTIVE or runtime.live():
                 return self.get_status(project)
             from .controller import stop_reason
@@ -467,14 +476,23 @@ class FactoryService:
                 raise FactoryError('worker_start_failed', 'Run intent is saved; resume to retry') from exc
         return self.get_status(project)
 
-    def configure_execution(self, policy, verification, project=None):
+    def configure_execution(self, policy, verification, project=None, planning_recovery=None):
         from .execution import configure
         store = self._store(project); store.initialize()
         runtime = Runtime(store)
-        with runtime.lock('launch'), runtime.lock():
-            if runtime.state()['status'] in ACTIVE:
-                raise FactoryError('run_busy', 'A run is already starting')
-            return configure(store, policy, verification)
+        with runtime.lock('launch'):
+            from .planning import recovery_replay
+            result = recovery_replay(store, policy, verification, planning_recovery) if planning_recovery is not None else None
+            if result is None:
+                with runtime.lock():
+                    if runtime.state()['status'] in ACTIVE:
+                        raise FactoryError('run_busy', 'A run is already starting')
+                    result = configure(store, policy, verification, planning_recovery=planning_recovery)
+        if planning_recovery is not None and not runtime.paused():
+            snapshot = store.snapshot()
+            if snapshot['phase'] == 'planning' and snapshot['planning']['stage'] in ('reconcile', 'critic_final', 'gate'):
+                self.resume(project, _preserve_pause=True)
+        return result
 
     def execute_next_slice(self, project=None, *, request_id):
         """One durable intent per logical client request; selection belongs to Factory."""

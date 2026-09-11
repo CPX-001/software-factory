@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 import fcntl
 import json
+import time
 
 from .architecture import canonical, fingerprint, classify as classify_architecture, SECTIONS
 from .planning_contract import validate_plan, validate_review
@@ -11,6 +12,109 @@ from .workflow import WorkflowError
 MAX_CALLS = 8
 MAX_CONTEXT_BYTES = 180_000
 MAX_OUTPUT_BYTES = 130_000
+
+
+def call_limits(state):
+    grant = state.get('authorized_recovery')
+    if grant:
+        return {'calls': grant['call_limit'], 'critic_passes': grant['critic_limit'],
+                'reconciliations': grant['reconciliation_limit']}
+    return {'calls': MAX_CALLS,
+            'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
+            'reconciliations': 1 + state.get('recovery_attempts', 0)}
+
+
+def recovery_replay(store, policy, verification, request):
+    from .execution_contract import check_schema
+    from .planning_contract import RECOVERY_SCHEMA
+    from .continuation_store import ContinuationStore
+    from .registry import FactoryError
+    check_schema(request, RECOVERY_SCHEMA)
+    group = ContinuationStore(store).latest()
+    grant = (group or {}).get('planning_recovery')
+    if grant and grant['request']['request_id'] == request['request_id']:
+        if grant['request_fingerprint'] != fingerprint([policy, verification, request]):
+            raise FactoryError('request_id_conflict', 'Recovery request ID already records different authorization')
+        return grant['result']
+    return None
+
+
+def authorize_recovery(store, policy, verification, request):
+    """One explicit operator correction/review grant, on the existing analysis ledger.
+
+    Called under the service's launch/run locks. No plan edit, counter reset or
+    implicit retry on ordinary resume; only an explicit absolute time extension.
+    """
+    from .continuation_store import ContinuationStore, budget
+    from .execution_contract import POLICY_SCHEMA
+    from .execution_store import ExecutionStore
+    from .registry import FactoryError
+    from .runtime import Runtime
+    from .verification import verify_resources
+    replay = recovery_replay(store, policy, verification, request)
+    if replay:
+        return replay
+    group = ContinuationStore(store).latest()
+    snapshot = store.snapshot()
+    state = {k: deepcopy(v) for k, v in snapshot['planning'].items() if k not in ('roadmap', 'decision_details')}
+    if (not group or not group.get('analysis') or group.get('planning_recovery') or
+            snapshot['phase'] != 'planning' or state['stage'] != 'blocked' or not state['proposal'] or
+            snapshot['planning']['roadmap'] or group['accepted']):
+        raise FactoryError('planning_recovery_unavailable', 'One operator recovery is available only for an unaccepted blocked analysis plan')
+    if request['run_id'] != group['runtime_id'] or request['proposal_fingerprint'] != fingerprint(state['proposal']):
+        raise FactoryError('stale_sources', 'Recovery must name the current run and exact blocked proposal')
+    if any(d['answer'] is None for d in snapshot['decisions']) or source_snapshot(snapshot) != state['source']:
+        raise FactoryError('stale_sources', 'Resolve human decisions or changed requirements/architecture before recovery')
+    old_policy = {k: v for k, v in group['policy'].items() if k in POLICY_SCHEMA['properties']}
+    if ({k: v for k, v in policy.items() if k != 'continuation'} !=
+            {k: v for k, v in old_policy.items() if k != 'continuation'}):
+        raise FactoryError('policy_changed', 'Planning recovery preserves model, effort, permissions and individual limits')
+    before, after = group['limits'], policy['continuation']
+    if (any(after.get(k) != before.get(k) for k in set(before) | set(after) if k != 'max_seconds') or
+            after['max_seconds'] < before['max_seconds']):
+        raise FactoryError('policy_changed', 'Planning recovery can extend only aggregate time; call/token/work limits remain fixed')
+    journal = ExecutionStore(store)
+    original = journal.definition(group['policy']['definition_id'])['verification']
+    if verification != original:
+        raise FactoryError('acceptance_contract_frozen', 'Recovery preserves every predeclared check, resource and scope authorization')
+    verify_resources(verification, store.project)
+    deadline = group['deadline'] + after['max_seconds'] - before['max_seconds']
+    with store._connection() as db:
+        remaining = budget(db, group['id'])
+    if remaining['usage_unknown_calls']:
+        raise FactoryError('usage_unknown', 'Unreported prior usage prevents another recovery call')
+    if deadline <= time.time() or remaining['calls_remaining'] < 2 or remaining['tokens_remaining'] <= 0:
+        raise FactoryError('budget_exhausted', 'The reviewed recovery needs time, tokens and two calls within the same aggregate budget')
+    now = time.time()
+    limits = {'request_id': request['request_id'], 'call_limit': state['calls'] + 2,
+              'critic_limit': state['critic_calls'] + 1, 'reconciliation_limit': state['reconciliations'] + 1}
+    result = {'policy': {**group['policy'], 'continuation': after},
+              'definition_id': group['policy']['definition_id'], 'planning_recovery': limits,
+              'continuation_id': group['id'], 'run_id': group['runtime_id'], 'deadline': deadline}
+    grant = {'request': request, 'request_fingerprint': fingerprint([policy, verification, request]),
+             'authorized_at': now, 'result': result, 'previous_stage': state['stage'],
+             'previous_gate': state.get('gate'), 'previous_blockers': state['blockers'],
+             'calls_consumed': state['calls'], 'critic_calls_consumed': state['critic_calls']}
+    amendment = {'continuation_id': group['id'], 'before': before, 'after': after,
+                 'previous_deadline': group['deadline'], 'deadline': deadline, 'authorized_at': now,
+                 'request_id': request['request_id']}
+    state.update(stage='reconcile', authorized_recovery=limits, reconciliations=state['reconciliations'] + 1)
+    state['classification']['required'] = True
+    group.update(policy=result['policy'], limits=after, deadline=deadline, planning_recovery=grant)
+    if before != after:
+        group.setdefault('budget_amendments', []).append(amendment)
+    with store._connection(write=True) as db:
+        if store._check(db, snapshot['revision']) != 'planning':
+            raise FactoryError('stale_sources', 'Planning changed before recovery authorization')
+        if db.execute('SELECT run_id FROM factory_control WHERE id=1').fetchone()[0] != request['run_id']:
+            raise FactoryError('stale_run', 'Recovery cannot replace a newer process owner')
+        db.execute('UPDATE continuations SET data=? WHERE id=?', (canonical(group), group['id']))
+        db.execute('UPDATE execution_policy SET data=? WHERE id=1', (canonical(result['policy']),))
+        Planning(store)._save(db, state, snapshot['revision'], 'planning_recovery_authorized')
+        Runtime.event(db, 'planning_recovery_authorized', grant)
+        if before != after:
+            Runtime.event(db, 'workflow_budget_extended', amendment)
+    return result
 
 
 def migrate(db):
@@ -429,7 +533,7 @@ class Planning:
         """
         snapshot = self.store.snapshot()
         planning = snapshot['planning']
-        if (not self.allow_recovery or snapshot['phase'] != 'planning' or planning['stage'] != 'blocked'
+        if (not self.allow_recovery or planning.get('authorized_recovery') or snapshot['phase'] != 'planning' or planning['stage'] != 'blocked'
                 or any(d['answer'] is None for d in snapshot['decisions'])):
             return False
         with self.store._connection() as db:
@@ -553,7 +657,8 @@ class Planning:
                     continue
                 self._complete(snapshot, state)
                 return self.store.snapshot()
-            if state['calls'] >= MAX_CALLS or state['stage'].startswith('critic') and state['critic_calls'] >= 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)):
+            limits = call_limits(state)
+            if state['calls'] >= limits['calls'] or state['stage'].startswith('critic') and state['critic_calls'] >= limits['critic_passes']:
                 state.update(stage='blocked', blockers=['Planning persistent call/review limit reached; explicit new effort required'])
                 self._mutate(snapshot, state, 'planning_budget_exhausted')
                 return self.store.snapshot()
@@ -596,8 +701,7 @@ class Planning:
                 'source_fingerprint': state['source_fingerprint'], 'proposal': state['proposal'],
                 'review': state['review'], 'human_answers': self._decisions(snapshot),
                 'gate_errors': gate_errors, 'skills': routing.context(),
-                'limits': {'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
-                           'reconciliations': 1 + state.get('recovery_attempts', 0), 'calls': MAX_CALLS, 'detailed_slices': 3}})
+                'limits': {**call_limits(state), 'detailed_slices': 3}})
             from .planning_binding import context as binding_context
             automatic = binding_context(self.store)
             if automatic:
@@ -667,8 +771,7 @@ class Planning:
         with self.store._connection(write=True) as db:
             self.store._check(db, snapshot['revision'])
             review = {'classification': state['classification'], 'passes': state['reviews'],
-                      'limits': {'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
-                                 'reconciliations': 1 + state.get('recovery_attempts', 0), 'calls': MAX_CALLS}}
+                      'limits': call_limits(state)}
             append_revision(db, state['proposal'], state['source'], review, state['gate'], 'Initial progressive roadmap')
             state.update(stage='completed', blockers=[])
             db.execute("UPDATE workflow SET phase='execution' WHERE id=1")

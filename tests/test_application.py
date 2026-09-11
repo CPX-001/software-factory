@@ -26,6 +26,138 @@ from tests.planning_fakes import fake as fake_planner
 
 
 class AuthorizedAnalysisTests(unittest.TestCase):
+    def blocked_recovery(self, *, schema_rejection=False):
+        from factory.architecture import fingerprint
+        from tests.planning_fakes import dynamic
+        def bad_plan(context):
+            plan = dynamic(context)
+            plan['risks'] = [{'id': 'contract_drift', 'severity': 'medium', 'description': 'Shared contract drift',
+                'owner': 'app', 'mitigation': 'Use the shared implementation', 'acceptance_key': '',
+                'validation_slice': 's1', 'blocks': []}]
+            plan['slices'][0]['risks'] = ['contract_drift']
+            return plan
+        self.sdk.responses = [complete_reply(), lambda c: proposal(c['source']['knowledge']), review(),
+                              bad_plan, review(), bad_plan, review(), bad_plan, review()]
+        if schema_rejection:
+            error = {'codex_error_info':'other','message':json.dumps({'status':400,'error':{
+                'type':'invalid_request_error','code':'invalid_json_schema','param':'text.format.schema'}})}
+            self.sdk.responses.insert(3, FactoryError('infrastructure_failed', str(error)))
+        self.start()
+        if schema_rejection:
+            with self.assertRaises(FactoryError): self.service.run_pending(*self.jobs[-1])
+            self.service.resume(self.identifier)
+        self.service.run_pending(*self.jobs[-1])
+        snapshot = self.store.snapshot()
+        self.assertEqual(snapshot['planning']['stage'], 'blocked')
+        group = self.service.get_status(self.identifier)['continuation']
+        request = {'request_id': 'reviewed-recovery-once', 'run_id': group['runtime_id'],
+            'proposal_fingerprint': fingerprint(snapshot['planning']['proposal']),
+            'reason': 'Operator authorizes one correction/review of the saved invalid owner; retain original checks.'}
+        policy = deepcopy(self.policy); policy['continuation']['max_seconds'] += 1800
+        return snapshot, group, policy, request
+
+    @staticmethod
+    def repaired_owner(context):
+        plan = deepcopy(context['proposal']); plan['risks'][0]['owner'] = 's1'
+        return plan
+
+    def test_operator_recovery_continues_same_run_and_preserves_history(self):
+        snapshot, before, policy, request = self.blocked_recovery(schema_rejection=True)
+        self.assertEqual(snapshot['planning']['calls'], 7)
+        jobs = len(self.jobs)
+        with self.store._connection() as db:
+            history = [tuple(r) for r in db.execute('SELECT * FROM planning_calls ORDER BY id')]
+        self.sdk.responses = [self.repaired_owner, review()]
+        with patch('time.time', return_value=before['deadline'] + 1):
+            self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+            self.assertEqual(self.jobs[-1][1], before['runtime_id'])
+            # A retry while queued grants no extra calls and creates no additional job.
+            self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+            self.assertEqual(len(self.jobs), jobs + 1)
+            self.service.run_pending(*self.jobs[-1])
+        after = self.service.get_status(self.identifier)['continuation']
+        self.assertEqual(after['id'], before['id'])
+        self.assertEqual(after['deadline'], before['deadline'] + 1800)
+        self.assertEqual(after['created_at'], before['created_at'])
+        self.assertEqual(after['budget']['calls'], before['budget']['calls'] + 2)
+        self.assertEqual(after['budget']['tokens'], before['budget']['tokens'] + 200)
+        final = self.store.snapshot()
+        self.assertEqual(final['phase'], 'execution')
+        self.assertEqual(final['architecture'], snapshot['architecture'])
+        self.assertEqual(final['planning']['proposal']['coverage'], snapshot['planning']['proposal']['coverage'])
+        self.assertTrue(final['planning']['roadmap']['gate']['passed'])
+        with self.store._connection() as db:
+            self.assertEqual([tuple(r) for r in db.execute('SELECT * FROM planning_calls ORDER BY id')][:len(history)], history)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertEqual(len(self.jobs), jobs + 1)
+
+    def test_operator_recovery_failure_stays_bounded_across_restarts_and_renamed_requests(self):
+        _, before, policy, request = self.blocked_recovery()
+        self.sdk.responses = [lambda c: deepcopy(c['proposal']), review()]
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.service.run_pending(*self.jobs[-1])
+        calls = self.service.get_status(self.identifier)['continuation']['budget']['calls']
+        self.assertEqual(calls, before['budget']['calls'] + 2)
+        self.service.resume(self.identifier)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertEqual(len(self.jobs), 2)
+        self.assertEqual(self.store.snapshot()['planning']['stage'], 'blocked')
+        renamed = {**request, 'request_id': 'different-name'}
+        restarted = FactoryService(self.service.registry, launcher=lambda *args: self.fail('Unexpected worker'))
+        with self.assertRaises(FactoryError) as error:
+            restarted.configure_execution(policy, self.verification, self.identifier, planning_recovery=renamed)
+        self.assertEqual(error.exception.code, 'planning_recovery_unavailable')
+
+    def test_operator_recovery_rejects_stale_sources_changed_checks_permissions_and_call_budget(self):
+        snapshot, before, policy, request = self.blocked_recovery()
+        for defect in ('proposal', 'run', 'checks', 'model', 'calls', 'time'):
+            p, v, r = deepcopy(policy), deepcopy(self.verification), deepcopy(request)
+            if defect == 'proposal': r['proposal_fingerprint'] = 'sha256:old'
+            if defect == 'run': r['run_id'] = 'another-run'
+            if defect == 'checks': v['checks'][0]['min_tests'] = 1
+            if defect == 'model': p['model'] = 'another-model'
+            if defect == 'calls': p['continuation']['max_calls'] += 1
+            if defect == 'time': p['continuation']['max_seconds'] = 10
+            with self.subTest(defect=defect), self.assertRaises(FactoryError):
+                self.service.configure_execution(p, v, self.identifier, planning_recovery=r)
+            self.assertEqual(self.store.snapshot(), snapshot)
+        self.assertEqual(len(self.jobs), 1)
+
+    def test_operator_recovery_preserves_pause_and_recovers_crash_before_launch(self):
+        _, before, policy, request = self.blocked_recovery()
+        self.service.pause(self.identifier)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertTrue(Runtime(self.store).paused())
+        self.assertEqual(len(self.jobs), 1)
+        conflict = {**request, 'reason': 'Changed meaning'}
+        with self.assertRaises(FactoryError) as error:
+            self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=conflict)
+        self.assertEqual(error.exception.code, 'request_id_conflict')
+        self.sdk.responses = [self.repaired_owner, review()]
+        self.service.resume(self.identifier)
+        self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(self.store.snapshot()['phase'], 'execution')
+        self.assertEqual(self.jobs[-1][1], before['runtime_id'])
+
+    def test_operator_recovery_commit_before_launch_is_recoverable_and_concurrent_pause_wins(self):
+        _, before, policy, request = self.blocked_recovery()
+        original = self.service.resume
+        with patch.object(self.service, 'resume', side_effect=OSError('Crash before launch')):
+            with self.assertRaises(OSError):
+                self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertEqual(len(self.jobs), 1)
+        def pause_before_resume(*args, **kwargs):
+            self.service.pause(self.identifier)
+            return original(*args, **kwargs)
+        with patch.object(self.service, 'resume', side_effect=pause_before_resume):
+            self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertTrue(Runtime(self.store).paused())
+        self.assertEqual(len(self.jobs), 1)
+        self.sdk.responses = [self.repaired_owner, review()]
+        self.service.resume(self.identifier); self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(self.store.snapshot()['phase'], 'execution')
+        self.assertEqual(self.service.get_status(self.identifier)['continuation']['deadline'], before['deadline'] + 1800)
+
     def test_schema_rejection_recovery_retains_call_budget_without_inventing_usage(self):
         from factory.continuation_store import ContinuationStore
         provider_error = {'codex_error_info':'other','message':json.dumps({'status':400,'error':{

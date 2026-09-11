@@ -163,6 +163,9 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
                              else report['integration_gaps'][0])
     if guarded and not report.get('blocker'):
         report['blocker'] = explicit.get('execution', {}).get('diagnostic')
+    if not report.get('blocker') and explicit.get('blockers'):
+        report['blocker'] = {'code': explicit['phase'] + '_blocked',
+                             'messages': explicit['blockers']}
     store = Store(prepared['project']['path'])
     snapshot = store.snapshot()
     report['phases_really_completed'] = [phase for phase, complete in (
@@ -182,9 +185,13 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
         report['effective_models'] = {k: effective_policy[k] for k in ('model', 'effort')}
         for phase in ('discovery', 'architecture', 'planning'):
             phase_calls = [json.loads(c['data']) for c in calls if c['kind'] == phase]
+            rejected = sum(not c.get('usage') and
+                (c.get('request_rejection') or {}).get('code') == 'invalid_json_schema' for c in phase_calls)
+            missing = sum(not c.get('usage') for c in phase_calls)
             report['usage_by_phase'][phase] = {'calls': len(phase_calls),
                 'tokens': sum((c.get('usage') or {}).get('total', {}).get('totalTokens', 0) for c in phase_calls),
-                'unknown_usage_calls': sum(not c.get('usage') for c in phase_calls)}
+                'unknown_usage_calls': missing - rejected, 'raw_usage_missing_calls': missing,
+                'rejected_before_inference': rejected}
     from factory.project_store import ProjectStore
     final = ProjectStore(store).inspect(full=True)
     report['independent_acceptance'] = independent_result(prepared, final)

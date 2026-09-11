@@ -9,14 +9,16 @@ proceso independiente existentes.
 `planning_recovery` contiene `request_id`, `run_id`, `proposal_fingerprint` y `reason`.
 La tool `factory_inspect` con `view=plan` proporciona la huella y el gate; `view=execution`
 proporciona la definición de verificación y política ya fijadas. La autorización mantiene
-esas definiciones exactas. No acepta otro modelo, esfuerzo, permisos, número de llamadas,
-tokens ni unidades de trabajo. Solo permite ampliar explícitamente el tiempo agregado,
-sumando la diferencia al deadline anterior; nunca lo recalcula como si el run fuera nuevo.
+esas definiciones exactas. No acepta otro modelo, esfuerzo, permisos ni unidades de trabajo.
+Permite ampliar explícitamente llamadas, tokens y tiempo agregados con autorización previa;
+registra los topes anteriores y nuevos sin reiniciar consumo. Suma la diferencia de tiempo
+al deadline anterior; nunca lo recalcula como si el run fuera nuevo. Una configuración
+ordinaria o reanudación no concede esa ampliación.
 
 Cada concesión de operador corresponde a una propuesta concreta: exactamente una corrección
 y una revisión independiente adicionales. Una propuesta revisada que mantenga objeciones
-necesita otra autorización del operador; todas comparten los topes originales de llamadas
-y tokens. Cambiar el nombre de una petición sobre la misma propuesta no concede nada.
+necesita otra autorización del operador; todas comparten el mismo presupuesto acumulado
+y sus ampliaciones autorizadas. Cambiar el nombre de una petición sobre la misma propuesta no concede nada.
 Los contadores de planning siguen aumentando desde
 su valor actual, incluidos errores anteriores. El plan y sus criterios no se editan al
 autorizar. Se conservan las llamadas, revisiones, fallos, arquitectura y fuentes previas.
@@ -63,3 +65,10 @@ Cada llamada de planning recibe el gate determinista calculado sobre su propuest
 El crítico no hereda los errores guardados de una propuesta anterior a la corrección.
 Los IDs originales de verificaciones siguen siendo obligatorios; el diagnóstico enumera
 los que faltan y las referencias de entrada conservan su vinculación a `project_close`.
+
+Una comprobación `project_close` puede acreditar un requisito de una milestone anterior:
+se ejecuta sobre el producto integrado después de todos los cierres. La validación del
+contrato ya no exige añadir como contribuyente la milestone usada para situar ese gate
+en el roadmap. Los cierres de las contribuyentes originales siguen siendo obligatorios;
+un check de cierre de otra milestone no obtiene esa excepción. Los diagnósticos identifican
+todos los contratos de requisito inválidos para que la corrección reciba causas concretas.

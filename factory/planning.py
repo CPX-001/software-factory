@@ -48,7 +48,7 @@ def authorize_recovery(store, policy, verification, request):
     """One explicit operator correction/review grant, on the existing analysis ledger.
 
     Called under the service's launch/run locks. No plan edit, counter reset or
-    implicit retry on ordinary resume; only an explicit absolute time extension.
+    implicit retry on ordinary resume; aggregate extensions are explicit and durable.
     """
     from .continuation_store import ContinuationStore, budget
     from .execution_contract import POLICY_SCHEMA
@@ -77,9 +77,10 @@ def authorize_recovery(store, policy, verification, request):
             {k: v for k, v in old_policy.items() if k != 'continuation'}):
         raise FactoryError('policy_changed', 'Planning recovery preserves model, effort, permissions and individual limits')
     before, after = group['limits'], policy['continuation']
-    if (any(after.get(k) != before.get(k) for k in set(before) | set(after) if k != 'max_seconds') or
-            after['max_seconds'] < before['max_seconds']):
-        raise FactoryError('policy_changed', 'Planning recovery can extend only aggregate time; call/token/work limits remain fixed')
+    extensible = {'max_seconds', 'max_calls', 'max_tokens'}
+    if (any(after.get(k) != before.get(k) for k in set(before) | set(after) if k not in extensible) or
+            any(after[k] < before[k] for k in extensible)):
+        raise FactoryError('policy_changed', 'Recovery can explicitly extend aggregate calls, tokens and time; work limits and permissions remain fixed')
     journal = ExecutionStore(store)
     original = journal.definition(group['policy']['definition_id'])['verification']
     if verification != original:
@@ -90,7 +91,7 @@ def authorize_recovery(store, policy, verification, request):
         remaining = budget(db, group['id'])
     if remaining['usage_unknown_calls']:
         raise FactoryError('usage_unknown', 'Unreported prior usage prevents another recovery call')
-    if deadline <= time.time() or remaining['calls_remaining'] < 2 or remaining['tokens_remaining'] <= 0:
+    if deadline <= time.time() or after['max_calls'] - remaining['calls'] < 2 or after['max_tokens'] <= remaining['tokens']:
         raise FactoryError('budget_exhausted', 'The reviewed recovery needs time, tokens and two calls within the same aggregate budget')
     now = time.time()
     limits = {'request_id': request['request_id'], 'call_limit': state['calls'] + 2,

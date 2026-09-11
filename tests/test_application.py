@@ -116,12 +116,31 @@ class AuthorizedAnalysisTests(unittest.TestCase):
             if defect == 'run': r['run_id'] = 'another-run'
             if defect == 'checks': v['checks'][0]['min_tests'] = 1
             if defect == 'model': p['model'] = 'another-model'
-            if defect == 'calls': p['continuation']['max_calls'] += 1
+            if defect == 'calls': p['continuation']['max_calls'] -= 1
             if defect == 'time': p['continuation']['max_seconds'] = 10
             with self.subTest(defect=defect), self.assertRaises(FactoryError):
                 self.service.configure_execution(p, v, self.identifier, planning_recovery=r)
             self.assertEqual(self.store.snapshot(), snapshot)
         self.assertEqual(len(self.jobs), 1)
+
+    def test_operator_budget_extension_records_delta_without_resetting_consumption(self):
+        _, before, policy, request = self.blocked_recovery()
+        policy['continuation']['max_calls'] += 4
+        policy['continuation']['max_tokens'] += 150000
+        with self.assertRaises(FactoryError):
+            self.service.configure_execution(policy, self.verification, self.identifier)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        after = self.service.get_status(self.identifier)['continuation']
+        self.assertEqual(after['budget']['calls'], before['budget']['calls'])
+        self.assertEqual(after['budget']['tokens'], before['budget']['tokens'])
+        self.assertEqual(after['budget']['calls_remaining'], before['budget']['calls_remaining'] + 4)
+        self.assertEqual(after['budget']['tokens_remaining'], before['budget']['tokens_remaining'] + 150000)
+        self.assertEqual(after['created_at'], before['created_at'])
+        self.assertEqual(after['deadline'], before['deadline'] + 1800)
+        self.assertEqual(after['budget_amendments'][-1]['before'], before['limits'])
+        self.assertEqual(after['budget_amendments'][-1]['after'], policy['continuation'])
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=request)
+        self.assertEqual(len(self.service.get_status(self.identifier)['continuation']['budget_amendments']), 1)
 
     def test_operator_recovery_preserves_pause_and_recovers_crash_before_launch(self):
         _, before, policy, request = self.blocked_recovery()

@@ -379,3 +379,19 @@ class AutomaticBindingTests(unittest.TestCase):
             if change == 'stale': mapping['definition_id'] = 'obsolete'
             if change == 'browser': bad['gates'][-1]['checks'][0] = 'Run mandatory browser validation'
             with self.subTest(change=change), self.assertRaises(FactoryError): compile(bad)
+
+    def test_project_close_check_can_revalidate_requirement_from_earlier_milestone(self):
+        from factory.execution_contract import validate_verification
+        definition = deepcopy(ExecutionStore(self.reference_store).definition(
+            ExecutionStore(self.reference_store).policy()['definition_id'])['verification'])
+        key = self.plan['coverage'][0]['requirement']
+        plan = deepcopy(self.plan)
+        next(c for c in plan['coverage'] if c['requirement'] == key)['slices'] = [plan['slices'][0]['id']]
+        contract = next(c for c in definition['requirement_acceptance'] if c['requirement'] == key)
+        contract.update(milestones=['m1'], checks=['entry'])
+        validate_verification(definition, plan)
+        # A later milestone's local closure cannot substitute for a project-wide check.
+        contract['checks'] = ['description_close']
+        with self.assertRaises(FactoryError) as error:
+            validate_verification(definition, plan)
+        self.assertEqual(error.exception.details['pending'], ['requirement_acceptance_invalid:' + key])

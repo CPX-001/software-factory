@@ -188,6 +188,7 @@ def validate_verification(definition, plan):
             relative_path(path)
     seen_requirements = set()
     checks = {c['id']: c for c in definition['checks']}
+    invalid_requirements = []
     for contract in definition.get('requirement_acceptance', []):
         key = contract['requirement']
         coverage = next((c for c in plan['coverage'] if c['requirement'] == key), None)
@@ -195,10 +196,14 @@ def validate_verification(definition, plan):
         if (key in seen_requirements or not coverage or coverage['disposition'] != 'covered' or
                 not contract['checks'] or not set(contract['milestones']) <= milestones.keys() or
                 not contributing <= set(contract['milestones']) or
-                any(c not in checks or gates[checks[c]['gate']]['target'] not in contract['milestones']
+                any(c not in checks or (gates[checks[c]['gate']]['trigger'] != 'project_close' and
+                                       gates[checks[c]['gate']]['target'] not in contract['milestones'])
                     for c in contract['checks'])):
-            raise FactoryError('invalid_verification', 'Full requirement acceptance must retain all contributing milestones and strategic checks')
+            invalid_requirements.append(key)
         seen_requirements.add(key)
+    if invalid_requirements:
+        raise FactoryError('invalid_verification', 'Full requirement acceptance must retain all contributing milestones and strategic checks: ' + ', '.join(invalid_requirements),
+                           details={'pending': ['requirement_acceptance_invalid:' + key for key in invalid_requirements]})
     project = definition.get('project_acceptance')
     if project:
         for path in project['delivery_paths']:

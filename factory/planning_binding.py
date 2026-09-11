@@ -70,6 +70,20 @@ def context(store):
             'resources': resources, 'permissions': {'write_paths': policy['write_paths']}}
 
 
+def extend_templates(store, policy, original, proposed):
+    """Operator-only additive evidence before an accepted plan or product exists."""
+    value = prepare_templates(store, policy, proposed)
+    if any(value.get(k) != original.get(k) for k in set(value) | set(original) if k not in ('checks', 'resources')):
+        raise FactoryError('acceptance_contract_frozen', 'Evidence extensions cannot change scope, delivery, harness or existing conditions')
+    checks = {c['id']: c for c in value['checks']}
+    resources = {r['path']: r for r in value['resources']}
+    if (len(checks) <= len(original['checks']) or
+            any(checks.get(c['id']) != c for c in original['checks']) or
+            any(resources.get(r['path']) != r for r in original.get('resources', []))):
+        raise FactoryError('acceptance_contract_frozen', 'Add independent checks; never remove or alter an original check or resource')
+    return value
+
+
 def compile_binding(plan, source, templates, definition_id, policy, decisions=()):
     from .planning_contract import PLAN_SCHEMA
     binding = plan.get('execution_binding')

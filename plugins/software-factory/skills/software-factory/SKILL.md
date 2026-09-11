@@ -73,6 +73,13 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   applies; do not ask again when it already covers recovery and the concrete extension.
   Authorization continues the same detached run unless paused. A normal resume alone
   never extends a budget. Recovery is unavailable after planning/work has been accepted.
+  If original acceptance needs additional evidence before an accepted plan exists,
+  `planning_recovery.verification_extension=true` can separately authorize new immutable
+  checks/resources. Show the concrete check and preserve every original procedure, resource,
+  scope and delivery condition. Only committed resources outside worker write permissions
+  are accepted; the definition receives a new version. Pending human decisions remain pending
+  and block inference. Record an actual answer through `factory_answer`; the same controller
+  then reviews the updated binding and continues. Never fabricate that answer.
   At the binding boundary, a previously authorized increase may extend finite aggregate
   limits through the same policy tool: Factory records the delta and retains all consumption.
   This is an explicit policy amendment, never a reset on resume. Pinned independent unittest

@@ -142,7 +142,8 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None, automatic
         '.gitignore': '.factory/\n__pycache__/\n*.pyc\n',
     }
     if automatic_binding:
-        for name in ('test_summary_integration.py', 'test_report_integration.py', 'test_delivery_contract.py'):
+        for name in ('test_summary_integration.py', 'test_report_integration.py', 'test_delivery_contract.py',
+                     'test_no_residual_storage.py'):
             resources[name] = (repo / 'pilots/records-v1' / name).read_text()
     valid = [{'category': 'Books', 'amount': 7}, {'category': ' Food ', 'amount': 10},
              {'category': 'FOOD', 'amount': 2}]
@@ -167,6 +168,8 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None, automatic
             for key, path in (('summary_integration', 'test_summary_integration.py'),
                               ('report_integration', 'test_report_integration.py'),
                               ('delivery_contract', 'test_delivery_contract.py')))
+        checks.append({**deepcopy(checks[0]), 'id':'no_residual_storage',
+                       'target':'test_no_residual_storage.py', 'min_tests':1})
         for check in checks:
             check.update(clean_copy=True, source_sha256=hashlib.sha256(resources[check['target']].encode()).hexdigest())
     contract = {'id': 'records-v1', 'input_kind': 'pilot_test_data', 'independent_of_implementation_worker': True,

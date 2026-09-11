@@ -54,8 +54,10 @@ El smoke existente acepta una preparación opcional, sin inferencia ni política
   --directory /ruta/nueva/records-v1 --model gpt-5.6-terra --effort low
 ```
 
-Prepara los mismos 25 tests independientes usados en el piloto real, ahora todos presentes
-antes de discovery, y propone `verification_templates` en `report.json`. No precarga un
+Prepara los 25 tests independientes originales y un check adicional sobre almacenamiento
+residual en los seis ejemplos CLI, todos presentes antes de discovery, y propone
+`verification_templates` en `report.json`. El check adicional surgió del hueco detectado
+durante el piloto real; las instancias anteriores no se actualizan automáticamente. No precarga un
 plan ni una arquitectura. La política propuesta debe autorizarse mediante la tool existente
 con límites adecuados; la preparación conserva límites pequeños y la reserva por defecto.
 La opción no habilita inferencia, no modifica instancias anteriores y rechaza sobrescrituras.

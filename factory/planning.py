@@ -59,22 +59,27 @@ def authorize_recovery(store, policy, verification, request):
     replay = recovery_replay(store, policy, verification, request)
     if replay:
         return replay
+    request_fingerprint = fingerprint([policy, verification, request])
     group = ContinuationStore(store).latest()
     snapshot = store.snapshot()
     state = {k: deepcopy(v) for k, v in snapshot['planning'].items() if k not in ('roadmap', 'decision_details')}
     grants = recovery_grants(group)
+    extending = request.get('verification_extension', False)
+    pending = any(d['answer'] is None for d in snapshot['decisions'])
+    waiting_extension = extending and pending and state['stage'] in ('propose', 'reconcile')
     if (not group or not group.get('analysis') or any(
             g['request']['proposal_fingerprint'] == request['proposal_fingerprint'] for g in grants) or
-            snapshot['phase'] != 'planning' or state['stage'] != 'blocked' or not state['proposal'] or
+            snapshot['phase'] != 'planning' or (state['stage'] != 'blocked' and not waiting_extension) or not state['proposal'] or
             snapshot['planning']['roadmap'] or group['accepted']):
         raise FactoryError('planning_recovery_unavailable', 'An operator grant needs a distinct unaccepted blocked proposal; replay or renaming cannot renew it')
     if request['run_id'] != group['runtime_id'] or request['proposal_fingerprint'] != fingerprint(state['proposal']):
         raise FactoryError('stale_sources', 'Recovery must name the current run and exact blocked proposal')
-    if any(d['answer'] is None for d in snapshot['decisions']) or source_snapshot(snapshot) != state['source']:
+    if (pending and not waiting_extension) or source_snapshot(snapshot) != state['source']:
         raise FactoryError('stale_sources', 'Resolve human decisions or changed requirements/architecture before recovery')
     old_policy = {k: v for k, v in group['policy'].items() if k in POLICY_SCHEMA['properties']}
-    if ({k: v for k, v in policy.items() if k != 'continuation'} !=
-            {k: v for k, v in old_policy.items() if k != 'continuation'}):
+    mutable = {'continuation', 'context_paths'} if extending else {'continuation'}
+    if ({k: v for k, v in policy.items() if k not in mutable} !=
+            {k: v for k, v in old_policy.items() if k not in mutable}):
         raise FactoryError('policy_changed', 'Planning recovery preserves model, effort, permissions and individual limits')
     before, after = group['limits'], policy['continuation']
     extensible = {'max_seconds', 'max_calls', 'max_tokens'}
@@ -83,7 +88,16 @@ def authorize_recovery(store, policy, verification, request):
         raise FactoryError('policy_changed', 'Recovery can explicitly extend aggregate calls, tokens and time; work limits and permissions remain fixed')
     journal = ExecutionStore(store)
     original = journal.definition(group['policy']['definition_id'])['verification']
-    if verification != original:
+    previous_definition = group['policy']['definition_id']
+    identifier = previous_definition
+    if extending:
+        from .planning_binding import extend_templates
+        verification = extend_templates(store, policy, original, verification)
+        before_context, after_context = set(old_policy['context_paths']), set(policy['context_paths'])
+        if not before_context <= after_context or not after_context - before_context <= {r['path'] for r in verification['resources']}:
+            raise FactoryError('policy_changed', 'Additional context is limited to the newly authorized immutable evidence')
+        identifier = fingerprint({'sources': None, 'verification': verification})
+    elif verification != original:
         raise FactoryError('acceptance_contract_frozen', 'Recovery preserves every predeclared check, resource and scope authorization')
     verify_resources(verification, store.project)
     deadline = group['deadline'] + after['max_seconds'] - before['max_seconds']
@@ -96,10 +110,11 @@ def authorize_recovery(store, policy, verification, request):
     now = time.time()
     limits = {'request_id': request['request_id'], 'call_limit': state['calls'] + 2,
               'critic_limit': state['critic_calls'] + 1, 'reconciliation_limit': state['reconciliations'] + 1}
-    result = {'policy': {**group['policy'], 'continuation': after},
-              'definition_id': group['policy']['definition_id'], 'planning_recovery': limits,
+    result = {'policy': {**group['policy'], 'continuation': after,
+                         'context_paths': policy['context_paths'], 'definition_id': identifier},
+              'definition_id': identifier, 'planning_recovery': limits,
               'continuation_id': group['id'], 'run_id': group['runtime_id'], 'deadline': deadline}
-    grant = {'request': request, 'request_fingerprint': fingerprint([policy, verification, request]),
+    grant = {'request': request, 'request_fingerprint': request_fingerprint,
              'authorized_at': now, 'result': result, 'previous_stage': state['stage'],
              'previous_gate': state.get('gate'), 'previous_blockers': state['blockers'],
              'calls_consumed': state['calls'], 'critic_calls_consumed': state['critic_calls']}
@@ -110,6 +125,11 @@ def authorize_recovery(store, policy, verification, request):
     state['classification']['required'] = True
     group.update(policy=result['policy'], limits=after, deadline=deadline, planning_recovery=grant,
                  planning_recoveries=[*grants, grant])
+    if extending:
+        extension = {'previous_definition': previous_definition, 'definition_id': identifier,
+                     'request_id': request['request_id'], 'authorized_at': now,
+                     'checks_added': sorted({c['id'] for c in verification['checks']} - {c['id'] for c in original['checks']})}
+        group.setdefault('verification_extensions', []).append(extension)
     if before != after:
         group.setdefault('budget_amendments', []).append(amendment)
     with store._connection(write=True) as db:
@@ -117,6 +137,10 @@ def authorize_recovery(store, policy, verification, request):
             raise FactoryError('stale_sources', 'Planning changed before recovery authorization')
         if db.execute('SELECT run_id FROM factory_control WHERE id=1').fetchone()[0] != request['run_id']:
             raise FactoryError('stale_run', 'Recovery cannot replace a newer process owner')
+        if extending:
+            db.execute('INSERT OR IGNORE INTO execution_definitions VALUES (?,?,?)',
+                       (identifier, canonical({'sources': None, 'verification': verification}), now))
+            Runtime.event(db, 'verification_evidence_extended', extension)
         db.execute('UPDATE continuations SET data=? WHERE id=?', (canonical(group), group['id']))
         db.execute('UPDATE execution_policy SET data=? WHERE id=1', (canonical(result['policy']),))
         Planning(store)._save(db, state, snapshot['revision'], 'planning_recovery_authorized')

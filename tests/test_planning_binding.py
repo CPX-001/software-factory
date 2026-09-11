@@ -191,6 +191,57 @@ class AutomaticBindingTests(unittest.TestCase):
         self.assertIn('Unresolved review mapping_gap', state['blockers'][0])
         self.assertEqual(self.worker.contexts, [])
 
+    def test_additive_evidence_before_acceptance_preserves_pending_answer_and_original_checks(self):
+        from factory.architecture import fingerprint
+        question = {'key':'evidence_gap','question':'Authorize the additional independent check?',
+                    'options':['Add check','Keep blocked'],'recommendation':'Add check',
+                    'consequences':['Original requirements remain mandatory']}
+        def waiting(context):
+            p = self.propose(context); p['unresolved_questions'] = [question]; return p
+        self.model.responses[3:] = [waiting]
+        self.start(); self.drive()
+        before = self.service.get_status(self.pid)['continuation']
+        original = deepcopy(ExecutionStore(self.store).definition(before['policy']['definition_id'])['verification'])
+        (self.product / 'test_extra.py').write_bytes((self.product / 'test_app.py').read_bytes())
+        git(self.product,'add','test_extra.py')
+        git(self.product,'-c','user.name=Fixture','-c','user.email=fixture@localhost','commit','-qm','Additional independent evidence before implementation')
+        definition = deepcopy(original)
+        check = deepcopy(next(c for c in definition['checks'] if c['kind'] == 'python_unittest'))
+        template_id = check['id']; check.update(id='extra',target='test_extra.py')
+        definition['checks'].append(check)
+        policy = {k:v for k,v in before['policy'].items() if k in POLICY_SCHEMA['properties']}
+        policy['context_paths'] = [*policy['context_paths'],'test_extra.py']
+        request = {'request_id':'evidence-extension','run_id':before['runtime_id'],
+            'proposal_fingerprint':fingerprint(self.store.snapshot()['planning']['proposal']),
+            'reason':'Test operator authorizes an additional independent check, not changed criteria',
+            'verification_extension':True}
+        for defect in ('weaken','scope','context'):
+            bad, p = deepcopy(definition), deepcopy(policy)
+            if defect == 'weaken': bad['checks'][0]['min_tests'] += 1
+            if defect == 'scope': bad['project_acceptance']['delivery_paths'] = []
+            if defect == 'context': p['context_paths'].append('private.py')
+            with self.subTest(defect=defect), self.assertRaises(FactoryError):
+                self.service.configure_execution(p,bad,self.pid,planning_recovery=request)
+        result = self.service.configure_execution(policy,definition,self.pid,planning_recovery=request)
+        self.assertNotEqual(result['definition_id'],before['policy']['definition_id'])
+        self.assertEqual(ExecutionStore(self.store).definition(before['policy']['definition_id'])['verification'],original)
+        self.assertIsNone(self.store.snapshot()['decisions'][0]['answer'])
+        self.assertEqual(len(self.jobs),1)
+        self.assertEqual(self.service.get_status(self.pid)['continuation']['budget']['calls'],before['budget']['calls'])
+        # Replay uses the original request, even though template preparation pins the new resource.
+        self.service.configure_execution(policy,definition,self.pid,planning_recovery=request)
+        self.binding['checks'].append({**next(c for c in self.binding['checks'] if c['id'] == template_id),
+                                       'id':'extra','template':'extra'})
+        def incorporate(context):
+            p = self.propose(context); p['decision_keys'] = ['evidence_gap']; return p
+        self.model.responses = [incorporate,review()]
+        self.service.answer_decision(1,'Add check (simulated pilot operator)',self.pid)
+        self.drive()
+        self.assertEqual(self.service.get_status(self.pid)['state'],'project_verified')
+        self.assertEqual(len(self.jobs),2)
+        self.service.configure_execution(policy,definition,self.pid,planning_recovery=request)
+        self.assertEqual(len(self.jobs),2)
+
     def test_critic_gets_current_gate_errors_after_correction_not_previous_rejection(self):
         def invalid(context):
             p = self.propose(context)
@@ -326,8 +377,8 @@ class AutomaticBindingTests(unittest.TestCase):
         self.assertIsNone(state['autonomous_run']['run_id'])
         self.assertFalse(state['execution']['enabled'])
         value = prepare_templates(service._store(prepared['project']['id']), prepared['policy'], prepared['verification_templates'])
-        self.assertEqual(len(value['checks']), 6)
-        self.assertEqual(sum(c['min_tests'] for c in value['checks']), 25)
+        self.assertEqual(len(value['checks']), 7)
+        self.assertEqual(sum(c['min_tests'] for c in value['checks']), 26)
         self.assertTrue(all(c['clean_copy'] and c['source_sha256'] for c in value['checks']))
         self.assertIn(value['scope_authorizations'][0]['prior_input']['quote'], prepared['initial_message'])
 

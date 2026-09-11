@@ -82,3 +82,20 @@ allowlist de biblioteca estándar/runtime, red ausente, producto de solo lectura
 y `/home` temporales vacíos. El PASS de los recorridos acredita independencia de estado
 previo y dependencias ausentes. No promete ausencia universal de operaciones de archivos
 o bases de datos en rutas no ejercitadas; los temporales efímeros siguen siendo posibles.
+
+## Evidencia adicional antes de aceptar el plan
+
+Si se necesita una comprobación adicional para una condición original, el operador puede
+autorizar `planning_recovery.verification_extension=true` con su definición concreta.
+Solo añade checks y recursos inmutables versionados, fuera de permisos de escritura del
+worker. Conserva íntegros los checks, recursos, condiciones, exclusiones y entrega originales.
+La definición recibe otro ID y la anterior queda intacta; el historial conserva la relación.
+El planner debe vincular la nueva evidencia y el crítico revisarla. No puede usarse después
+de aceptar el plan o implementar producto. La extensión no responde decisiones humanas:
+si alguna está pendiente, no arranca inferencia hasta registrar su respuesta real.
+
+`test_no_residual_storage.py` ejecuta los seis ejemplos CLI ya declarados con eventos de
+auditoría Python. Detecta escrituras, SQLite y lanzamiento de otros procesos, incluidos
+intentos cuyo error captura el producto. Usa el mismo runner limpio. La regresión ejecuta
+productos desechables con y sin esos efectos; no implementa el piloto real. Su garantía
+cubre esos recorridos Python, no código nativo arbitrario ni todos los inputs posibles.

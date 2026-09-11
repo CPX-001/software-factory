@@ -69,6 +69,7 @@ REVIEW_SCHEMA = obj({'findings': array(obj({'id': KEY, 'severity': enum(('high',
 # Operator input through the existing policy tool, never part of a model response.
 RECOVERY_SCHEMA = obj({'request_id': string(128), 'run_id': string(128),
     'proposal_fingerprint': string(80), 'reason': string(2000)})
+RECOVERY_SCHEMA['properties']['verification_extension'] = {'type': 'boolean'}
 
 INSTRUCTIONS = """Plan a progressive executable roadmap from the supplied active requirements and
 CURRENT accepted architectural baseline. Return only the closed JSON schema. These snapshots

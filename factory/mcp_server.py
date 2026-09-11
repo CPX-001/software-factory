@@ -46,6 +46,9 @@ TOOLS['factory_execution_policy'] = ('Explicitly authorize bounded execution in 
 TOOLS['factory_execution_policy'] = (TOOLS['factory_execution_policy'][0] +
     ' Exception: an explicitly authorized planning_recovery grants one correction/review pair and continues the same run unless paused. Bind its stable request_id, run_id and proposal_fingerprint; reason records the authorization. Aggregate max_seconds, max_calls and max_tokens may increase only with explicit authorization; consumed usage, work limits, checks and permissions remain fixed.',
     TOOLS['factory_execution_policy'][1])
+TOOLS['factory_execution_policy'] = (TOOLS['factory_execution_policy'][0] +
+    ' Before an accepted plan, planning_recovery.verification_extension=true separately authorizes additive immutable checks/resources for an existing acceptance gap. Original checks, scope and delivery stay unchanged. A pending human decision remains pending and prevents inference until answered.',
+    TOOLS['factory_execution_policy'][1])
 TOOLS['factory_execute'] = ('Start authorized execution and return promptly. Default: one prepared slice. Explicit continuation policy: execute and close milestones within persistent limits; inter_milestone=true authorizes automatic advancement. Reuse request_id on retries.',
     schema({'project': PROJECT, 'request_id': {'type': 'string', 'minLength': 1, 'maxLength': 128},
             'action': {'enum': ['execute', 'validate_project']}, 'automatic_remediation': {'type': 'boolean'}}, ['request_id']))

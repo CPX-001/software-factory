@@ -705,12 +705,14 @@ class Planning:
             if state['proposal']:
                 gate_errors = self._gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
             context = bounded({'role': role, 'source': state['source'],
-                'runtime_semantics': {'version': 2,
+                'runtime_semantics': {'version': 3,
                     'milestone_dependencies': 'Factory closes prerequisite milestones before selecting ANY slice from a dependent milestone.',
                     'slice_dependencies': 'Slice dependencies reference slice IDs only; cross-milestone closure is enforced separately by the controller.',
                     'project_close': 'Runs only after all required milestones close; it cannot be a milestone closure prerequisite.',
                     'closure_evidence': 'requirement_acceptance.milestones are mandatory closed-receipt prerequisites in ProjectGate.obligations, not labels. MilestoneGate.publish requires every declared member slice to have a durable acceptance for the same sources. Slice and milestone dependencies are enforced before selection.',
-                    'receipt_references': 'The final receipt binding.milestones references the immutable milestone receipts and commits; each milestone receipt.slices references its accepted slice execution IDs and commits. These prove Factory delivery order and closure. Product behavior still needs the declared product checks on the final candidate.'},
+                    'receipt_references': 'The final receipt binding.milestones references the immutable milestone receipts and commits; each milestone receipt.slices references its accepted slice execution IDs and commits. These prove Factory delivery order and closure. Product behavior still needs the declared product checks on the final candidate.',
+                    'clean_copy_profile': 'For clean_copy checks and final project validation, Factory exports exact Git blobs and runs system Python with -I -S, an allowlist of stdlib/native runtime resources, no network, a read-only product workspace and fresh temporary /home and /tmp. Developer venv/site packages, host databases, untracked files, Factory state and inherited secrets are absent. The declared oracles and entrypoint run inside this same profile. Environment/procedure identities and code identity are bound to evidence.',
+                    'clean_copy_limits': 'Successful checks in that profile establish independence from pre-existing application state or undeclared dependencies for the exercised paths. Temporary writes inside the fresh namespace are possible and disappear with it. This is not an audit proving absence of every filesystem/database operation or side effect on untested paths. Assess the authoritative condition as written; no dependence on residual state does not itself mean no temporary operations.'},
                 'source_fingerprint': state['source_fingerprint'], 'proposal': state['proposal'],
                 'review': state['review'], 'human_answers': self._decisions(snapshot),
                 'gate_errors': gate_errors, 'skills': routing.context(),

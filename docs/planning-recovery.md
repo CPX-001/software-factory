@@ -76,3 +76,9 @@ También identifican target, índice y texto original de cada criterio sin compr
 incluidas las condiciones de cierre que siguen a los success criteria de una milestone.
 El planner debe justificar la correspondencia con la evidencia; el diagnóstico no asigna
 checks ni cambia el plan automáticamente.
+
+El contexto describe también el perfil de copia limpia ya existente: Python de sistema,
+allowlist de biblioteca estándar/runtime, red ausente, producto de solo lectura y `/tmp`
+y `/home` temporales vacíos. El PASS de los recorridos acredita independencia de estado
+previo y dependencias ausentes. No promete ausencia universal de operaciones de archivos
+o bases de datos en rutas no ejercitadas; los temporales efímeros siguen siendo posibles.

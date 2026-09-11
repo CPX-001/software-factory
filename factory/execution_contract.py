@@ -31,6 +31,7 @@ POLICY_SCHEMA['properties']['final_validation'] = obj({
     'enabled': {'type': 'boolean'}, 'automatic_remediation': {'type': 'boolean'},
 })
 POLICY_SCHEMA['properties']['automatic_plan_binding'] = {'type': 'boolean'}
+POLICY_SCHEMA['properties']['service_tier'] = enum(('priority',))
 
 CHECK_SCHEMA = obj({
     'id': KEY, 'gate': KEY, 'kind': enum(('python_behavior', 'python_unittest', 'specialist', 'human_review')),

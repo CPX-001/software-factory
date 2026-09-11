@@ -48,6 +48,39 @@ class CodexExecutionTests(unittest.TestCase):
             self.adapter()
         self.assertEqual(error.exception.code, 'model_unavailable')
 
+    def test_fast_tier_must_be_offered_without_changing_model_or_spending(self):
+        self.policy['service_tier'] = 'priority'
+        with self.assertRaises(FactoryError) as error:
+            self.adapter()
+        self.assertEqual(error.exception.code, 'service_tier_unavailable')
+        self.codex.thread_start.assert_not_called()
+
+    def test_authorized_fast_tier_reaches_new_and_resumed_turns(self):
+        self.policy['service_tier'] = 'priority'
+        self.codex.models.return_value.data[0].service_tiers = [NS(id='priority')]
+        adapter = self.adapter()
+        self.assertTrue(adapter.runtime_info['service_tier_offered'])
+        self.assertIn('fast_mode=true', (adapter.home / 'config.toml').read_text())
+        for saved in (None, 'existing'):
+            method = self.codex.thread_resume if saved else self.codex.thread_start
+            thread = method.return_value
+            thread.id = saved or 'new'
+            handle = thread.turn.return_value
+            handle.id = 'turn'
+            handle.stream.return_value = iter([
+                NS(method='thread/settings/updated', payload=NS(thread_settings=NS(service_tier='priority'))),
+                NS(method='item/completed', payload=NS(item=NS(root=NS(type='agentMessage',text='{}')))),
+                NS(method='turn/completed', payload=NS(turn=NS(status=NS(value='completed')))),
+            ])
+            with patch.object(adapter, 'quota', return_value={}):
+                adapter.respond({}, thread_id=saved, should_stop=lambda: None,
+                    on_runtime=lambda r: None, on_usage=lambda u: None, on_quota=lambda q: None)
+            self.assertEqual(method.call_args.kwargs['service_tier'], 'priority')
+            self.assertEqual(method.call_args.kwargs['model'], 'offered-model')
+            self.assertEqual(thread.turn.call_args.kwargs['service_tier'], 'priority')
+            self.assertEqual(thread.turn.call_args.kwargs['effort'].value, 'low')
+        self.assertEqual(adapter.runtime_info['service_tier_observed'], 'priority')
+
     def test_separate_bucket_cannot_authorize_a_standard_model(self):
         self.policy['quota_bucket'] = 'codex_bengalfox'
         with self.assertRaises(FactoryError) as error:

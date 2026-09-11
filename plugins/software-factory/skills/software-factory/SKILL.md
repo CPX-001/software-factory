@@ -89,6 +89,12 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   Do not infer that a plugin update authorizes broader execution. Once the user has authorized
   these concrete settings, use `factory_execute` once; never ask for confirmation between slices.
   Factory selects, refines only when needed, implements and verifies in the detached process.
+- If the user requests Fast mode, explicitly set `policy.service_tier="priority"` before
+  the run. Factory checks that the selected model advertises that tier and passes it to
+  each new/resumed SDK thread and turn. It preserves model, effort and account meter;
+  unsupported tiers block before inference. Fast mode may consume more shared account
+  quota; it does not enable API billing. Omission preserves existing policies. Do not
+  change the user's global Codex configuration or claim a measured speedup from selection alone.
 - `factory_status.continuation` shows the active/next slice, accepted commits, actual stage,
   aggregate implementation/refinement usage and remaining budgets. Its diagnostic explains
   blocks. Use `factory_inspect execution` and `factory_inspect refinement` for evidence.

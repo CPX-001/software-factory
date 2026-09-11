@@ -61,6 +61,13 @@ con límites adecuados; la preparación conserva límites pequeños y la reserva
 La opción no habilita inferencia, no modifica instancias anteriores y rechaza sobrescrituras.
 Una instancia existente se consulta/reanuda con `--prepared`, sin añadir opciones de creación.
 
+La política admite `service_tier="priority"` cuando el usuario pide Fast. El adaptador
+comprueba el catálogo del modelo antes de inferencia y transmite el nivel a threads nuevos,
+reanudados y a cada turno. Conserva modelo, esfuerzo, cuenta y límites; no cambia la
+configuración global ni habilita facturación API. Un nivel no ofrecido bloquea. La
+telemetría distingue el nivel solicitado del observado cuando llega esa notificación.
+Seleccionar Fast no demuestra una aceleración medida del recorrido completo.
+
 ## Evidencia y límite de esta corrección
 
 `tests/test_planning_binding.py` reutiliza el producto de dos milestones en repositorios

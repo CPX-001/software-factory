@@ -57,11 +57,14 @@ class CodexExecution:
                   'web_search="disabled"', 'approval_policy="never"', 'sandbox_mode="read-only"',
                   'mcp_servers.software_factory={command="false",enabled=false}', '[features]']
         config += [f'{name}=false' for name in DISABLED_FEATURES]
+        if policy.get('service_tier'):
+            config.append('fast_mode=true')
         (self.home / 'config.toml').write_text('\n'.join(config) + '\n')
         binary = _resolve_codex_bin(CodexConfig())
         self.runtime_info = {'sdk_version': importlib.metadata.version('openai-codex'),
             'binary': str(binary), 'runtime_selection': 'sdk_pinned_dependency',
             'model': policy['model'], 'effort': policy['effort'], 'provider': 'openai',
+            'service_tier_requested': policy.get('service_tier'),
             'configuration': 'private_chatgpt_read_only_no_tools', 'initialized': False}
         mounts = [(str(self.home), '/home', True), (str(worktree), '/workspace', False),
                   (str(binary), '/runtime/codex', False)]
@@ -90,6 +93,11 @@ class CodexExecution:
             model = next((m for m in models if m.model == policy['model']), None)
             if model is None or policy['effort'] not in [x.reasoning_effort.value for x in model.supported_reasoning_efforts]:
                 raise FactoryError('model_unavailable', 'Configured model/effort is not offered by this runtime')
+            tier = policy.get('service_tier')
+            offered = {t.id for t in (getattr(model, 'service_tiers', None) or [])}
+            if tier and tier not in offered:
+                raise FactoryError('service_tier_unavailable', 'Authorized speed tier is not offered for this model; no automatic substitution')
+            self.runtime_info['service_tier_offered'] = bool(tier and tier in offered)
             # model/list 0.147.0 has no general model->meter field. Do not let a
             # caller pair a standard Codex model with a cheaper separate bucket.
             if policy['quota_bucket'] != 'codex' or 'spark' in model.model.lower():
@@ -147,11 +155,13 @@ class CodexExecution:
         from openai_codex.generated.v2_all import ReasoningEffort
         args = dict(model=self.policy['model'], model_provider='openai', cwd='/workspace',
                     sandbox=Sandbox.read_only, approval_mode=ApprovalMode.deny_all)
+        speed = {'service_tier': self.policy['service_tier']} if self.policy.get('service_tier') else {}
+        args.update(speed)
         thread = (self.codex.thread_resume(thread_id, **args) if thread_id else
                   self.codex.thread_start(**args, base_instructions=self.instructions))
         inputs = [TextInput(json.dumps(context, ensure_ascii=False))]
         inputs += [SkillInput(name=s['name'], path=s['path']) for s in self.skill_inputs]
-        handle = thread.turn(inputs, effort=ReasoningEffort(self.policy['effort']), output_schema=self.result_schema)
+        handle = thread.turn(inputs, effort=ReasoningEffort(self.policy['effort']), output_schema=self.result_schema, **speed)
         on_runtime({'thread_id': thread.id, 'turn_id': handle.id,
                     'process': process_identity(self.codex._client._proc.pid)})
         finished = threading.Event()
@@ -188,6 +198,8 @@ class CodexExecution:
                 if event.method == 'thread/tokenUsage/updated':
                     last_usage = payload.token_usage.model_dump(by_alias=True, mode='json')
                     on_usage(last_usage)
+                elif event.method == 'thread/settings/updated':
+                    self.runtime_info['service_tier_observed'] = payload.thread_settings.service_tier
                 elif event.method == 'model/rerouted':
                     stop_error.append(FactoryError('model_rerouted', 'Runtime changed model; automatic escalation is prohibited'))
                     handle.interrupt()

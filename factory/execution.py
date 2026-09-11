@@ -82,10 +82,19 @@ def configure(store, policy, verification):
     identity = repository_identity(store.project)
     definition = {'sources': sources, 'verification': verification}
     identifier = fingerprint(definition)
+    with store._connection() as db:
+        frozen_contracts = [json.loads(r[0]) for r in db.execute('SELECT data FROM project_contracts')]
+    if (any(a['sources'] == sources for a in journal.acceptances()) and
+            any(c['sources'] == sources and c['definition_id'] != identifier for c in frozen_contracts)):
+        raise FactoryError('acceptance_contract_frozen', 'Accepted work freezes project criteria and exclusions; changes require a separately approved planning revision')
     authorized = {**policy, 'repository': identity, 'definition_id': identifier, 'authorized_at': time.time()}
     with store._connection(write=True) as db:
         db.execute('INSERT OR IGNORE INTO execution_definitions VALUES (?,?,?)',
                    (identifier, canonical(definition), time.time()))
+        if verification.get('project_acceptance'):
+            from .project_validation import contract_snapshot
+            contract = contract_snapshot(store.snapshot(), verification, identifier)
+            db.execute('INSERT OR IGNORE INTO project_contracts VALUES (?,?)', (fingerprint(contract), canonical(contract)))
         db.execute('UPDATE execution_policy SET data=? WHERE id=1', (canonical(authorized),))
         Runtime.event(db, 'execution_authorized' if policy['enabled'] else 'execution_disabled',
                       {'definition_id': identifier, 'repository': identity})

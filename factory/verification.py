@@ -46,6 +46,8 @@ def capability_errors(plan, slice_, definition, policy, baseline):
     required = {h for g in gates for h in g['harness']}
     errors = ['specialist_review_unsupported:' + c['id'] for c in definition['checks']
               if c['gate'] in ids and c['kind'] == 'specialist']
+    errors += ['external_service_unavailable:' + c['id'] for c in definition['checks']
+               if c['gate'] in ids and c.get('integration_mode') == 'external_service']
     descriptions = [h['capability'] for h in plan['harness'] if h['id'] in required]
     descriptions += [t for g in gates for t in g['checks']]
     descriptions += slice_['scope'] + [slice_['verification_expectation']]
@@ -110,8 +112,9 @@ def protected_harness(definition, inventory):
 
 
 class Verifier:
-    def __init__(self, sandbox):
+    def __init__(self, sandbox, *, clean=False):
         self.sandbox = sandbox
+        self.clean = clean
 
     def run(self, plan, slice_, definition, worktree, *, trigger, should_stop, on_process, remaining):
         identity = code_identity(worktree)
@@ -122,6 +125,7 @@ class Verifier:
                 continue
             base = {'check_id': c['id'], 'gate': c['gate'], 'criteria': c['criteria'],
                     'gate_checks': c['gate_checks'], 'code_id': identity, 'trigger': trigger,
+                    'integration_mode': c.get('integration_mode', 'local'),
                     'started_at': time.time(),
                     'runner_sha256': hashlib.sha256(Path(__file__).with_name('verification_runner.py').read_bytes()).hexdigest(),
                     'python_sha256': hashlib.sha256(Path('/usr/bin/python3').read_bytes()).hexdigest()}
@@ -131,12 +135,12 @@ class Verifier:
             with tempfile.TemporaryDirectory(prefix='check-', dir=self.sandbox.directory) as tmp:
                 spec = Path(tmp) / 'check.json'
                 spec.write_text(json.dumps(c))
-                result = self.sandbox.run(['/usr/bin/python3', '-I', '/verification_runner.py'],
+                result = self.sandbox.run(['/usr/bin/python3', '-I', *(['-S'] if self.clean else []), '/verification_runner.py'],
                     [(str(worktree), '/workspace', False), (str(spec), '/check.json', False),
                      (str(Path(__file__).with_name('verification_runner.py')), '/verification_runner.py', False)],
                     timeout=max(.01, min(c['timeout_seconds'], remaining())),
-                    should_stop=should_stop, on_process=on_process)
-            if result['exit_code'] == 124:
+                    should_stop=should_stop, on_process=on_process, clean=self.clean)
+            if result['exit_code'] == 124 and not result.get('reason'):
                 result.update(status='NOT_RUN', reason='missing_dependency_or_tests')
             if result['status'] == 'PASS' and 'FACTORY_CHECK_COMPLETED_V1' not in result['log'].splitlines():
                 result.update(status='NOT_RUN', reason='runner_did_not_complete')

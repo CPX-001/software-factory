@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Software Factory",
     "shortDescription": "Manage Factory projects from Codex.",
-    "longDescription": "Run discovery, architecture, planning and explicitly authorized execution. Validate and close milestones, continue within persistent budgets, inspect evidence and answer decisions.",
+    "longDescription": "Run discovery, architecture, planning and explicitly authorized execution. Close milestones, validate the integrated project on an exact commit and prepare a reproducible local delivery within persistent budgets.",
     "developerName": "Local developer",
     "category": "Productivity",
     "capabilities": [],
@@ -19,7 +19,8 @@
       "Enséñame la arquitectura vigente.",
       "Implementa la próxima slice preparada.",
       "¿Por qué no puedes iniciar la ejecución?",
-      "Continúa el proyecto entre milestones dentro de la política autorizada y detente si necesitas una decisión."
+      "Continúa el proyecto entre milestones dentro de la política autorizada y detente si necesitas una decisión.",
+      "Valida el proyecto terminado y prepara su entrega local."
     ]
   },
   "mcpServers": "./.mcp.json"

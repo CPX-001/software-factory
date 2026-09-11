@@ -5,6 +5,15 @@ producir una baseline arquitectónica estructurada y versionada. Codex conduce d
 y diseña/revisa arquitectura; Python valida, persiste y controla los gates y transiciones.
 Planning produce un roadmap progresivo versionado con gates de cobertura/verificación y necesidades de harness. La ejecución requiere habilitación explícita, con worktree aislado, verificaciones reales, reparaciones acotadas y checkpoint recuperable. La autorización original conserva una slice por run; una política adicional permite [continuidad autónoma y cierre de milestones](docs/continuation.md), con validación integrada, remediación acotada, refinamiento justo a tiempo y límites agregados. El salto entre milestones requiere `continuation.inter_milestone=true`. Consulta [el motor de ejecución](docs/execution.md).
 
+La [validación final](docs/project-validation.md) comprueba el alcance aprobado sobre un commit
+integrado exportado desde Git y ejecutado en un entorno Python limpio. Publica `project_verified`
+y una entrega local reproducible cuando pasan todas las condiciones obligatorias. Su autorización
+y la de una posible remediación final son explícitas; no incluye publicación ni despliegue.
+
+El [piloto end-to-end desde discovery](docs/end-to-end-acceptance.md) queda preparado en una
+ubicación persistente. Su aceptación real sigue pendiente por cuota y por los límites de
+autorización/presupuesto entre las fases de análisis y ejecución; los tests simulados no la sustituyen.
+
 La interfaz principal es Codex App mediante el plugin local y MCP. Consulta
 [instalación y uso desde Codex](docs/codex.md). La CLI se conserva para recovery, debugging
 y scripting, sobre el mismo `FactoryService`.
@@ -125,18 +134,18 @@ Al superar el gate se guardan evaluación, evidencias, resultado del gate, fecha
 finalización y evento de transición **en la misma transacción** que el conocimiento final:
 
 ```text
-discovery -> architecture -> planning -> execution -> verification -> completed
-                                           ^              |
-                                           +--------------+
+Fases: discovery -> architecture -> planning -> execution
+Cierre: milestones cerrados -> project_ready_for_validation
+        -> validación final autorizada -> project_verified o bloqueo
 ```
 
 `requirements` se conserva únicamente para poder leer y avanzar proyectos antiguos que
 ya estuvieran en esa fase. El nuevo discovery reúne la información de producto y requisitos
-y pasa directamente a arquitectura. Architecture y planning tienen handlers y gates propios. Execution conserva la fase `execution` tras aceptar slices; la continuidad valida el código integrado y publica recibos de cierre de milestones. El salto automático requiere `continuation.inter_milestone=true`. Al cerrar el roadmap queda `project_ready_for_validation`; el gate final del proyecto sigue pendiente.
+y pasa directamente a arquitectura. Architecture y planning tienen handlers y gates propios. Execution conserva la fase `execution` tras aceptar slices; la continuidad valida el código integrado y publica recibos de cierre de milestones. El salto automático requiere `continuation.inter_milestone=true`. Al cerrar el roadmap queda `project_ready_for_validation`; con autorización final, el mismo controller continúa hasta `project_verified` y su entrega local o un bloqueo concreto.
 
 ## Persistencia y recuperación
 
-Fuente autoritativa: `.factory/state.sqlite3`, esquema v8. La migración aditiva desde v1–v7
+Fuente autoritativa: `.factory/state.sqlite3`, esquema v9. La migración aditiva desde v1–v8
 ocurre en `init` o la siguiente escritura y conserva fase, revisión, eventos y decisiones.
 Las lecturas de v1 siguen funcionando sin migrarlo; versiones desconocidas se rechazan.
 

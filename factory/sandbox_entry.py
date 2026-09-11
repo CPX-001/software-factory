@@ -37,9 +37,16 @@ def enter(spec):
         # Add restrictions without clearing locked atime flags inherited from a host sandbox.
         if libc.syscall(442, -100, os.fsencode(target), 0x8000, ctypes.byref(attr), ctypes.sizeof(attr)):
             raise OSError(ctypes.get_errno(), 'Cannot restrict bind mount: ' + str(target))
-    for directory in ('/usr', '/bin', '/lib', '/lib64'):
-        if Path(directory).exists():
-            bind(directory, directory)
+    if spec.get('clean'):
+        # System Python, its standard library and native runtime only. No developer
+        # environment, site packages, installed CLIs, /usr/local or arbitrary tools.
+        for path in spec['clean_resources']:
+            bind(path, path)
+        (root / 'lib').symlink_to('usr/lib')
+    else:
+        for directory in ('/usr', '/bin', '/lib', '/lib64'):
+            if Path(directory).exists():
+                bind(directory, directory)
     for src, dst, writable in spec['mounts']:
         bind(src, dst, writable)
     for directory in ('tmp', 'proc', 'dev', 'workspace', 'home'):

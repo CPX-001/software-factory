@@ -26,6 +26,7 @@ def main():
         signal.signal(signal.SIGINT, stop)
         deadline = time.monotonic() + spec.get('lifetime', 3600)
         pause_seen = None
+        timed_out = False
         while process.poll() is None:
             paused = Path(spec['pause_file']).exists()
             if paused and pause_seen is None:
@@ -35,6 +36,7 @@ def main():
             # Give the SDK controller its native interrupt grace period first. This
             # guardian also works if the controller crashed or is stuck initializing.
             if time.monotonic() >= deadline or (pause_seen is not None and time.monotonic() - pause_seen >= 3):
+                timed_out = time.monotonic() >= deadline
                 process.kill()
                 break
             time.sleep(.1)
@@ -43,7 +45,12 @@ def main():
             for source, destination, _ in spec['mounts']:
                 if destination == '/home':
                     (Path(source) / 'auth.json').unlink(missing_ok=True)
-        return code
+        if timed_out:
+            print('FACTORY_SANDBOX_TIMEOUT_V1', flush=True)
+            return 124
+        # sys.exit(-SIGKILL) becomes 247 on POSIX, which the controller could mistake
+        # for an ordinary failing product. Signals never establish a product verdict.
+        return 125 if code < 0 else code
 
 
 if __name__ == '__main__':

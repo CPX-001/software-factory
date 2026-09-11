@@ -32,15 +32,18 @@ class LinuxSandbox:
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lifetime = 3600
 
-    def command(self, argv, mounts=(), *, mode='test', lifetime=None):
+    def command(self, argv, mounts=(), *, mode='test', lifetime=None, clean=False):
         if sys.platform != 'linux' or not shutil.which('unshare'):
             raise FactoryError('isolation_unavailable', 'Execution requires Linux user/mount/PID/network namespaces and seccomp')
         place = Path(tempfile.mkdtemp(prefix='sandbox-', dir=self.directory))
         (place / 'root').mkdir()
-        spec = {'root': str(place / 'root'), 'mounts': list(mounts), 'mode': mode, 'argv': argv,
+        spec = {'root': str(place / 'root'), 'mounts': list(mounts), 'mode': mode, 'argv': argv, 'clean': clean,
                 'lease': str(self.directory / 'process.lock'),
                 'lifetime': self.lifetime if lifetime is None else min(lifetime, self.lifetime),
                 'pause_file': str(self.directory / 'pause')}
+        if clean:
+            from .reproducibility import clean_resources
+            spec['clean_resources'] = [str(p) for p in clean_resources()]
         location = place / 'launch.json'
         location.write_text(json.dumps(spec))
         cmd = ['/usr/bin/unshare', '--user', '--map-root-user', '--mount', '--pid', '--fork', '--kill-child=KILL']
@@ -57,8 +60,8 @@ class LinuxSandbox:
                 return True
             return False
 
-    def run(self, argv, mounts=(), *, timeout=30, should_stop=lambda: False, on_process=lambda x: None):
-        command = self.command(argv, mounts, lifetime=timeout)
+    def run(self, argv, mounts=(), *, timeout=30, should_stop=lambda: False, on_process=lambda x: None, clean=False):
+        command = self.command(argv, mounts, lifetime=timeout, clean=clean)
         start = time.monotonic()
         process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, start_new_session=True, close_fds=True,
@@ -95,10 +98,13 @@ class LinuxSandbox:
             selector.close()
             process.stdout.close()
         output = log.decode('utf-8', errors='replace')
+        if 'FACTORY_SANDBOX_TIMEOUT_V1' in output.splitlines():
+            reason = 'timeout'
         status = ('NOT_RUN' if reason or code < 0 or code in (124, 125, 126, 127) else 'PASS' if code == 0 else 'FAIL')
         if 'FACTORY_SANDBOX_UNAVAILABLE:' in output:
             status, reason = 'NOT_RUN', 'isolation_unavailable'
-        return {'status': status, 'reason': reason, 'command': argv, 'environment': 'linux-namespaces-seccomp-v1',
+        return {'status': status, 'reason': reason, 'command': argv,
+                'environment': 'linux-namespaces-seccomp-python-stdlib-v1' if clean else 'linux-namespaces-seccomp-v1',
                 'exit_code': code, 'duration_seconds': round(time.monotonic() - start, 4),
                 'log': output, 'log_limit_bytes': 24000, 'process': identity}
 

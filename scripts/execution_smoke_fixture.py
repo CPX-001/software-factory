@@ -115,6 +115,86 @@ class RankingAcceptance(unittest.TestCase):
 '''
 
 
+def prepare_from_discovery(root, model, effort, *, registry_home=None):
+    """A NEW persistent instance of the records scenario, with no generated phase input.
+
+    Only normal project initialization/pause are used. No model, enqueue, acceptance,
+    architecture, planning, verification mapping or workflow database write occurs here.
+    """
+    import hashlib
+    import json
+    from factory.reproducibility import atomic_json
+    from factory.registry import FactoryError
+    repo = Path(__file__).resolve().parent.parent
+    root = Path(root).expanduser().resolve()
+    if root.is_relative_to(repo):
+        raise FactoryError('pilot_separate_repository_required', 'The product pilot must be outside the Factory checkout')
+    if root.exists():
+        raise FactoryError('pilot_exists', 'Creation never overwrites an existing pilot; use --prepared to inspect/resume it')
+    root.mkdir(parents=True)
+    product = root / 'product'; product.mkdir()
+    resources = {
+        'record_rules.py': EXISTING_HELPER,
+        'test_records.py': ACCEPTANCE,
+        'test_category_report.py': RANKING_ACCEPTANCE,
+        'test_product_cli.py': (repo / 'pilots/records-v1/test_product_cli.py').read_text(),
+        'PILOT.md': (repo / 'pilots/records-v1/brief.md').read_text(),
+        '.gitignore': '.factory/\n__pycache__/\n*.pyc\n',
+    }
+    valid = [{'category': 'Books', 'amount': 7}, {'category': ' Food ', 'amount': 10},
+             {'category': 'FOOD', 'amount': 2}]
+    examples = {'valid.json': valid, 'reordered.json': list(reversed(valid)), 'empty.json': [],
+                'negative.json': [{'category': 'x', 'amount': -1}],
+                'boolean.json': [{'category': 'x', 'amount': True}]}
+    resources.update({'examples/' + name: json.dumps(value, ensure_ascii=False, indent=2) + '\n'
+                      for name, value in examples.items()})
+    resources['examples/malformed.json'] = '[broken JSON\n'
+    for name, content in resources.items():
+        target = product / name; target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content)
+    checks = [{'id': key, 'gate': 'independent_acceptance', 'kind': 'python_unittest', 'target': path,
+               'cases': [], 'min_tests': minimum, 'timeout_seconds': 20, 'criteria': [], 'gate_checks': [0],
+               'integration_mode': 'local'}
+              for key, path, minimum in [('summary', 'test_records.py', 10),
+                  ('ranking', 'test_category_report.py', 4), ('cli', 'test_product_cli.py', 5)]]
+    checks[-1]['entrypoint'] = {'path': 'category_report.py', 'args': ['examples/valid.json'],
+        'stdout': '[{"category":"food","count":2,"total":12},{"category":"books","count":1,"total":7}]\n'}
+    contract = {'id': 'records-v1', 'input_kind': 'pilot_test_data', 'independent_of_implementation_worker': True,
+        'factory_source': git(repo, 'rev-parse', 'HEAD'),
+        'resource_hashes': {p: hashlib.sha256(t.encode()).hexdigest() for p, t in resources.items()},
+        'checks': checks, 'required_milestones': 2,
+        'milestone_outcomes': ['Reusable validated category summary', 'User-facing deterministic ranking through the accepted summary'],
+        'delivery_paths': ['records.py', 'category_report.py', 'USAGE.md'],
+        'runtime': 'python_stdlib', 'plan_binding': 'pending real discovery/architecture/planning; these are independent oracle templates, not approved gate mappings'}
+    atomic_json(product / 'pilot-contract.json', contract)
+    git(product, 'init', '-q')
+    git(product, 'add', '.')
+    git(product, '-c', 'user.name=Pilot fixture', '-c', 'user.email=fixture@localhost',
+        'commit', '-qm', 'Independent records pilot inputs and acceptance, before discovery')
+    service = FactoryService(Registry(registry_home))
+    service.authorize_root(root)
+    status = service.initialize_project(str(product), 'Records end-to-end pilot')
+    service.pause(status['project']['id'])  # Preparation never permits an unguarded analysis call.
+    policy = {**DEFAULT_POLICY, 'enabled': True, 'model': model, 'effort': effort,
+        'max_attempts': 2, 'max_seconds': 180, 'max_tokens': 12000,
+        'write_paths': ['records.py', 'category_report.py', 'USAGE.md'],
+        'context_paths': list(resources) + ['records.py', 'category_report.py', 'pilot-contract.json'],
+        'continuation': {'enabled': True, 'inter_milestone': True, 'max_slices': 2,
+                         'max_calls': 4, 'max_seconds': 300, 'max_tokens': 30000},
+        'final_validation': {'enabled': True, 'automatic_remediation': False}}
+    prepared = {'root': str(root), 'project': status['project'], 'registry_home': str(service.registry.home),
+        'baseline_commit': git(product, 'rev-parse', 'HEAD'), 'phase_inputs': 'discovery_brief',
+        'scenario': 'records-v1', 'initial_message': resources['PILOT.md'],
+        'contract': contract, 'contract_sha256': hashlib.sha256((product / 'pilot-contract.json').read_bytes()).hexdigest(),
+        'policy': policy, 'policy_applied': False,
+        'full_workflow_limits': {k: policy['continuation'][k] for k in ('max_calls', 'max_seconds', 'max_tokens')},
+        'full_workflow_limits_enforced': False,
+        'request_id': 'records-v1-discovery-once', 'real_model_requested': False,
+        'recovery': 'Use this report with --prepared. Do not recreate or overwrite this directory.'}
+    atomic_json(root / 'report.json', prepared)
+    return prepared
+
+
 def prepare(root, model, effort, *, continuation=False):
     root = Path(root)
     product = root / 'product'; product.mkdir()
@@ -220,6 +300,8 @@ def prepare(root, model, effort, *, continuation=False):
                         'expected_json': '[{"category":"y","count":1,"total":4},{"category":"x","count":2,"total":3}]'}],
              'min_tests': 1, 'timeout_seconds': 5, 'criteria': [0], 'gate_checks': [0]}])
         milestone_checks(verification)
+        final_checks(plan, verification)
+        policy['final_validation'] = {'enabled': True, 'automatic_remediation': False}
     return {'root': str(root), 'project': project, 'registry_home': str(registry.home),
             'policy': policy, 'verification': verification, 'baseline_commit': baseline_commit}
 
@@ -248,12 +330,24 @@ def milestone_checks(verification):
     for source, identifier, gate, mapped in [('acceptance', 'summary_close', 'milestone_gate', [0, 1]),
             ('examples', 'summary_close_examples', 'milestone_gate', [1]),
             ('ranking_acceptance', 'rank_close', 'ranking_close', [0]),
+            ('ranking_examples', 'rank_close_examples', 'ranking_close', [0]),
             ('acceptance', 'summary_regression', 'ranking_close', [1])]:
         if any(c['id'] == identifier for c in verification['checks']):
             continue
         check = deepcopy(next(c for c in verification['checks'] if c['id'] == source))
         check.update(id=identifier, gate=gate, criteria=mapped)
         verification['checks'].append(check)
+
+
+def final_checks(plan, verification):
+    """Bind complete acceptance to existing records/ranking oracles; no new success rule."""
+    verification['requirement_acceptance'] = [{'requirement': c['requirement'],
+        'condition': 'The approved summary and ranking contracts pass together on the clean accepted candidate.',
+        'milestones': ['m1', 'm2'], 'checks': ['summary_close', 'summary_close_examples', 'rank_close', 'rank_close_examples']}
+        for c in plan['coverage'] if c['disposition'] == 'covered']
+    verification['project_acceptance'] = {'entry_checks': ['rank_close_examples'],
+        'delivery_paths': ['records.py', 'record_rules.py', 'category_report.py', 'test_records.py', 'test_category_report.py'],
+        'runtime': 'python_stdlib', 'exclusions': []}
 
 
 def upgrade_prepared(prepared):
@@ -280,4 +374,6 @@ def upgrade_prepared(prepared):
     prepared = deepcopy(prepared)
     prepared['policy']['continuation']['inter_milestone'] = True
     milestone_checks(prepared['verification'])
+    final_checks(plan, prepared['verification'])
+    prepared['policy']['final_validation'] = {'enabled': True, 'automatic_remediation': False}
     return prepared

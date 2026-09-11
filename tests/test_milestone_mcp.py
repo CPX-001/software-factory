@@ -9,14 +9,14 @@ from mcp import Client
 from mcp.client.stdio import StdioServerParameters
 from factory.application import FactoryService
 from factory.registry import Registry
-from tests.milestone_fakes import setup_milestones
+from tests.project_fakes import setup_project
 
 
 class MilestoneMCPTests(unittest.IsolatedAsyncioTestCase):
     async def test_disconnected_client_does_not_supervise_two_milestone_slice_run(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            service, store, _, git, _, _ = setup_milestones(root)
+            service, store, _, git, _, _ = setup_project(root)
             repo = Path(__file__).resolve().parent.parent
             release, entered = root / 'release', root / 'entered'
             worker = root / 'worker.py'
@@ -29,9 +29,9 @@ from factory.registry import Registry
 from factory.skill_router import SkillRouter
 from factory.skill_catalog import Catalog
 from tests.execution_fakes import FakeSDK
-from tests.continuation_fakes import implementation_a, implementation_c, refinement
-from tests.milestone_fakes import broken_b, remediation
-sdk=FakeSDK(implementation_a(), broken_b(), remediation(), implementation_c())
+from tests.continuation_fakes import implementation_a, implementation_b, refinement
+from tests.project_fakes import cli_implementation, final_repair
+sdk=FakeSDK(implementation_a(), implementation_b(), cli_implementation(broken=True), final_repair)
 def wait(stop):
     Path({str(entered)!r}).touch()
     end=time.monotonic()+15
@@ -75,10 +75,10 @@ main()
             reader = FactoryService(Registry(service.registry.home))
             for _ in range(600):
                 status = reader.get_status()
-                if status['continuation']['state'] == 'project_ready_for_validation':
+                if status['continuation']['state'] == 'project_verified':
                     break
                 await asyncio.sleep(.1)
-            self.assertEqual(status['state'], 'project_ready_for_validation', status)
+            self.assertEqual(status['state'], 'project_verified', status)
             self.assertEqual(status['continuation']['budget']['calls'], 5)
             self.assertEqual(len(status['continuation']['accepted']), 4)
             self.assertEqual([m['milestone'] for m in status['continuation']['closed_milestones']], ['m1', 'm2'])
@@ -86,7 +86,12 @@ main()
                 duplicate = (await client.call_tool('factory_execute', {'request_id': 'pilot'})).structured_content['data']
                 self.assertEqual(duplicate['requested_continuation_id'], identifier)
                 detail = (await client.call_tool('factory_inspect', {'view': 'execution'})).structured_content['data']
-                self.assertEqual(detail['continuation']['state'], 'project_ready_for_validation')
+                self.assertEqual(detail['continuation']['state'], 'project_verified')
+                final = (await client.call_tool('factory_inspect', {'view': 'project_validation'})).structured_content['data']
+                self.assertEqual(len(final['receipts']), 1)
+                self.assertEqual([v['state'] for v in final['validations']], ['failed', 'verified'])
+                again = (await client.call_tool('factory_execute', {'action': 'validate_project', 'request_id': 'validate-again'})).structured_content['data']
+                self.assertEqual(again['requested_continuation_id'], identifier)
                 refined = (await client.call_tool('factory_inspect', {'view': 'refinement', 'slice_id': 's3'})).structured_content
                 self.assertTrue(refined['ok'], refined)
                 self.assertEqual(len(refined['data']['execution_refinements']), 1)

@@ -32,6 +32,7 @@ Ejemplos de mensajes:
 - «Enséñame la arquitectura vigente», «Pausa el proyecto» o «Continúa».
 - «¿Cuál es el plan?», «¿Qué milestones hay?», «¿Cuál es la próxima slice?».
 - «¿Qué requisitos siguen pendientes?», «¿Dónde están los gates importantes?».
+- «Valida el proyecto terminado y prepara su entrega local».
 
 Estas consultas usan las vistas `plan`, `milestones`, `next_slice`, `requirements` y
 `verification` de `factory_inspect`; `factory_decisions` muestra las decisiones humanas.
@@ -51,6 +52,13 @@ operaciones que cambian el proyecto activo.
 `factory_decisions`, `factory_answer`, `factory_inspect`, `factory_pause`, `factory_resume`.
 `factory_execution_policy` autoriza la política y definición tipada; `factory_execute`
 selecciona la próxima slice preparada y devuelve su ID sin esperar a que termine.
+Con `action=validate_project`, esa misma tool autoriza la validación final y entrega local
+del proyecto cerrado, conservando el run y sus límites. La remediación automática exige
+`automatic_remediation=true` por separado. Para incluir todo el recorrido desde milestones,
+la política puede autorizar `final_validation` antes del run. La vista `project_validation`
+muestra commit, criterios pendientes, checks, exclusiones, bloqueos y entrega; distingue
+`project_ready_for_validation`, `project_validating`, `project_verified`, `delivery_pending`
+y cambios posteriores en `version_pending`. Consulta [el contrato final](project-validation.md).
 Las respuestas usan `{ok, data}` o `{ok:false, error:{code,message,details}}`; los errores
 MCP también llevan `isError`. Status es compacto; inspect pide documentos completos.
 

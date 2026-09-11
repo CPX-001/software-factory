@@ -1,0 +1,214 @@
+{
+  "phase_inputs": "discovery_brief",
+  "scenario": "records-v1",
+  "project": {
+    "id": "p_3084354cc76d1c23",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-v1/product"
+  },
+  "registry_home": "/home/cpx/.local/state/software-factory",
+  "baseline_commit": "9af30b4ae36f421f6a41eb2b77011b9fbb303a65",
+  "request_id": "records-v1-discovery-once",
+  "model_calls_this_invocation": 0,
+  "model_started": false,
+  "run_id": null,
+  "continuation_id": null,
+  "phases_really_completed": [],
+  "selection_survived_reconnect": true,
+  "usage_by_phase": {
+    "architecture": {
+      "calls": 0,
+      "token_usage": "not recorded"
+    },
+    "discovery": {
+      "completed_turns": 0,
+      "token_usage": "not recorded"
+    },
+    "execution_and_refinement": null,
+    "planning": {
+      "calls": 0,
+      "token_usage": "not recorded"
+    }
+  },
+  "effective_models": {},
+  "human_answers": [],
+  "interventions": [
+    {
+      "action": "Prepare one fresh persistent pilot; retain the existing model, effort, reserve and finite limits.",
+      "kind": "initial_authorization"
+    },
+    {
+      "action": "Keep the project paused before any model inference.",
+      "kind": "environment_or_quota"
+    }
+  ],
+  "integration_gaps": [
+    {
+      "code": "workflow_budget_unavailable",
+      "detail": "Aggregate call/token/deadline enforcement begins with execution; discovery, architecture and planning are not covered.",
+      "source": "factory/continuation_store.py:budget"
+    },
+    {
+      "code": "initial_execution_authorization_boundary",
+      "detail": "After real planning, typed verification and execution authorization must still be bound through the normal service; no initial whole-workflow authorization exists.",
+      "source": "factory/controller.py:stop_reason"
+    },
+    {
+      "code": "analysis_effort_not_pinned",
+      "detail": "The analysis adapters select the existing model but do not apply the execution effort policy.",
+      "source": "factory/codex_discovery.py; factory/codex_architecture.py; factory/codex_planning.py"
+    }
+  ],
+  "blocker": {
+    "bucket": "codex",
+    "code": "quota_reserve",
+    "message": "Shared Codex quota has reached the configured reserve",
+    "method": "account/rateLimits/read",
+    "next_step": "Wait until the applicable quota has recovered above the configured reserve; do not switch buckets.",
+    "reserve_percent": 25,
+    "resets_at": 1789462830,
+    "used_percent": 92
+  },
+  "independent_acceptance": {
+    "reason": "Independent accepted-candidate checks have not run in this driver",
+    "status": "NOT_RUN"
+  },
+  "final_commit": null,
+  "final_receipt": null,
+  "delivery": null,
+  "tool_names": [
+    "factory_answer",
+    "factory_decisions",
+    "factory_execute",
+    "factory_execution_policy",
+    "factory_inspect",
+    "factory_message",
+    "factory_pause",
+    "factory_project",
+    "factory_resume",
+    "factory_status"
+  ],
+  "finished_at": 1789122884.9094887,
+  "scenario_source": "pilots/records-v1/brief.md; scripts/execution_smoke_fixture.py; pilots/records-v1/test_product_cli.py",
+  "contract_sha256": "9c2c01684b16a35b7fabd9307d95b1492d8602387e05c8bda10716117f23c82b",
+  "declared_policy": {
+    "context_paths": [
+      "record_rules.py",
+      "test_records.py",
+      "test_category_report.py",
+      "test_product_cli.py",
+      "PILOT.md",
+      ".gitignore",
+      "examples/valid.json",
+      "examples/reordered.json",
+      "examples/empty.json",
+      "examples/negative.json",
+      "examples/boolean.json",
+      "examples/malformed.json",
+      "records.py",
+      "category_report.py",
+      "pilot-contract.json"
+    ],
+    "continuation": {
+      "enabled": true,
+      "inter_milestone": true,
+      "max_calls": 4,
+      "max_seconds": 300,
+      "max_slices": 2,
+      "max_tokens": 30000
+    },
+    "effort": "low",
+    "enabled": true,
+    "final_validation": {
+      "automatic_remediation": false,
+      "enabled": true
+    },
+    "max_attempts": 2,
+    "max_seconds": 180,
+    "max_tokens": 12000,
+    "model": "gpt-5.6-terra",
+    "quota_bucket": "codex",
+    "quota_max_age_seconds": 60,
+    "quota_reserve_percent": 25,
+    "write_paths": [
+      "records.py",
+      "category_report.py",
+      "USAGE.md"
+    ]
+  },
+  "policy_applied": false,
+  "full_workflow_limits": {
+    "max_calls": 4,
+    "max_seconds": 300,
+    "max_tokens": 30000
+  },
+  "full_workflow_limits_enforced": false,
+  "old_pilot": {
+    "project_id": "p_1f2f88a25a7f899c",
+    "path": "/tmp/factory-continuation-smoke-bc7lwhrv/product",
+    "project_exists": false,
+    "registry_exists": false,
+    "recovered": false,
+    "other_hosts": "not accessible; no state copied"
+  },
+  "client": {
+    "kind": "real Python MCP stdio client using installed local plugin launcher",
+    "native_factory_tools_in_this_conversation": false,
+    "codex_app_ui": "not performed"
+  },
+  "plugin": {
+    "id": "software-factory@personal",
+    "version": "0.1.0",
+    "installed": true,
+    "enabled": true,
+    "cache_matches_source": {
+      ".mcp.json": true,
+      ".codex-plugin/plugin.json": true,
+      "skills/software-factory/SKILL.md": true
+    },
+    "resource_sha256": {
+      ".mcp.json": "bde2b4c66a0dd82cbdfbfd505763d38830082b24a9a3d0f43a85af43e37edea9",
+      ".codex-plugin/plugin.json": "d73dfb35b548c6dd1311c9e720fb9f37d76b947a53eabc82b812d75319917228",
+      "skills/software-factory/SKILL.md": "4426047b60751192520bc3cd1b158369a31ff2fe2df23d1b9040c0fd20abe9ba"
+    }
+  },
+  "quota_preflight": {
+    "observed_at": 1789122881.2309952,
+    "sdk_version": "0.147.0",
+    "method": "account/rateLimits/read",
+    "model_calls": 0,
+    "reserve_percent": 25,
+    "runtime": {
+      "authentication": "chatgpt",
+      "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+      "configuration": "private_chatgpt_read_only_no_tools",
+      "effort": "low",
+      "initialized": true,
+      "model": "gpt-5.6-terra",
+      "provider": "openai",
+      "runtime_selection": "sdk_pinned_dependency",
+      "sdk_version": "0.147.0",
+      "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)"
+    },
+    "status": "blocked",
+    "diagnostic": {
+      "bucket": "codex",
+      "code": "quota_reserve",
+      "message": "Shared Codex quota has reached the configured reserve",
+      "method": "account/rateLimits/read",
+      "next_step": "Wait until the applicable quota has recovered above the configured reserve; do not switch buckets.",
+      "reserve_percent": 25,
+      "resets_at": 1789462830,
+      "used_percent": 92
+    }
+  },
+  "accepted": false,
+  "local_report": "/home/cpx/.local/share/software-factory/pilots/records-v1/report.json",
+  "durable_counts": {
+    "discovery_turns": 1,
+    "factory_runs": 0,
+    "continuations": 0,
+    "milestone_acceptances": 0,
+    "project_acceptances": 0
+  }
+}

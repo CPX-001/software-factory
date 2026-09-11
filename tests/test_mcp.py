@@ -127,6 +127,30 @@ class ToolTests(unittest.TestCase):
 
 
 class ProtocolTests(unittest.IsolatedAsyncioTestCase):
+    async def test_discovery_pilot_reconnects_without_model_or_budget_bypass(self):
+        from scripts.execution_smoke_fixture import prepare_from_discovery
+        from scripts.smoke_continuation import discovery_smoke
+        with tempfile.TemporaryDirectory() as path:
+            root = Path(path)
+            prepared = prepare_from_discovery(root / 'pilot', 'gpt-5.6-terra', 'low', registry_home=root / 'registry')
+            jobs = []
+            service = FactoryService(Registry(prepared['registry_home']), launcher=lambda p, r: jobs.append((p, r)))
+            with patch('scripts.diagnose_execution.inspect_runtime', return_value={'status': 'ready', 'model_calls': 0}):
+                a = await discovery_smoke(prepared, True, parameters=build_server(service))
+                b = await discovery_smoke(prepared, True, parameters=build_server(service))
+            self.assertEqual(a['blocker']['code'], 'workflow_budget_unavailable')
+            self.assertEqual(a['project'], b['project'])
+            self.assertEqual(a['run_id'], b['run_id'])
+            self.assertTrue(a['selection_survived_reconnect'])
+            self.assertEqual(a['model_calls_this_invocation'], 0)
+            self.assertEqual(a['phases_really_completed'], [])
+            self.assertEqual(a['independent_acceptance']['status'], 'NOT_RUN')
+            self.assertEqual(jobs, [])
+            store = Store(prepared['project']['path'])
+            with store._connection() as db:
+                self.assertEqual(db.execute('SELECT count(*) FROM discovery_turns').fetchone()[0], 1)
+                self.assertEqual(db.execute('SELECT count(*) FROM factory_runs').fetchone()[0], 0)
+
     async def test_official_sdk_negotiates_and_returns_structured_results(self):
         with tempfile.TemporaryDirectory() as path:
             service = FactoryService(Registry(path))

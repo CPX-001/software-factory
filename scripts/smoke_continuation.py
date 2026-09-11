@@ -1,4 +1,4 @@
-"""Prepare a NEW disposable two-slice scenario; --run starts ONE bounded real MCP run.
+"""Reuse the pending two-milestone scenario through final validation and local delivery.
 
 Model code is never supplied by this driver. All starts, authorization and recovery
 use the product service. Phase fixtures are synthetic and validated, not model work.
@@ -18,6 +18,123 @@ from mcp.client.stdio import StdioServerParameters
 from factory.execution_store import ExecutionStore
 from factory.workflow import Store
 from scripts.execution_smoke_fixture import prepare, upgrade_prepared
+
+
+def load_discovery_pilot(path):
+    """Resume is a read of the same instance, never fixture recreation or an upgrade."""
+    import hashlib
+    from factory.registry import FactoryError, Registry
+    value = json.loads(Path(path).read_text())
+    if value.get('phase_inputs') != 'discovery_brief':
+        raise FactoryError('pilot_kind_mismatch', 'This is not a from-discovery pilot')
+    root, product = Path(value['root']), Path(value['project']['path'])
+    if product != root / 'product' or not (product / '.factory/state.sqlite3').is_file():
+        raise FactoryError('pilot_unavailable', 'The original pilot state is missing; do not recreate it as a resume')
+    if not (Path(value['registry_home']) / 'registry.sqlite3').is_file():
+        raise FactoryError('pilot_registry_unavailable', 'The original registry is unavailable on this host')
+    project = Registry(value['registry_home']).resolve(value['project']['id'])
+    if project != value['project']:
+        raise FactoryError('pilot_identity_mismatch', 'The saved project does not match its registered identity')
+    contract = product / 'pilot-contract.json'
+    if hashlib.sha256(contract.read_bytes()).hexdigest() != value['contract_sha256']:
+        raise FactoryError('pilot_contract_changed', 'The predeclared acceptance contract changed; review it explicitly')
+    return value
+
+
+def installed_parameters(prepared):
+    """Use the actual local plugin launcher, not a second server configuration."""
+    config = Path.home() / 'plugins/software-factory/.mcp.json'
+    server = json.loads(config.read_text())['mcpServers']['software_factory']
+    args = server['args']
+    if '--home' not in args or args[args.index('--home') + 1] != prepared['registry_home']:
+        raise ValueError('The installed plugin points at a different Factory registry')
+    return StdioServerParameters(command=server['command'], args=args)
+
+
+async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
+    """Prepare/inspect through the normal MCP surface without faking phase progress.
+
+    The present analysis adapters have no aggregate authorization/usage guard. This
+    driver refuses real dispatch until that integration exists, even if quota recovers.
+    It must not become an alternate phase controller or a budget enforced by polling.
+    """
+    if parameters is None:
+        parameters = installed_parameters(prepared) if installed else StdioServerParameters(command=sys.executable,
+            args=['-m', 'factory.mcp_server', '--home', prepared['registry_home']],
+            cwd=str(Path(__file__).resolve().parent.parent))
+    report = {**prepared, 'real_model_requested': run, 'model_started': False,
+        'client': 'Real MCP stdio client; installed plugin launcher' if installed else 'Real MCP stdio client; repository launcher',
+        'codex_app_ui': 'not performed', 'model_calls_this_invocation': 0,
+        'implementation_status': 'prepared; end-to-end acceptance incomplete',
+        'integration_gaps': [
+            {'code': 'workflow_budget_unavailable', 'source': 'factory/continuation_store.py:budget',
+             'detail': 'Aggregate call/token/deadline enforcement begins with execution; discovery, architecture and planning are not covered.'},
+            {'code': 'initial_execution_authorization_boundary', 'source': 'factory/controller.py:stop_reason',
+             'detail': 'After real planning, typed verification and execution authorization must still be bound through the normal service; no initial whole-workflow authorization exists.'},
+            {'code': 'analysis_effort_not_pinned', 'source': 'factory/codex_discovery.py; factory/codex_architecture.py; factory/codex_planning.py',
+             'detail': 'The analysis adapters select the existing model but do not apply the execution effort policy.'}],
+        'effective_models': {}, 'usage_by_phase': {}, 'human_answers': [],
+        'interventions': [{'kind': 'initial_authorization', 'action': 'Prepare one fresh persistent pilot; retain the existing model, effort, reserve and finite limits.'},
+                          {'kind': 'environment_or_quota', 'action': 'Keep the project paused before any model inference.'}]}
+    async def call(client, name, **arguments):
+        value = (await client.call_tool(name, arguments)).structured_content
+        if not value['ok']:
+            raise RuntimeError(json.dumps(value['error']))
+        return value['data']
+    identifier = prepared['project']['id']
+    async with Client(parameters) as client:
+        listed = await client.list_tools()
+        report['tool_names'] = sorted(t.name for t in listed.tools)
+        await call(client, 'factory_project', action='select', project=identifier)
+        status = await call(client, 'factory_status', project=identifier)
+        # Enqueue the declared test input once while paused; no worker or fake answer.
+        if status['phase'] == 'discovery' and status['autonomous_run']['paused']:
+            status = await call(client, 'factory_message', project=identifier,
+                                message=prepared['initial_message'], request_id=prepared['request_id'])
+        report['status_before_disconnect'] = status
+    report['client_disconnected_at'] = time.time()
+    async with Client(parameters) as client:
+        status = await call(client, 'factory_status')
+        if status['project']['id'] != identifier:
+            raise RuntimeError('Selected project did not survive reconnect')
+        explicit = await call(client, 'factory_status', project=identifier)
+        if status['autonomous_run']['run_id'] != explicit['autonomous_run']['run_id']:
+            raise RuntimeError('Reconnect changed the run identity')
+        report['status'] = explicit
+        report['selection_survived_reconnect'] = True
+        report['run_id'] = explicit['autonomous_run']['run_id']
+        report['continuation_id'] = (explicit.get('continuation') or {}).get('id')
+        report['pending_decisions'] = await call(client, 'factory_decisions', project=identifier)
+    if run:
+        from scripts.diagnose_execution import inspect_runtime
+        report['quota_preflight'] = await asyncio.to_thread(inspect_runtime,
+            prepared['policy']['model'], prepared['policy']['effort'], prepared['policy']['quota_reserve_percent'])
+        if report['quota_preflight']['status'] != 'ready':
+            report['blocker'] = report['quota_preflight']['diagnostic']
+        else:
+            report['blocker'] = report['integration_gaps'][0]
+    else:
+        report['blocker'] = report['integration_gaps'][0]
+    store = Store(prepared['project']['path'])
+    snapshot = store.snapshot()
+    report['phases_really_completed'] = [phase for phase, complete in (
+        ('discovery', snapshot['discovery']['completed_at']),
+        ('architecture', snapshot['architecture']['baseline']),
+        ('planning', snapshot['planning']['roadmap'])) if complete]
+    with store._connection() as db:
+        completed_turns = db.execute("SELECT count(*) FROM discovery_turns WHERE status='completed'").fetchone()[0]
+    report['usage_by_phase'] = {'discovery': {'completed_turns': completed_turns, 'token_usage': 'not recorded'},
+        'architecture': {'calls': snapshot['architecture']['calls'], 'token_usage': 'not recorded'},
+        'planning': {'calls': snapshot['planning']['calls'], 'token_usage': 'not recorded'},
+        'execution_and_refinement': (explicit.get('continuation') or {}).get('budget')}
+    from factory.project_store import ProjectStore
+    final = ProjectStore(store).inspect(full=True)
+    report['independent_acceptance'] = {'status': 'NOT_RUN', 'reason': 'Independent accepted-candidate checks have not run in this driver'}
+    report['final_commit'] = (final['validated_version'] or {}).get('commit')
+    report['final_receipt'] = (final['validated_version'] or {}).get('receipt')
+    report['delivery'] = final['delivery']
+    report['finished_at'] = time.time()
+    return report
 
 
 async def smoke(prepared, run):
@@ -60,7 +177,8 @@ async def smoke(prepared, run):
                 print(json.dumps({'slice': stage[0], 'state': stage[1]}), flush=True)
                 previous = stage
             if group['state'] not in ('queued', 'preflight', 'refining', 'implementing', 'repairing', 'applying', 'verifying', 'publishing',
-                                      'milestone_ready', 'milestone_validating', 'milestone_validation_failed', 'remediating', 'preparing_milestone'):
+                                      'milestone_ready', 'milestone_validating', 'milestone_validation_failed', 'remediating', 'preparing_milestone',
+                                      'project_ready', 'project_validating', 'project_validation_failed'):
                 break
             if time.monotonic() > deadline:
                 break
@@ -76,7 +194,9 @@ async def smoke(prepared, run):
                             for a in report['acceptances']]
     from factory.milestone_store import MilestoneStore
     report['milestone_receipts'] = MilestoneStore(store).receipts()
-    report['completed_after_disconnect'] = group['state'] == 'project_ready_for_validation'
+    from factory.project_store import ProjectStore
+    report['project_validation'] = ProjectStore(store).inspect(full=True)
+    report['completed_after_disconnect'] = group['state'] == 'project_verified'
     report['finished_at'] = time.time()
     return report
 
@@ -87,19 +207,39 @@ def main():
     parser.add_argument('--model')
     parser.add_argument('--effort')
     parser.add_argument('--prepared', type=Path, help='Reuse/upgrade the existing unexecuted pilot report')
+    parser.add_argument('--from-discovery', action='store_true', help='Create the same small product with only its initial brief and independent oracles')
+    parser.add_argument('--directory', type=Path, help='New persistent pilot directory outside Factory; never overwritten')
+    parser.add_argument('--installed', action='store_true', help='Use the locally installed plugin launcher for the from-discovery pilot')
     args = parser.parse_args()
     if args.prepared:
-        prepared = upgrade_prepared(json.loads(args.prepared.read_text()))
+        if args.from_discovery or args.directory or args.model or args.effort:
+            parser.error('Resume with --prepared alone; creation and authorization changes are separate operations')
+        value = json.loads(args.prepared.read_text())
+        prepared = (load_discovery_pilot(args.prepared) if value.get('phase_inputs') == 'discovery_brief'
+                    else upgrade_prepared(value))
+        root = Path(prepared['root'])
+    elif args.from_discovery:
+        if not args.directory or not args.model or not args.effort:
+            parser.error('From-discovery creation requires --directory, --model and --effort explicitly')
+        from scripts.execution_smoke_fixture import prepare_from_discovery
+        prepared = prepare_from_discovery(args.directory, args.model, args.effort)
         root = Path(prepared['root'])
     else:
+        if args.directory or args.installed:
+            parser.error('--directory/--installed belong to the from-discovery pilot')
         if not args.model or not args.effort:
             parser.error('Provide --prepared, or explicit --model and --effort')
         root = Path(tempfile.mkdtemp(prefix='factory-continuation-smoke-'))
         prepared = prepare(root, args.model, args.effort, continuation=True)
     print(json.dumps({'prepared': str(root), 'project': prepared['project'], 'real_model_requested': args.run}), flush=True)
-    report = asyncio.run(smoke(prepared, args.run))
-    target = root / 'report.json'; target.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    print(json.dumps({'report': str(target), 'state': report.get('status', {}).get('state', 'prepared')}), flush=True)
+    report = asyncio.run(discovery_smoke(prepared, args.run, installed=args.installed)
+                         if prepared.get('phase_inputs') == 'discovery_brief' else smoke(prepared, args.run))
+    from factory.reproducibility import atomic_json
+    if prepared.get('phase_inputs') == 'discovery_brief':
+        atomic_json(root / 'observations' / (str(time.time_ns()) + '.json'), report)
+    target = root / 'report.json'; atomic_json(target, report)
+    print(json.dumps({'report': str(target), 'state': report.get('status', {}).get('state', 'prepared'),
+                      'blocker': report.get('blocker')}), flush=True)
     return 0 if not args.run or report.get('completed_after_disconnect') else 1
 
 

@@ -27,6 +27,9 @@ DEFAULT_POLICY = dict(enabled=False, model='', effort='', max_attempts=3, max_se
     max_tokens=30000, quota_reserve_percent=25, quota_max_age_seconds=60, quota_bucket='codex',
     write_paths=[], context_paths=[])
 POLICY_SCHEMA['properties']['continuation']['properties']['inter_milestone'] = {'type': 'boolean'}
+POLICY_SCHEMA['properties']['final_validation'] = obj({
+    'enabled': {'type': 'boolean'}, 'automatic_remediation': {'type': 'boolean'},
+})
 
 CHECK_SCHEMA = obj({
     'id': KEY, 'gate': KEY, 'kind': enum(('python_behavior', 'python_unittest', 'specialist', 'human_review')),
@@ -36,6 +39,10 @@ CHECK_SCHEMA = obj({
     'criteria': array({'type': 'integer', 'minimum': 0}, 100),
     'gate_checks': array({'type': 'integer', 'minimum': 0}, 100),
 })
+CHECK_SCHEMA['properties']['integration_mode'] = enum(('local', 'simulated', 'external_service'))
+CHECK_SCHEMA['properties']['entrypoint'] = obj({
+    'path': string(300), 'args': array(string(4000, empty=True), 30), 'stdout': string(8000, empty=True),
+})
 VERIFICATION_SCHEMA = obj({'schema_version': {'type': 'integer', 'enum': [1]},
     'checks': array(CHECK_SCHEMA, 100),
     'harness': array(obj({'id': KEY, 'paths': array(string(300), 30)}), 100)})
@@ -43,6 +50,12 @@ VERIFICATION_SCHEMA['properties']['requirement_acceptance'] = array(obj({
     'requirement': KEY, 'condition': string(2000), 'milestones': array(KEY, 100),
     'checks': array(KEY, 100),
 }), 150)
+VERIFICATION_SCHEMA['properties']['project_acceptance'] = obj({
+    'entry_checks': array(KEY, 30),
+    'delivery_paths': array(string(300), 30),
+    'runtime': enum(('python_stdlib',)),
+    'exclusions': array(obj({'requirement': KEY, 'decision_id': {'type': 'integer', 'minimum': 1}}), 150),
+})
 
 RESULT_SCHEMA = obj({
     'summary': string(3000),
@@ -105,6 +118,10 @@ def validate_verification(definition, plan):
         if c['id'] in ids or c['gate'] not in gates:
             raise FactoryError('invalid_verification', 'Duplicate check or unknown gate')
         ids.add(c['id'])
+        if c.get('entrypoint'):
+            relative_path(c['entrypoint']['path'])
+            if c['kind'] != 'python_unittest' or not c['entrypoint']['path'].endswith('.py'):
+                raise FactoryError('invalid_verification', 'Real product entries use Python scripts alongside unittest checks')
         gate = gates[c['gate']]
         if not c['gate_checks'] or any(i >= len(gate['checks']) for i in c['gate_checks']):
             raise FactoryError('invalid_verification', 'Checks must map to the planned gate criteria')
@@ -116,7 +133,7 @@ def validate_verification(definition, plan):
             milestone = milestones[gate['target']]
             if any(i >= len(milestone['success_criteria'] + milestone['closure_conditions']) for i in c['criteria']):
                 raise FactoryError('invalid_verification', 'Unknown milestone criterion (success criteria then closure conditions)')
-        if c['kind'] == 'human_review' and gate['trigger'] not in ('milestone_close', 'project_checkpoint'):
+        if c['kind'] == 'human_review' and gate['trigger'] not in ('milestone_close', 'project_checkpoint', 'project_close'):
             raise FactoryError('invalid_verification', 'Human review is supported at milestone closure/checkpoints')
         if c['kind'] == 'python_behavior':
             if not re.fullmatch(r'[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*:[A-Za-z_]\w*', c['target']):
@@ -156,6 +173,14 @@ def validate_verification(definition, plan):
                     for c in contract['checks'])):
             raise FactoryError('invalid_verification', 'Full requirement acceptance must retain all contributing milestones and strategic checks')
         seen_requirements.add(key)
+    project = definition.get('project_acceptance')
+    if project:
+        for path in project['delivery_paths']:
+            relative_path(path)
+        if any(c not in checks or checks[c]['kind'] not in ('python_unittest', 'python_behavior') for c in project['entry_checks']):
+            raise FactoryError('invalid_verification', 'Product entry checks must reference declared Python procedures')
+        if len({e['requirement'] for e in project['exclusions']}) != len(project['exclusions']):
+            raise FactoryError('invalid_verification', 'Duplicate project exclusion')
 
 
 def check_schema(value, schema):

@@ -1,0 +1,92 @@
+{
+  "observed_at": 1789122120.9223027,
+  "sdk_version": "0.147.0",
+  "bundled_runtime": {
+    "path": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+    "version": "codex-cli 0.147.0",
+    "sha256": "cb0a15567e9a60a5820d54b0f6ae86d504dc3805c1eab21a47f70e3eb7b73a40"
+  },
+  "terminal_runtime": {
+    "path": "/home/cpx/.vscode-server/extensions/openai.chatgpt-26.901.22334-linux-x64/bin/linux-x86_64/codex",
+    "version": "codex-cli 0.153.0",
+    "sha256": "fce635028842bfe9257140e8b7d53162732945e2f356fc35225be0702b4974be"
+  },
+  "method": "account/rateLimits/read",
+  "model_calls": 0,
+  "environment_presence": {
+    "CODEX_HOME": false,
+    "HTTPS_PROXY": false,
+    "HTTP_PROXY": false,
+    "ALL_PROXY": false,
+    "SSL_CERT_FILE": false,
+    "SSL_CERT_DIR": false,
+    "OPENAI_API_KEY": false,
+    "CODEX_API_KEY": false
+  },
+  "reserve_percent": 25,
+  "isolation": {
+    "available": true,
+    "profile": "linux-namespaces-seccomp-v1",
+    "tested_at": 1789122123.6173759
+  },
+  "runtime": {
+    "sdk_version": "0.147.0",
+    "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+    "runtime_selection": "sdk_pinned_dependency",
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "provider": "openai",
+    "configuration": "private_chatgpt_read_only_no_tools",
+    "initialized": true,
+    "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)",
+    "authentication": "chatgpt"
+  },
+  "quota": {
+    "observed_at": 1789122125.212453,
+    "buckets": {
+      "codex_bengalfox": {
+        "limitId": "codex_bengalfox",
+        "limitName": "GPT-5.3-Codex-Spark",
+        "planType": "prolite",
+        "rateLimitReachedType": null,
+        "spendControlReached": null,
+        "primary": {
+          "usedPercent": 0,
+          "resetsAt": 1789140125,
+          "windowDurationMins": 300
+        },
+        "secondary": {
+          "usedPercent": 0,
+          "resetsAt": 1789726925,
+          "windowDurationMins": 10080
+        }
+      },
+      "codex": {
+        "limitId": "codex",
+        "limitName": null,
+        "planType": "prolite",
+        "rateLimitReachedType": null,
+        "spendControlReached": false,
+        "primary": {
+          "usedPercent": 90,
+          "resetsAt": 1789462830,
+          "windowDurationMins": 10080
+        },
+        "secondary": null
+      }
+    },
+    "scope": "shared_codex_account",
+    "method": "account/rateLimits/read"
+  },
+  "status": "blocked",
+  "diagnostic": {
+    "code": "quota_reserve",
+    "message": "Shared Codex quota has reached the configured reserve",
+    "method": "account/rateLimits/read",
+    "next_step": "Wait until the applicable quota has recovered above the configured reserve; do not switch buckets.",
+    "bucket": "codex",
+    "used_percent": 90,
+    "reserve_percent": 25,
+    "resets_at": 1789462830
+  }
+}

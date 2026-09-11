@@ -6,7 +6,7 @@ import uuid
 from .architecture import canonical
 from .registry import FactoryError
 
-TERMINAL = ('checkpoint', 'milestone_closed', 'project_ready_for_validation')
+TERMINAL = ('checkpoint', 'milestone_closed', 'project_ready_for_validation', 'project_verified')
 
 
 def migrate(db):

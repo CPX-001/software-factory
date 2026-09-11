@@ -4,7 +4,9 @@ La autorización original conserva **una slice por run**. La migración inicial 
 `enabled=false`; actualizar el plugin, consultar status o reanudar discovery/planning
 no habilita escritura. El paso 9 añade [continuidad y refinamiento justo a tiempo](continuation.md)
 mediante autorización adicional explícita; la migración a schema 7 no la activa.
-No hay cierre de milestones, arquitecto automático, paralelismo ni despliegue.
+Este documento describe el contrato inicial de ejecución. Los pasos posteriores añaden
+[cierre de milestones](continuation.md) y [validación final](project-validation.md).
+No hay arquitecto automático, paralelismo ni despliegue.
 
 ## Autorizar, lanzar y consultar desde Codex App
 
@@ -72,7 +74,7 @@ Por ejemplo, un check tipado para sumar:
  "timeout_seconds":5,"criteria":[0],"gate_checks":[0]}
 ```
 
-No se ejecutan automáticamente gates de cierre de milestone o sistema. Se ejecutan los
+En la modalidad inicial de una slice no se ejecutan gates de cierre de milestone o sistema. Se ejecutan los
 gates locales e integración `before_slice`/`after_slice` definidos para la slice elegida.
 La cobertura de TODOS sus checks y criterios es una precondición. Los gates de otros
 alcances siguen pendientes. El PASS prueba esos casos sobre ese código, no todos los

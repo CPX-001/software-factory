@@ -2,6 +2,7 @@
 import json
 import time
 import uuid
+from pathlib import Path
 
 from .architecture import canonical
 from .continuation_store import ContinuationStore, TERMINAL, check_budget
@@ -44,7 +45,7 @@ class Continuation:
             closed = MilestoneStore(self.store).closed(sources)
             milestone = eligible_milestone(snapshot['planning']['roadmap']['plan'], closed)
             if not milestone:
-                if data and data['state'] == 'project_ready_for_validation' and data['sources'] == sources:
+                if data and data['state'] in ('project_ready_for_validation', 'project_verified') and data['sources'] == sources:
                     with self.store._connection(write=True) as db:
                         db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))
                     return data['id']
@@ -61,10 +62,54 @@ class Continuation:
                 'limits': limits, 'created_at': now, 'updated_at': now, 'deadline': now + limits['max_seconds'],
                 'accepted': [], 'execution_id': None, 'refinement_id': None, 'active_slice': None,
                 'next_slice': None, 'reason': None, 'diagnostic': None, 'integrated': head}
+            if policy.get('final_validation', {}).get('enabled'):
+                data['final_authorization'] = {**policy['final_validation'], 'sources': sources,
+                    'definition_id': policy['definition_id'], 'authorized_at': policy['authorized_at']}
             with self.store._connection(write=True) as db:
                 db.execute('INSERT INTO continuations VALUES (?,?,?,?,?)',
                            (data['id'], runtime_id, 'queued', canonical(data), now))
                 db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))
+            self.service._launch_registered(self.project_id(), runtime_id, self.runtime)
+            return data['id']
+
+    def start_validation(self, request_id, *, automatic_remediation=False):
+        """Authorize final work on the SAME logical run; never renew its budgets."""
+        with self.runtime.lock('launch', timeout=2):
+            data = self.journal.latest()
+            if not data:
+                raise FactoryError('project_not_ready', 'No completed milestone run is available')
+            with self.store._connection() as db:
+                prior = db.execute('SELECT continuation_id FROM continuation_requests WHERE id=?', (request_id,)).fetchone()
+            if prior:
+                return prior[0]
+            escalation = (automatic_remediation and data.get('final_authorization') and
+                          not data['final_authorization'].get('automatic_remediation') and
+                          (data.get('diagnostic') or {}).get('code') == 'final_remediation_not_authorized')
+            restore_delivery = (data['state'] == 'project_verified' and data.get('delivery') and
+                                not Path(data['delivery']).is_file())
+            if data.get('final_authorization') and data['state'] != 'project_ready_for_validation' and not escalation and not restore_delivery:
+                with self.store._connection(write=True) as db:
+                    db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))
+                return data['id']
+            if self.runtime.live() or self.runtime.state()['status'] in ACTIVE:
+                raise FactoryError('run_busy', 'The current run is still active')
+            snapshot, sources, _, policy = Execution(self.service, self.store).prerequisites(check_selected=False)
+            if data['sources'] != sources or data['policy'] != policy:
+                raise FactoryError('stale_sources', 'Final validation cannot reuse a run for different commitments')
+            closed = MilestoneStore(self.store).closed(sources)
+            if set(closed) != {m['id'] for m in snapshot['planning']['roadmap']['plan']['milestones']}:
+                raise FactoryError('project_not_ready', 'Required milestones still lack closure receipts')
+            runtime_id = self.runtime.queue()
+            authorization = data.get('final_authorization') or {'enabled': True, 'automatic_remediation': automatic_remediation,
+                    'sources': sources, 'definition_id': policy['definition_id'], 'authorized_at': time.time()}
+            if escalation:
+                authorization = {**authorization, 'automatic_remediation': True, 'remediation_authorized_at': time.time()}
+            data.update(runtime_id=runtime_id, state='queued', reason=None, diagnostic=None, final_authorization=authorization)
+            with self.store._connection(write=True) as db:
+                db.execute('UPDATE continuations SET runtime_id=?,state=?,data=? WHERE id=?',
+                           (runtime_id, 'queued', canonical(data), data['id']))
+                db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))
+                Runtime.event(db, 'project_validation_authorized', data['final_authorization'])
             self.service._launch_registered(self.project_id(), runtime_id, self.runtime)
             return data['id']
 
@@ -78,7 +123,7 @@ class Continuation:
 
     def pause(self, data):
         if data.get('validation_id'):
-            place = self.store.path.parent / 'milestones' / data['validation_id'] / 'runtime'
+            place = self.store.path.parent / ('projects' if data.get('validation_scope') == 'project' else 'milestones') / data['validation_id'] / 'runtime'
             place.mkdir(parents=True, exist_ok=True)
             (place / 'pause').touch()
         if data.get('refinement_id'):
@@ -98,7 +143,7 @@ class Continuation:
                 return
             guards = []
             if data.get('validation_id'):
-                guards.append(self.store.path.parent / 'milestones' / data['validation_id'] / 'runtime')
+                guards.append(self.store.path.parent / ('projects' if data.get('validation_scope') == 'project' else 'milestones') / data['validation_id'] / 'runtime')
             if data.get('refinement_id'):
                 guards.append(self.store.path.parent / 'refinements' / data['refinement_id'] / 'runtime')
             execution = self.executions.latest()
@@ -168,6 +213,24 @@ class Continuation:
         if not data or data['runtime_id'] != runtime_id or data['state'] in TERMINAL:
             return
         try:
+            # A committed acceptance is the authority even if the process died before
+            # report generation or the final group checkpoint. Rendering its projection
+            # needs no new verification/model budget and never renews the deadline.
+            if data.get('final_authorization'):
+                snapshot, sources, definition, policy = Execution(self.service, self.store).prerequisites(check_selected=False)
+                if sources == data['sources'] and policy == data['policy']:
+                    from .project_store import ProjectStore
+                    final = ProjectStore(self.store).inspect(full=True)
+                    receipt = (final['receipts'][-1] if final['validated_version'] and
+                               final['validated_version']['current'] else None)
+                    if receipt and receipt['continuation_id'] != data['id']:
+                        receipt = None
+                    if receipt:
+                        from .project_delivery import deliver
+                        report = deliver(self.store, receipt)
+                        data.update(project_receipt=receipt['id'], candidate_commit=receipt['commit'], delivery=report)
+                        self.stop(data, 'project_verified', 'Accepted version and local report recovered without repeating verification')
+                        return
             while True:
                 data['integrated'] = reconcile(self.store)
                 receipts = self.executions.acceptances()
@@ -185,10 +248,6 @@ class Continuation:
                 with self.store._connection() as db:
                     check_budget(db, data['id'])
                 closed = MilestoneStore(self.store).closed(sources)
-                if data['milestone'] in closed:
-                    if not self.advance(data, snapshot, closed):
-                        return
-                    continue
                 # Recover a dispatch committed before its group pointer was saved.
                 active = self.executions.latest()
                 if active and active.get('continuation_id') == data['id'] and active['state'] != 'checkpoint':
@@ -199,14 +258,19 @@ class Continuation:
                     active = self.executions.get(active['id'])
                     if active['state'] != 'checkpoint':
                         if active.get('remediation') and active.get('architecture_proposal'):
-                            journal = MilestoneStore(self.store)
-                            for issue in journal.issues(data['milestone']):
+                            from .project_store import ProjectStore
+                            journal = ProjectStore(self.store) if active['remediation'].get('scope') == 'project' else MilestoneStore(self.store)
+                            for issue in journal.issues():
                                 if issue['id'] in active['remediation']['issues']:
                                     issue.update(classification='architecture_change', proposal=active['architecture_proposal'])
                                     journal.save_issue(data, issue)
                         self.stop(data, active['state'], active['reason'], active.get('diagnostic'))
                         return
                     data.update(execution_id=None, active_slice=None, remediation=None)
+                    continue
+                if data['milestone'] in closed:
+                    if not self.advance(data, snapshot, closed):
+                        return
                     continue
                 selected, stop = self.choose(data, snapshot)
                 data.update(next_slice=selected['id'] if selected else None, active_slice=None, execution_id=None)
@@ -260,6 +324,16 @@ class Continuation:
                     next_milestone=next_['id'] if next_ else None, active_gate=None, validation_id=None,
                     pending_gates=[], remediation=None, execution_id=None, active_slice=None)
         if len(closed) == len(plan['milestones']):
+            if data.get('final_authorization', {}).get('enabled'):
+                from .project_validation import ProjectGate
+                definition = self.executions.definition(data['policy']['definition_id'])['verification']
+                receipt = ProjectGate(self, data, snapshot, definition).run()
+                if receipt:
+                    data.update(project_receipt=receipt['id'], candidate_commit=receipt['commit'],
+                                delivery=str(self.store.path.parent / 'deliveries' / receipt['id'] / 'REPORT.md'))
+                    self.stop(data, 'project_verified', 'Recorded project conditions verified on the accepted commit; local delivery prepared')
+                    return False
+                return True
             self.stop(data, 'project_ready_for_validation', 'Roadmap milestones closed; final project validation remains pending')
             return False
         if not next_:

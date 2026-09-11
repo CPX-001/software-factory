@@ -299,6 +299,37 @@ class ContinuationTests(unittest.TestCase):
         self.assertFalse((store.project / 'category_report.py').exists())
         self.assertTrue((store.project / 'test_category_report.py').exists())
 
+    def test_from_discovery_pilot_has_independent_oracles_and_no_preloaded_phases(self):
+        from scripts.execution_smoke_fixture import prepare_from_discovery
+        from scripts.smoke_continuation import load_discovery_pilot
+        from factory.workflow import Store
+        root = self.root / 'persistent-pilot'
+        value = prepare_from_discovery(root, 'gpt-5.6-terra', 'low', registry_home=self.root / 'registry')
+        store = Store(value['project']['path'])
+        snapshot = store.snapshot()
+        self.assertEqual(snapshot['phase'], 'discovery')
+        self.assertEqual(snapshot['discovery']['knowledge'], [])
+        self.assertIsNone(snapshot['architecture']['baseline'])
+        self.assertIsNone(snapshot['planning']['roadmap'])
+        self.assertIsNone(ContinuationStore(store).latest())
+        self.assertTrue(Runtime(store).paused())
+        self.assertFalse((store.project / 'records.py').exists())
+        self.assertFalse((store.project / 'category_report.py').exists())
+        self.assertEqual(value['contract']['required_milestones'], 2)
+        self.assertEqual(value['policy']['quota_reserve_percent'], 25)
+        self.assertEqual(value['full_workflow_limits'], {'max_calls': 4, 'max_seconds': 300, 'max_tokens': 30000})
+        self.assertFalse(value['full_workflow_limits_enforced'])
+        self.assertEqual(load_discovery_pilot(root / 'report.json')['project'], value['project'])
+        (store.project / 'user-change.txt').write_text('preserve')
+        with self.assertRaises(FactoryError) as error:
+            prepare_from_discovery(root, 'gpt-5.6-terra', 'low', registry_home=self.root / 'registry')
+        self.assertEqual(error.exception.code, 'pilot_exists')
+        self.assertEqual((store.project / 'user-change.txt').read_text(), 'preserve')
+        (store.project / 'pilot-contract.json').write_text('{}')
+        with self.assertRaises(FactoryError) as error:
+            load_discovery_pilot(root / 'report.json')
+        self.assertEqual(error.exception.code, 'pilot_contract_changed')
+
     def test_harness_file_without_accepted_capability_evidence_is_not_reused(self):
         self.product(count=2)
         acceptances = self.executions.acceptances

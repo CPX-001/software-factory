@@ -254,7 +254,7 @@ def quality_gate(plan, source, decisions=(), review_passed=True, *, initial=True
             if g['target'] in slices:
                 require(set(g['signals']) <= set(slices[g['target']]['verification_triggers']), 'unjustified_integration:' + gid)
         else:
-            require(g['target'] in milestones and g['trigger'] == ('milestone_close' if g['kind'] == 'milestone' else 'project_checkpoint'), 'strategic_trigger:' + gid)
+            require(g['target'] in milestones and g['trigger'] in (('milestone_close',) if g['kind'] == 'milestone' else ('project_checkpoint', 'project_close')), 'strategic_trigger:' + gid)
     for hid, h in harness.items():
         intro = slices.get(h['introduced_by'])
         require(bool(intro) and intro['milestone'] == h['milestone'], 'harness_introduction:' + hid)

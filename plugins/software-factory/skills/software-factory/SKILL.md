@@ -86,3 +86,18 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   Human answers continue an eligible authorized attempt automatically unless paused or out
   of budget. `factory_resume` recovers that execution; it never resets budgets or silently
   starts a new slice after a checkpoint. A new execute request explicitly starts the next run.
+- For “Valida el proyecto terminado y prepara su entrega local”, call `factory_execute`
+  with `action=validate_project`, the pinned project and a stable `request_id`. That request
+  authorizes deterministic final validation and local delivery on the existing run budget.
+  Set `automatic_remediation=true` only when the user separately authorized a bounded final
+  correction. To include validation automatically in an upcoming milestone run, explicitly
+  authorize `policy.final_validation.enabled=true` and its separate
+  `automatic_remediation` setting beforehand. Never reset limits or rewrite criteria to close.
+- Inspect `project_validation` for the candidate commit, missing criteria, results, exclusions,
+  correction, accepted receipt and delivery path. `project_verified` covers the recorded
+  commit and conditions; `version_pending` means later changes are outside that acceptance.
+  `delivery_pending` has an accepted receipt but still needs report recovery. A missing
+  contract, unavailable dependency, zero/skipped tests or subjective approval is a blocker.
+  Request actual human review only for its recorded criterion/candidate. Report simulated
+  integrations as simulated; local PASS does not establish external-service validation.
+  The delivery is local code and evidence, without push, publication or deployment.

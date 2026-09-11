@@ -149,6 +149,13 @@ class FactoryService:
                 blockers = [continuation['diagnostic'].get('code', continuation['reason'])]
                 if continuation['diagnostic'].get('next_step'):
                     action['next_step'] = continuation['diagnostic']['next_step']
+        from .project_store import ProjectStore
+        project_validation = ProjectStore(store).inspect()
+        if project_validation['validated_version']:
+            state = project_validation['state']
+            action = {'action': 'inspect_project_validation', 'reason': state}
+        elif state == 'project_ready_for_validation':
+            action = {'action': 'validate_project', 'reason': 'Final project acceptance remains pending'}
         action = {k: v for k, v in action.items() if k not in ('readiness', 'pending_questions', 'blockers')}
         if 'decision_ids' in action:
             action['decision_ids'] = action['decision_ids'][:3]
@@ -165,8 +172,9 @@ class FactoryService:
                 'blockers': [short(b, 500) for b in blockers], 'next_action': action,
                 'architecture_revision': {k: baseline[k] for k in ('revision', 'fingerprint')} if baseline else None,
                 'autonomous_run': {k: runtime.get(k) for k in ('run_id', 'status', 'paused', 'reason')},
-                'execution': execution, 'continuation': continuation,
+                'execution': execution, 'continuation': continuation, 'project_validation': project_validation,
                 'capabilities': {'implemented_phases': ['discovery', 'architecture', 'planning', 'execution'],
+                                 'project_validation_implemented': True,
                                  'planning_implemented': True, 'execution_slice_limit': continuation_policy['max_slices'] if continuation_policy.get('enabled') else 1}}
 
     def get_discovery(self, project=None):
@@ -237,6 +245,13 @@ class FactoryService:
         if view == 'requirements':
             from .milestone_store import MilestoneStore
             progress = {r['requirement']: r for r in MilestoneStore(self._store(project)).progress(snapshot)['requirements']}
+            from .project_store import ProjectStore
+            final = ProjectStore(self._store(project)).inspect(full=True)
+            if final['validated_version'] and final['validated_version']['current']:
+                receipt = final['receipts'][-1]
+                for acceptance in receipt['requirement_acceptances']:
+                    progress[acceptance['requirement']].update(status='satisfied', acceptance={**acceptance,
+                        'receipt': receipt['id'], 'commit': receipt['commit'], 'scope': 'project'})
             slices = {s['id']: s for s in plan['slices']} if plan else {}
             coverage = {c['requirement']: c for c in plan['coverage']} if plan else {}
             items = []
@@ -253,12 +268,17 @@ class FactoryService:
         if view == 'verification':
             from .milestone_store import MilestoneStore
             journal = MilestoneStore(self._store(project))
+            from .project_store import ProjectStore
             return {**metadata, 'gates': plan['gates'] if plan else [],
                     'harness': plan['harness'] if plan else [],
-                    'milestone_validations': journal.rows('milestone_validations'), 'closure_issues': journal.issues()}
+                    'milestone_validations': journal.rows('milestone_validations'), 'closure_issues': journal.issues(),
+                    'project_validation': ProjectStore(self._store(project)).inspect(full=True)}
         raise FactoryError('invalid_view', 'Unknown planning view')
 
     def inspect(self, project=None, *, view, slice_id=None):
+        if view == 'project_validation':
+            from .project_store import ProjectStore
+            return ProjectStore(self._store(project)).inspect(full=True)
         if view == 'execution':
             from .execution_store import ExecutionStore
             from .continuation_store import ContinuationStore
@@ -432,6 +452,15 @@ class FactoryService:
                 raise
             self._launch_registered(project, run_id, runtime)
         return self.get_status(project)
+
+    def validate_project(self, project=None, *, request_id, automatic_remediation=False):
+        from .continuation import Continuation
+        if not isinstance(request_id, str) or not 1 <= len(request_id) <= 128 or type(automatic_remediation) is not bool:
+            raise FactoryError('invalid_request', 'Use a stable request_id and explicit remediation authorization')
+        project = self._project(project)['id']
+        store = self._store(project); store.initialize()
+        identifier = Continuation(self, store).start_validation(request_id, automatic_remediation=automatic_remediation)
+        return {**self.get_status(project), 'requested_continuation_id': identifier}
 
     def _launch_registered(self, project, run_id, runtime):
         target = self._project(project)

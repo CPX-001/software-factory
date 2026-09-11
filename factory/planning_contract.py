@@ -24,7 +24,7 @@ SLICE = obj({
 })
 GATE = obj({
     'id': KEY, 'kind': enum(('local', 'integration', 'milestone', 'system')),
-    'trigger': enum(('before_slice', 'after_slice', 'milestone_close', 'project_checkpoint')),
+    'trigger': enum(('before_slice', 'after_slice', 'milestone_close', 'project_checkpoint', 'project_close')),
     'target': KEY, 'checks': TEXTS, 'harness': REFS,
     'cost': enum(('cheap', 'moderate', 'expensive')), 'rationale': string(2000),
     'signals': array(enum(('routine', 'cross_component', 'boundary', 'persistence', 'security', 'public_api', 'milestone', 'release')), 8),
@@ -90,7 +90,10 @@ is required to accept an otherwise unmitigated critical risk.
 Verification is proportional: cheap local checks for execution_ready slices; integration
 only when the declared verification_triggers justify it (cross_component, boundary,
 persistence, security, public_api); milestone gates verify all milestone criteria; system
-gates only at explicit strategic project_checkpoint targets (a milestone ID). Never impose
+gates only at explicit strategic project_checkpoint or project_close targets (a milestone ID).
+project_close runs after ALL required milestones close and checks the integrated product's
+approved main entry, contracts and delivery conditions. Preserve the original success criteria;
+never invent easier acceptance at final closure. Never impose
 full suite or expensive gate on every routine slice. Each nonlocal gate has signals and a
 specific rationale/checks. Local gates are cheap and use after_slice. Integration gates
 use before_slice/after_slice. Milestone gates use milestone_close. System gates use

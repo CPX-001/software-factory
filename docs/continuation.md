@@ -55,10 +55,15 @@ no existe una pausa. Un checkpoint requiere una nueva solicitud explícita para 
 | `checkpoint` / `budget_exhausted` | Límite intencional de unidades / presupuesto agotado |
 | `project_ready_for_validation` | Todos los milestones cerrados; gate final del proyecto pendiente |
 
+El [paso 11](project-validation.md) amplía este mismo recorrido hasta `project_verified`
+cuando la validación final está autorizada. La descripción del paso 10 que sigue conserva
+sus límites originales de milestones.
+
 Los estados transitorios se conservan en journals; el estado de validación fallida y su
 historial siguen disponibles aunque el run avance a remediación. El roadmap original no
 se reescribe: su estado efectivo se obtiene de recibos, nunca de `completed` escrito por
-un modelo. No se implementan release, despliegue ni gate final de proyecto.
+un modelo. No se implementan release ni despliegue; el gate final se describe en el
+[paso 11](project-validation.md).
 
 El cierre consume **todos** los gates `milestone_close` y `project_checkpoint` dirigidos al
 milestone. No agrega por defecto otras suites de coste arbitrario ni sustituye esos gates

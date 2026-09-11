@@ -38,9 +38,10 @@ def remediation_view(plan, definition, unit):
     plan, definition = deepcopy(plan), deepcopy(definition)
     spec = unit['remediation']
     selected = unit['slice']
-    members = {s['id'] for s in plan['slices'] if s['milestone'] == selected['milestone']}
+    project = spec.get('scope') == 'project'
+    members = {s['id'] for s in plan['slices'] if project or s['milestone'] == selected['milestone']}
     gates = [g for g in plan['gates'] if (g['target'] in members and g['trigger'] == 'after_slice') or
-             (g['target'] == selected['milestone'] and g['trigger'] in ('milestone_close', 'project_checkpoint'))]
+             ((project or g['target'] == selected['milestone']) and g['trigger'] in ('milestone_close', 'project_checkpoint', 'project_close'))]
     ids = {g['id'] for g in gates}
     checks = []
     for c in definition['checks']:
@@ -66,12 +67,31 @@ def remediation_view(plan, definition, unit):
 
 
 class MilestoneGate:
+    scope = 'milestone'
+    directory = 'milestones'
+
     def __init__(self, controller, group, snapshot, definition):
         self.controller, self.group = controller, group
         self.store, self.service = controller.store, controller.service
         self.journal = MilestoneStore(self.store)
         self.snapshot, self.plan, self.definition = snapshot, snapshot['planning']['roadmap']['plan'], definition
         self.milestone = next(m for m in self.plan['milestones'] if m['id'] == group['milestone'])
+
+    def closed_receipt(self):
+        return self.journal.closed(self.group['sources']).get(self.milestone['id'])
+
+    def prepare_candidate(self, data, root):
+        prepare(self.store, data)
+        identity = code_identity(data['worktree'])
+        if (git(data['worktree'], 'rev-parse', 'HEAD') != data['binding']['commit'] or
+                git(data['worktree'], 'status', '--porcelain', '--untracked-files=all') or
+                tree_object(data['worktree'], root / 'candidate.index') != git(data['worktree'], 'rev-parse', data['binding']['commit'] + '^{tree}') or
+                ('code_id' in data and data['code_id'] != identity)):
+            raise FactoryError('stale_evidence', 'Validation workspace no longer matches the exact accepted candidate')
+        data['code_id'] = identity
+
+    def members(self):
+        return [s for s in self.plan['slices'] if s['milestone'] == self.milestone['id']]
 
     def stop_reason(self):
         if self.controller.runtime.paused():
@@ -95,6 +115,8 @@ class MilestoneGate:
             raise FactoryError('stale_sources', 'Milestone commitments/authorization changed')
         with self.store._connection() as db:
             review_ids = {r[0] for r in db.execute('SELECT decision_id FROM milestone_reviews')}
+            if db.execute("SELECT 1 FROM sqlite_master WHERE name='project_reviews'").fetchone():
+                review_ids.update(r[0] for r in db.execute('SELECT decision_id FROM project_reviews'))
         return {'sources': sources, 'definition_id': policy['definition_id'],
                 'commit': reconcile(self.store)['commit'],
                 'decisions': [d for d in snapshot['decisions'] if d['id'] not in review_ids],
@@ -125,18 +147,18 @@ class MilestoneGate:
     def review(self, validation, check):
         with self.store._connection(write=True) as db:
             fence(db, self.group)
-            row = db.execute('SELECT decision_id FROM milestone_reviews WHERE validation_id=? AND check_id=?',
+            row = db.execute('SELECT decision_id FROM ' + self.scope + '_reviews WHERE validation_id=? AND check_id=?',
                              (validation['id'], check['id'])).fetchone()
             if row:
                 decision_id = row[0]
             else:
-                question = ('Review milestone ' + self.milestone['id'] + ' at commit ' + validation['binding']['commit'] +
+                question = ('Review ' + self.scope + ' ' + self.milestone['id'] + ' at commit ' + validation['binding']['commit'] +
                     ', validation ' + validation['id'] + '. ' + check['target'] + '\nCriteria: ' +
                     canonical([criteria(self.milestone)[i] for i in check['criteria']]) +
                     '\nAnswer accept only if this exact candidate satisfies the review. Otherwise answer ambiguous, architecture_change, scope_change or provide the pending decision/diagnosis.')
                 decision_id = db.execute('INSERT INTO decisions(question) VALUES (?)', (question,)).lastrowid
-                db.execute('INSERT INTO milestone_reviews VALUES (?,?,?)', (validation['id'], check['id'], decision_id))
-                Runtime.event(db, 'milestone_review_requested', {'validation': validation['id'], 'decision_id': decision_id})
+                db.execute('INSERT INTO ' + self.scope + '_reviews VALUES (?,?,?)', (validation['id'], check['id'], decision_id))
+                Runtime.event(db, self.scope + '_review_requested', {'validation': validation['id'], 'decision_id': decision_id})
             decision = dict(db.execute('SELECT * FROM decisions WHERE id=?', (decision_id,)).fetchone())
         return {'check_id': check['id'], 'gate': check['gate'], 'criteria': check['criteria'],
                 'gate_checks': check['gate_checks'], 'code_id': validation['code_id'],
@@ -146,13 +168,22 @@ class MilestoneGate:
                 'classification': {'ambiguous': 'ambiguous_criterion', 'architecture_change': 'architecture_change',
                                    'scope_change': 'scope_decision'}.get((decision['answer'] or '').strip().lower(), 'decision_pending')}
 
+    def criterion_status(self, checks, evidence):
+        passed = {e['check_id'] for e in evidence if e['status'] == 'PASS'}
+        result = []
+        for i, text in enumerate(criteria(self.milestone)):
+            required = [c['id'] for c in checks if i in c['criteria']]
+            result.append({'index': i, 'text': text, 'checks': required,
+                           'status': 'PASS' if required and set(required) <= passed else 'PENDING'})
+        return result
+
     def run(self):
-        closed = self.journal.closed(self.group['sources'])
-        if self.milestone['id'] in closed:
-            return closed[self.milestone['id']]
+        closed = self.closed_receipt()
+        if closed:
+            return closed
         self.check_running()
         gates, checks, errors = self.obligations()
-        self.group.update(state='milestone_ready', active_gate=None,
+        self.group.update(state=self.scope + '_ready', active_gate=None,
             pending_gates=[{'id': g['id'], 'kind': g['kind'], 'trigger': g['trigger'], 'status': 'NOT_RUN'} for g in gates])
         self.controller.journal.save(self.group)
         if errors:
@@ -161,30 +192,25 @@ class MilestoneGate:
         binding = self.binding()
         identifier = fingerprint({'milestone': self.milestone, 'binding': binding})
         saved = next((v for v in self.journal.rows('milestone_validations') if v['id'] == identifier), None)
-        root = self.store.path.parent / 'milestones' / identifier
+        root = self.store.path.parent / self.directory / identifier
         data = saved or {'id': identifier, 'milestone': self.milestone['id'], 'binding': binding,
             'repository': self.group['policy']['repository'], 'base_commit': binding['commit'],
             'branch': 'factory/validate-' + identifier.split(':')[-1], 'worktree': str(root / 'worktree'),
             'state': 'validating', 'evidence': [], 'created_at': time.time()}
-        self.group.update(validation_id=identifier, state='milestone_validating')
+        data['criteria'] = self.criterion_status(checks, data['evidence'])
+        self.group.update(validation_id=identifier, validation_scope=self.scope, state=self.scope + '_validating')
+        self.group['candidate_commit'] = binding['commit']
         self.controller.journal.save(self.group)
         sandbox = LinuxSandbox(root / 'runtime')
         if sandbox.live():
             raise FactoryError('validation_runtime_alive', 'Existing validation sandbox is alive; no duplicate checks')
         (sandbox.directory / 'pause').unlink(missing_ok=True)
         sandbox.lifetime = max(.01, self.group['deadline'] - time.time())
-        prepare(self.store, data)
-        identity = code_identity(data['worktree'])
-        if (git(data['worktree'], 'rev-parse', 'HEAD') != binding['commit'] or
-                git(data['worktree'], 'status', '--porcelain', '--untracked-files=all') or
-                tree_object(data['worktree'], root / 'candidate.index') != git(data['worktree'], 'rev-parse', binding['commit'] + '^{tree}') or
-                ('code_id' in data and data['code_id'] != identity)):
-            raise FactoryError('stale_evidence', 'Validation workspace no longer matches the exact accepted candidate')
-        data['code_id'] = identity
+        self.prepare_candidate(data, root)
         self.journal.save_validation(self.group, data)
         # Capability and harness checks use exactly the strategic gates selected by planning.
         target = {'id': self.milestone['id'], 'scope': [], 'verification_expectation': '',
-                  'components': sorted({c for s in self.plan['slices'] if s['milestone'] == self.milestone['id'] for c in s['components']})}
+                  'components': sorted({c for s in self.members() for c in s['components']})}
         projected = {**self.plan, 'gates': [{**g, 'trigger': 'after_slice'} for g in gates]}
         unsupported = capability_errors(projected, target, self.definition, self.group['policy'],
                                         self.snapshot['architecture']['baseline']['architecture'])
@@ -202,12 +228,20 @@ class MilestoneGate:
             frozen = self.controller.executions.definition(receipt.get('harness_revision'))
             if receipt['sources'] == self.group['sources'] and frozen and any(inventory.get(p) != v for p, v in frozen['files'].items()):
                 raise FactoryError('verification_weakened', 'Accepted frozen harness changed; closure cannot weaken its criteria')
-        verifier = Verifier(sandbox)
+        verifier = Verifier(sandbox, clean=self.scope == 'project')
         probed = False
         for check in checks:
             self.check_running()
             previous = next((e for e in data['evidence'] if e['check_id'] == check['id']), None)
-            if previous and previous['status'] in ('PASS', 'FAIL'):
+            artifact = root / 'checks' / (check['id'] + '.json')
+            if previous is None and artifact.is_file() and check['kind'] != 'human_review':
+                saved_check = json.loads(artifact.read_text())
+                if saved_check['binding'] == binding and saved_check['definition'] == check:
+                    previous = saved_check['evidence']
+                    if previous['code_id'] != data['code_id']:
+                        raise FactoryError('stale_evidence', 'Recovered check belongs to different code')
+                    data['evidence'].append(previous)
+            if previous and previous['status'] in ('PASS', 'FAIL') and check['kind'] != 'human_review':
                 continue
             self.group['active_gate'] = check['gate']
             self.controller.journal.save(self.group)
@@ -220,31 +254,35 @@ class MilestoneGate:
                 def process(ref):
                     data['process'] = ref
                     self.journal.save_validation(self.group, data)
-                evidence = verifier.run(self.plan, target, {**self.definition, 'checks': [check]}, data['worktree'],
+                execution_plan = {**self.plan, 'gates': gates}
+                evidence = verifier.run(execution_plan, target, {**self.definition, 'checks': [check]}, data['worktree'],
                     trigger=gate['trigger'], should_stop=self.stop_reason, on_process=process,
                     remaining=lambda: max(0, self.group['deadline'] - time.time()))[0]
                 evidence['commit'] = binding['commit']
+                from .reproducibility import atomic_json
+                atomic_json(artifact, {'binding': binding, 'definition': check, 'evidence': evidence})
             data['evidence'] = [e for e in data['evidence'] if e['check_id'] != check['id']] + [evidence]
+            data['criteria'] = self.criterion_status(checks, data['evidence'])
             self.journal.save_validation(self.group, data)
         self.check_running()
         pending = [e for e in data['evidence'] if e['status'] != 'PASS']
         data.update(state='failed' if pending else 'verified',
-            criteria=[{'index': i, 'text': text, 'checks': [e['check_id'] for e in data['evidence'] if i in e['criteria']],
-                       'status': 'PASS' if any(i in e['criteria'] for e in data['evidence']) and
-                         all(e['status'] == 'PASS' for e in data['evidence'] if i in e['criteria']) else 'PENDING'}
-                      for i, text in enumerate(criteria(self.milestone))])
+            criteria=self.criterion_status(checks, data['evidence']))
         self.journal.save_validation(self.group, data)
         if pending:
             return self.handle_failures(data, pending)
         return self.publish(data, checks)
 
     def handle_failures(self, validation, pending):
-        self.group.update(state='milestone_validation_failed', active_gate=None)
+        self.group.update(state=self.scope + '_validation_failed', active_gate=None)
         self.controller.journal.save(self.group)
         issues = []
         for evidence in pending:
             # Identity deliberately excludes commit, log text, runtime and plan revision.
-            key = fingerprint({'milestone': self.milestone['id'], 'gate': evidence['gate'], 'check': evidence['check_id']})
+            identity = {'milestone': self.milestone['id'], 'gate': evidence['gate'], 'check': evidence['check_id']}
+            if self.scope == 'project':
+                identity['scope'] = 'project'  # Cannot collide with a milestone actually named "project".
+            key = fingerprint(identity)
             prior = next((i for i in self.journal.issues() if i['id'] == key), None)
             classification = (evidence.get('classification', 'decision_pending') if evidence.get('reason') == 'human_review_pending' else
                 'implementation_defect' if evidence['status'] == 'FAIL' and
@@ -262,6 +300,7 @@ class MilestoneGate:
             raise FactoryError('waiting_decision' if decision else 'architecture_proposal' if architectural else 'validation_pending',
                 'Closure requires an explicit review/decision' if decision else 'Closure environment/check did not execute successfully',
                 details={'issues': [{'id': i['id'], 'classification': i['classification']} for i in blocked]})
+        self.remediation_guard(validation, issues)
         # Recover issue -> execution linkage even if the process died just after queue.
         for i in issues:
             if i['attempts'] >= 1 and not i.get('execution_id'):
@@ -288,7 +327,7 @@ class MilestoneGate:
         issue = issues[0]
         unit_id = 'remediation_' + issue['id'].split(':')[-1][:32]
         failed_ids = [e['check_id'] for e in pending]
-        members = [s for s in self.plan['slices'] if s['milestone'] == self.milestone['id']]
+        members = self.members()
         criterion_keys, acceptance, criterion_checks = [], [], {}
         for e in pending:
             obligations = [('criterion:' + str(i), criteria(self.milestone)[i]) for i in e['criteria']]
@@ -320,11 +359,11 @@ class MilestoneGate:
                            if allowed(p, self.group['policy']['write_paths'])})
         if not writable:
             raise FactoryError('remediation_scope_unknown', 'No accepted milestone file can be identified for a bounded correction; scope decision required')
-        remediation = {'issues': [i['id'] for i in issues], 'checks': failed_ids, 'validation_id': validation['id'],
+        remediation = {'scope': self.scope, 'issues': [i['id'] for i in issues], 'checks': failed_ids, 'validation_id': validation['id'],
                        'write_paths': writable, 'criteria_checks': criterion_checks}
         execution = Execution(self.service, self.store).queue(self.group['runtime_id'], 'closure:' + unit_id,
             selected=selected, continuation=self.group, remediation=remediation,
-            failure={'kind': 'milestone_integration_failure', 'commit': validation['binding']['commit'], 'checks': pending})
+            failure={'kind': self.scope + '_integration_failure', 'commit': validation['binding']['commit'], 'checks': pending})
         for i in issues:
             i['execution_id'] = execution['id']; self.journal.save_issue(self.group, i)
         self.group.update(remediation=remediation, execution_id=execution['id'], active_slice=unit_id,
@@ -332,14 +371,26 @@ class MilestoneGate:
         self.controller.journal.save(self.group)
         return None
 
-    def publish(self, validation, checks):
+    def remediation_guard(self, validation, issues):
+        """Project closure additionally reserves one global, durable cycle."""
+
+    def check_publication(self, validation, checks):
         self.check_running()
-        if self.binding() != validation['binding'] or code_identity(validation['worktree']) != validation['code_id']:
+        self.check_candidate(validation)
+        if self.binding() != validation['binding']:
             raise FactoryError('stale_evidence', 'Candidate or pertinent sources changed before milestone publication')
         evidence = validation['evidence']
         if ({e['check_id'] for e in evidence} != {c['id'] for c in checks} or not evidence or
                 any(e['status'] != 'PASS' or e['code_id'] != validation['code_id'] for e in evidence)):
             raise FactoryError('validation_pending', 'Every mandatory check must have current PASS evidence')
+
+    def check_candidate(self, validation):
+        if code_identity(validation['worktree']) != validation['code_id']:
+            raise FactoryError('stale_evidence', 'Candidate changed before acceptance')
+
+    def publish(self, validation, checks):
+        self.check_publication(validation, checks)
+        evidence = validation['evidence']
         accepted = [a for a in self.controller.executions.acceptances() if a['sources'] == self.group['sources']]
         done = {a['slice_id'] for a in accepted}
         if any(s['id'] not in done for s in self.plan['slices'] if s['milestone'] == self.milestone['id']):
@@ -365,6 +416,10 @@ class MilestoneGate:
             receipt['requirement_acceptances'].append({**contract, 'receipt': receipt['id'], 'commit': receipt['commit']})
         receipt['summary'] = {'criteria_verified': len(receipt['criteria']), 'checks_passed': len(evidence),
                               'accepted_slices': len(receipt['slices']), 'pending_project_validation': True}
+        return self.persist_receipt(validation, receipt,
+            fingerprint({'sources': receipt['sources'], 'definition_id': receipt['definition_id']}))
+
+    def persist_receipt(self, validation, receipt, source_key):
         # A Git ref lock and SQLite writer transaction fence both the code candidate
         # and authoritative sources while publishing the single durable close event.
         from .execution_workspace import lock_accepted_ref
@@ -375,16 +430,18 @@ class MilestoneGate:
                 if db.execute('SELECT 1 FROM decisions WHERE answer IS NULL').fetchone():
                     raise FactoryError('waiting_decision', 'A decision opened before closure')
                 # Concurrent source writes cannot cross this transaction boundary.
+                self.check_candidate(validation)
                 if self.binding() != validation['binding']:
                     raise FactoryError('stale_evidence', 'Sources changed before closure transaction')
-                old = db.execute('SELECT data FROM milestone_acceptances WHERE milestone=? AND source_key=?',
-                                 (receipt['milestone'], fingerprint({'sources': receipt['sources'], 'definition_id': receipt['definition_id']}))).fetchone()
+                old = db.execute('SELECT data FROM ' + self.scope + '_acceptances WHERE milestone=? AND source_key=?',
+                                 (receipt['milestone'], source_key)).fetchone()
                 if old:
                     return json.loads(old[0])
-                db.execute('INSERT INTO milestone_acceptances VALUES (?,?,?,?)',
-                           (receipt['id'], receipt['milestone'], fingerprint({'sources': receipt['sources'], 'definition_id': receipt['definition_id']}), canonical(receipt)))
-                Runtime.event(db, 'milestone_closed', {'milestone': receipt['milestone'], 'receipt': receipt['id'], 'commit': receipt['commit']})
+                db.execute('INSERT INTO ' + self.scope + '_acceptances VALUES (?,?,?,?)',
+                           (receipt['id'], receipt['milestone'], source_key, canonical(receipt)))
+                Runtime.event(db, 'project_verified' if self.scope == 'project' else 'milestone_closed',
+                              {'milestone': receipt['milestone'], 'receipt': receipt['id'], 'commit': receipt['commit']})
                 for issue in self.journal.issues(self.milestone['id']):
                     issue.update(state='resolved', receipt=receipt['id'])
-                    db.execute('UPDATE milestone_issues SET data=? WHERE id=?', (canonical(issue), issue['id']))
+                    db.execute('UPDATE ' + self.scope + '_issues SET data=? WHERE id=?', (canonical(issue), issue['id']))
         return receipt

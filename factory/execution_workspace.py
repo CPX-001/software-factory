@@ -13,6 +13,10 @@ from .registry import FactoryError
 
 
 def git(repo, *args, input=None, env=None):
+    return git_bytes(repo, *args, input=input, env=env).decode().strip()
+
+
+def git_bytes(repo, *args, input=None, env=None):
     # Never run repository hooks, shell aliases, filters, signing or external diffs.
     result = subprocess.run(['/usr/bin/git', '-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgSign=false',
         '-c', 'core.fsmonitor=false', '-c', 'core.attributesFile=/dev/null', '-C', str(repo), *args],
@@ -21,7 +25,7 @@ def git(repo, *args, input=None, env=None):
              'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_TERMINAL_PROMPT': '0', **(env or {})})
     if result.returncode:
         raise FactoryError('git_failed', result.stderr.decode(errors='replace')[:1000])
-    return result.stdout.decode().strip()
+    return result.stdout
 
 
 def repository_identity(project):

@@ -1,0 +1,20 @@
+{
+  "project": {
+    "id": "p_3084354cc76d1c23",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-v1/product"
+  },
+  "selection_survived_reconnect": true,
+  "run_id": null,
+  "continuation_id": null,
+  "durable_counts": {
+    "discovery_turns": 1,
+    "factory_runs": 0,
+    "continuations": 0
+  },
+  "duplicate_message_request": "records-v1-discovery-once",
+  "model_calls_this_invocation": 0,
+  "client": "Actual installed plugin launcher, real MCP stdio; same pilot, no Codex App UI",
+  "quota_refreshed": false,
+  "checked_at": 1789123336.452953
+}

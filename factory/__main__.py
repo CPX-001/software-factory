@@ -66,14 +66,16 @@ def converse(store, *, message=None, once=False, model=None):
 def main():
     parser = argparse.ArgumentParser(description="Local deterministic software factory")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show", "execution-policy", "execute", "execution-show"):
+    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show", "execution-policy", "execute", "execution-show", "validate-project", "project-validation-show"):
         command = commands.add_parser(name)
         command.add_argument("project", nargs="?", default=".")
         if name == 'execution-policy':
             command.add_argument('--policy', required=True, help='Reviewed JSON policy file')
             command.add_argument('--verification', required=True, help='Typed verification JSON file')
-        if name == 'execute':
+        if name in ('execute', 'validate-project'):
             command.add_argument('--request-id', required=True)
+        if name == 'validate-project':
+            command.add_argument('--automatic-remediation', action='store_true')
         if name == "planning-show":
             command.add_argument("--view", choices=("plan", "milestones", "next_slice", "requirements", "verification", "markdown"), default="plan")
         if name == "architecture-show":
@@ -111,6 +113,10 @@ def main():
                                                  json.loads(Path(args.verification).read_text()))
         elif args.command == 'execute':
             result = service.execute_next_slice(request_id=args.request_id)
+        elif args.command == 'validate-project':
+            result = service.validate_project(request_id=args.request_id, automatic_remediation=args.automatic_remediation)
+        elif args.command == 'project-validation-show':
+            result = service.inspect(view='project_validation')
         elif args.command == 'execution-show':
             result = service.inspect(view='execution')
         elif args.command == "allow-root":

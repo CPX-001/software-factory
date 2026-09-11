@@ -1,109 +1,121 @@
-# Segundo piloto real: detenido en planning
+# Segundo piloto real: decisión de evidencia pendiente
 
-La segunda ejecución autorizada recorrió discovery y arquitectura con modelo real, pero
-su planning no superó el gate determinista. **No tiene código implementado, aceptación
-independiente ni entrega. El goal de autonomía end-to-end sigue pendiente.** La primera
-[entrega real](end-to-end-acceptance.md) conserva su commit y recibo; allí la vinculación
-inicial del roadmap necesitó una intervención revisada.
+El segundo piloto sigue en **planning, esperando la decisión humana 1**. No tiene código
+implementado, aceptación independiente ni entrega. El goal sigue activo; no se declara
+completada la aceptación end-to-end. La primera [entrega real](end-to-end-acceptance.md)
+conserva su commit, recibo y consumo originales.
 
-La [evidencia sanitizada](evidence/end-to-end-12-auto-real.json) identifica llamadas,
-contratos, recuperación, consumo y límites. El escenario sigue siendo Records,
-Python con biblioteca estándar: resumen de registros, ranking, entrada CLI y documentación.
-Los mismos 25 tests independientes y fixtures quedaron versionados antes de discovery.
-No se precargaron arquitectura, plan ni implementación.
+La [evidencia actual](evidence/end-to-end-12-auto-recovery-real.json) conserva las llamadas,
+recuperaciones, extensiones y estado. El [bloqueo anterior](evidence/end-to-end-12-auto-real.json)
+a las diez llamadas permanece como historia, no como descripción del estado actual.
+
+## Instancia, autorización y consumo
+
+- Proyecto: `p_ba973102351c9eac`, Records end-to-end pilot.
+- Producto: `/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product`.
+- Run: `50fe4228-5bee-4f71-a660-dcc6357768db`.
+- Continuation: `2abc197c-eac7-497a-850e-d4c5379cf9cf`.
+- Modelo/esfuerzo: `gpt-5.6-terra/low`, autenticación ChatGPT, SDK/runtime 0.147.0.
 
 | Fase | Llamadas contabilizadas | Tokens observados | Resultado |
 | --- | ---: | ---: | --- |
-| Discovery | 1 | 9.370 | Requisitos obtenidos |
+| Discovery | 1 | 9.370 | Completado |
 | Arquitectura | 2 | 23.585 | Baseline aceptada |
-| Planning | 7 | 159.190 | Bloqueado; incluye un rechazo previo a generación |
+| Planning | 20 | 524.877 | Espera decisión de evidencia |
 | Implementación y validación final | 0 | 0 | No iniciadas |
-| Total | **10** | **192.145** | Sin consumo pendiente de clasificación |
+| Total | **23** | **557.832** | Sin uso pendiente de clasificación |
 
-El modelo fue `gpt-5.6-terra`, esfuerzo `low`, SDK/runtime 0.147.0, autenticación ChatGPT.
-La autorización concreta fue 20 llamadas, 1.800 segundos y 500.000 tokens agregados.
-Se conservó la autorización anterior de reserva 0 %. Fast se solicitó con
-`service_tier="priority"`, ofrecido por ese modelo, para cada thread y turno. No llegó
-notificación del nivel aplicado y no se ha medido una aceleración. No se cambió proveedor,
-cuenta, facturación ni configuración global de Codex.
+Una llamada fue rechazada antes de generación por HTTP 400 `invalid_json_schema`.
+Sigue contabilizada y conserva el uso SDK ausente; no se fabrica una medición de cero tokens.
 
-El proyecto es `p_ba973102351c9eac`, en
-`/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product`.
-Su run es `50fe4228-5bee-4f71-a660-dcc6357768db` y su continuation
-`2abc197c-eac7-497a-850e-d4c5379cf9cf`. La recuperación conservó ambos IDs, todas las
-llamadas y el deadline original. El tiempo de corrección de Factory no lo reinicia.
-En la observación final esa ventana de 30 minutos ya había vencido durante las correcciones
-y la suite local. Se conservan 10 llamadas y 192.145 tokens; la parada original fue el gate
-de planning y su recuperación agotada, no la cuota.
+La autorización inicial fue 20 llamadas, 30 minutos y 500.000 tokens. Aplicando la instrucción
+posterior de ampliar lo necesario y corregir los obstáculos, se registraron ampliaciones
+explícitas: 7.200 segundos desde el inicio original, después 24/650.000 y 28/750.000
+llamadas/tokens. No se reiniciaron contadores. El deadline actual es 2026-09-11 16:15:47 UTC.
+La reserva 0 % procede de la autorización explícita anterior. Agotamiento real y consumo
+no conocido siguen bloqueando; no cambió proveedor, cuenta ni facturación.
 
-## Defectos e intervenciones
+Fast se solicitó como `service_tier=priority`, ofrecido por el modelo. No hay notificación
+del nivel aplicado ni medición de aceleración. La parada actual es una decisión de aceptación,
+no un bloqueo de cuota.
 
-El proveedor rechazó el esquema de planning por usar `oneOf`. Se sustituyó por `anyOf`
-con dos objetos cerrados, conservando exactamente una forma de autorización por exclusión.
-Factory clasifica únicamente el error explícito HTTP 400 `invalid_json_schema` sobre
-`text.format.schema`: mantiene la llamada contabilizada, el error y el uso SDK sin reportar.
-No fabrica una medición de cero tokens. Los demás fallos con uso desconocido siguen
-bloqueando inferencia. Tras corregir Factory se reanudó el mismo run, sin repetir discovery
-ni arquitectura y sin editar SQLite o la propuesta del producto.
+## Correcciones e intervenciones
 
-El plan asignó `risk_contract_drift` al componente `cmp_category_report`. El contrato exige
-una milestone o slice del propio plan, con referencia inversa al riesgo. Los errores
-`risk_owner:risk_contract_drift` y `risk_owner_link:risk_contract_drift` persistieron tras
-las dos reconciliaciones permitidas, aunque el crítico devolvió una revisión sin hallazgos.
-El gate rechazó la propuesta; no existe roadmap aceptado. Quedaban llamadas agregadas,
-pero estaba agotada la recuperación de planning: una corrección normal y una recuperación
-adicional, con límite persistente de ocho llamadas de fase, incluidos errores.
+Se mantuvieron el mismo run, arquitectura y propuesta en curso. Ninguna intervención
+implementó el producto ni escribió su mapping fuera del planner. Hubo siete concesiones
+explícitas de recuperación de propuestas distintas; esto sigue siendo una intervención
+operativa observada y no una demostración de cero intervenciones.
 
-Las instrucciones y el esquema explican ahora esa propiedad y ambos errores. La regresión
-comprueba que un componente no puede ser propietario y que un ID válido sin referencia
-inversa tampoco pasa. Se conservaron el gate y los límites. **Esta aclaración posterior
-no se probó con otra inferencia real y no desbloquea automáticamente el caso guardado.**
-Cambiar código, prompt, commit o nombre del fallo no concede otra recuperación.
+Las correcciones de Factory reutilizan sus mecanismos existentes:
 
-El resumen del smoke también omitía el motivo de este bloqueo. Ahora copia los errores de
-análisis del estado y separa uso SDK ausente de rechazos clasificados previos a generación.
-La consulta instalada comprobó la corrección sin crear llamadas ni un run nuevo.
+- Esquema de salida compatible; clasificación precisa del rechazo previo a inferencia.
+- Propietarios de riesgos vinculados a milestones/slices y sus referencias inversas.
+- Recuperación autorizada con historial, presupuesto agregado y protección de pausa/proceso.
+- Hallazgos que referencian bindings válidos y recuperación del checkpoint de un crítico ya
+  terminado, sin repetir su inferencia ni consumo.
+- Gate calculado sobre la propuesta actual, sin enviar al crítico errores de la anterior.
+- Contexto fiel de recibos de cierre y aislamiento, con sus garantías y límites.
+- Checks finales que revalidan requisitos de milestones anteriores sin añadir contribuyentes
+  ficticios; conservación de los recibos exigidos.
+- Diagnósticos con los IDs originales y los criterios concretos sin correspondencia.
 
-## Consulta y reproducción
+Los detalles y regresiones están en [recuperación de planning](planning-recovery.md).
+Los oráculos detectaron carencias de cobertura reales; los gates no se relajaron para aprobarlas.
 
-La [tool nativa inició el run](evidence/end-to-end-12-auto-native-start.json) en esta
-conversación y [mostró el bloqueo](evidence/end-to-end-12-auto-native-blocked.json).
-El controller avanzó después de desconectar MCP. Un cliente nuevo con el plugin instalado
-`0.1.0+codex.20260911141403` confirmó selección, mismo run y política efectiva. El servidor
-MCP ya abierto en esta conversación conserva código anterior: para el cómputo corregido
-de uso se utilizó un proceso nuevo del launcher instalado. Esto no es una observación humana
-del informe en la UI. Las dos comprobaciones humanas anteriores de selección/envío pausado
-siguen registradas y no necesitan repetirse.
+## Decisión 1 y solución preparada
 
-Consulta comprobada, sin inferencia:
+El planner mantiene bloqueado `runtime_constraint` porque los oráculos iniciales no
+establecen explícitamente ausencia de almacenamiento residual. La copia limpia prueba
+independencia de estado previo, pero permite temporales efímeros y no es una auditoría
+universal de efectos secundarios.
+
+Se preparó [test_no_residual_storage.py](../pilots/records-v1/test_no_residual_storage.py):
+usa el runner Python existente sobre los seis ejemplos CLI originales y detecta escrituras,
+SQLite y creación de otros procesos mediante eventos de auditoría. Detecta también intentos
+cuyo error captura el producto. La regresión usa productos desechables; cubre una utilidad
+sin estado, un archivo residual, un temporal y SQLite. Su garantía se limita a esos caminos
+Python, no a código nativo arbitrario ni todos los inputs posibles.
+
+La definición concreta está preparada en
+`/home/cpx/.local/share/software-factory/pilots/records-auto-v1/proposed-storage-evidence-extension.json`.
+Conserva los seis procedimientos/25 tests originales y añade un check independiente.
+**Todavía no se ha aplicado al piloto real ni se ha respondido por el usuario.**
+
+`planning_recovery.verification_extension=true` permite registrar esa evidencia adicional
+antes de aceptar el plan, conservando inmutables la definición anterior y todas sus
+condiciones. La prueba está fuera de permisos de escritura del worker. La decisión pendiente
+impide inferencia; al registrar una respuesta real, continúa el mismo controller y revisa
+la nueva vinculación. No se cambian arquitectura, alcance o exclusiones para lograr PASS.
+
+Las preparaciones futuras del mismo escenario incluyen este check antes de discovery:
+26 tests en total. No se ha creado ni autorizado un tercer piloto real.
+
+## MCP, App y reproducción
+
+La tool nativa inició esta instancia y ha consultado su progreso y decisión pendiente.
+El proceso autónomo sobrevivió a las desconexiones MCP. Las recuperaciones usaron procesos
+nuevos del launcher instalado; el servidor nativo ya abierto conserva código anterior para
+algunos contadores y esquemas. El plugin actualizado es
+`0.1.0+codex.20260911155308`. Esto no equivale a una observación humana del informe en la UI.
+Las dos pruebas humanas anteriores de selección/envío pausado en chats distintos siguen
+registradas y no necesitan repetirse. La consulta humana de una entrega final sigue pendiente.
+
+Consulta comprobada, sin inferencia ni nuevo run:
 
 ```bash
 .venv/bin/python scripts/smoke_continuation.py \
   --prepared /home/cpx/.local/share/software-factory/pilots/records-auto-v1/report.json --installed
 ```
 
-`report.json` y `observations/` conservan las proyecciones locales; no son una entrega aceptada.
-El mismo comando con `--run` es el camino de reanudación, conserva consumo e historial y
-respeta el bloqueo. Repetirlo no corrige un plan con recuperación agotada. Para avanzar falta
-resolver esa propuesta por un nuevo esfuerzo expresamente autorizado y soportado; no se
-ha añadido aquí un mecanismo que renueve sus contadores.
+Recrear usa `--from-discovery --automatic-binding --directory /ruta/nueva` según
+[la preparación existente](planning-binding.md); rechaza sobrescribir una instancia.
+Reanudar usa el mismo `--prepared` con `--run` y conserva historial/límites. Una reanudación
+no responde decisiones ni amplía presupuestos. Para el piloto actual falta la decisión 1;
+no hace falta volver a iniciar discovery, arquitectura ni cada fase posterior.
 
-La [preparación reproducible](planning-binding.md) usa el mismo smoke y un directorio nuevo.
-Preparar otra instancia no autoriza un tercer piloto real ni sustituye la reanudación.
-
-Para consultar el caso desde otro chat, sin repetir las pruebas humanas ya realizadas:
-
-> Usa Software Factory. Consulta el proyecto p_ba973102351c9eac. Muestra su fase, bloqueo
-> y run actual. No inicies ni reanudes ejecuciones.
-
-La observación humana de una entrega final sigue pendiente para el primer piloto; su mensaje
-exacto está en [la entrega real](end-to-end-acceptance.md). Ninguna consulta al segundo
-proyecto puede demostrar una entrega que todavía no existe.
-
-La suite completa pasa **326 tests en 646,623 segundos**, sin fallos, errores ni omisiones,
-y sin inferencia. El [log](evidence/end-to-end-12-auto-tests.txt) y el
-[manifiesto de 89 fuentes](evidence/end-to-end-12-auto-checks.json) corresponden al código
-`e7d9ba6`. Pasan también compilación, validación del plugin y comprobación de whitespace.
-La suite normal usa modelos simulados; la aceptación real de esta segunda
-instancia continúa bloqueada. Las correcciones no amplían lenguajes, dependencias,
-arquitectura, paralelismo, publicación ni despliegue.
+La suite completa del código `54db76a` pasa **341 tests en 553.021 segundos**,
+sin fallos, errores ni omisiones y sin inferencia. El [log](evidence/end-to-end-12-auto-recovery-tests.txt) y el
+[manifiesto de 91 fuentes](evidence/end-to-end-12-auto-recovery-checks.json) permiten
+comprobar esa versión. Los modelos de la suite son simulados; Git, Python y aislamiento
+son reales. La aceptación con modelo real continúa pendiente de la decisión y de ejecutar el producto.
+No hay push, publicación, despliegue, otros lenguajes ni cambios arquitectónicos automáticos.

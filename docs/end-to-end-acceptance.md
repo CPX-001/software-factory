@@ -1,9 +1,9 @@
-# Paso 12: primera entrega real; segundo piloto autónomo bloqueado
+# Paso 12: primera entrega real; segundo piloto esperando evidencia
 
-El [segundo piloto autorizado con Fast](automatic-pilot-result.md) completó discovery y
-arquitectura, pero su planning agotó las correcciones sin superar el gate de propiedad de
-riesgos. No tiene una entrega aceptada. Este documento conserva la evidencia del primer
-piloto, que sí llegó a `project_verified` con la intervención de vinculación registrada.
+El [segundo piloto autorizado](automatic-pilot-result.md) conserva su mismo run y espera
+una decisión humana sobre una comprobación adicional. Todavía no tiene entrega aceptada.
+Este documento conserva la evidencia del primer piloto, que llegó a `project_verified`
+con la intervención de vinculación registrada.
 
 **El mismo piloto real ha alcanzado `project_verified` y tiene entrega local.** Sus dos
 milestones están cerrados y los tests independientes y el CLI pasaron desde una copia limpia.

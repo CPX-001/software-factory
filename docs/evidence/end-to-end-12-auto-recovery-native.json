@@ -1,0 +1,28 @@
+{
+  "recorded_at": 1789142109.41,
+  "client": "Native Software Factory tool in this Codex conversation; not a new human UI acceptance",
+  "project": "p_ba973102351c9eac",
+  "decisions": {
+    "ok": true,
+    "data": {
+      "items": [
+        {
+          "id": 1,
+          "question": "How should the required absence of residual application storage be accepted when supplied immutable checks do not establish it?",
+          "reason": "",
+          "options": [
+            "Authorize immutable check (Recommended)",
+            "Revise scope requirement"
+          ],
+          "recommendation": "Authorize an immutable verification resource that specifically establishes the residual-storage condition.",
+          "consequences": [
+            "Without an authorized check, runtime_constraint remains blocked for full acceptance.",
+            "Changing scope requires explicit human approval and cannot be inferred from clean-copy isolation."
+          ]
+        }
+      ],
+      "total": 1,
+      "next_offset": null
+    }
+  }
+}

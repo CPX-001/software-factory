@@ -130,7 +130,11 @@ When automatic_plan_binding is supplied, include execution_binding referencing e
 definition_id and the authorized templates. Never supply new procedures or alter tests,
 cases, minima, entrypoints, delivery conditions or permissions. Reuse a template under
 distinct check IDs for distinct gates; preserve each original template ID in at least one
-binding. Map every planned criterion and gate check to appropriate evidence, not blanket
+binding. In particular, project_acceptance.entry_checks refer to those unchanged original
+IDs and must be bound to project_close; use separate aliases for earlier gates. Update
+requirement check references consistently. gate_errors are recomputed on the CURRENT
+proposal; earlier review findings describe the previous proposal and need reassessment.
+Map every planned criterion and gate check to appropriate evidence, not blanket
 index coverage. Requirements map to strategic checks for FULL acceptance; a transversal
 requirement needs a project_close check as well as all contributing milestone references.
 Its acceptance text will be copied verbatim from the authoritative requirement by Factory.

@@ -700,8 +700,8 @@ class Planning:
                 risk=state['classification']['risk'], concerns=concerns))
             skill_inputs = routing.required_inputs(self.router.catalog)
             state['routing'] = routing.as_dict()
-            gate_errors = state.get('gate', {}).get('errors', [])
-            if role == 'reconcile' and state['proposal']:
+            gate_errors = []
+            if state['proposal']:
                 gate_errors = self._gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
             context = bounded({'role': role, 'source': state['source'],
                 'runtime_semantics': {'version': 2,

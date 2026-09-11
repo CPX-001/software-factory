@@ -191,6 +191,22 @@ class AutomaticBindingTests(unittest.TestCase):
         self.assertIn('Unresolved review mapping_gap', state['blockers'][0])
         self.assertEqual(self.worker.contexts, [])
 
+    def test_critic_gets_current_gate_errors_after_correction_not_previous_rejection(self):
+        def invalid(context):
+            p = self.propose(context)
+            p['coverage'][0]['disposition'] = 'blocked'
+            return p
+        def inspect_correction(context):
+            self.assertTrue(any(e.startswith('blocked_requirement:') for e in context['gate_errors']))
+            return self.propose(context)
+        def inspect_review(context):
+            self.assertEqual(context['gate_errors'], [])
+            return review()
+        self.model.responses[3:] = [invalid, review(), inspect_correction, inspect_review]
+        self.start(); self.drive()
+        self.assertEqual(self.service.get_status(self.pid)['state'], 'project_verified')
+        self.assertEqual(len(self.model.contexts), 7)
+
     def test_missing_bindings_stop_within_shared_budget_before_implementation(self):
         self.policy['continuation']['max_calls'] = 5
         original = self.propose

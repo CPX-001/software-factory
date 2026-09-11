@@ -58,3 +58,8 @@ de milestone conservan ejecuciones y commits de sus slices. Esto acredita orden/
 de la entrega; no sustituye el comportamiento integrado ni el recorrido principal.
 La regresión comprueba las referencias reales y que retirar un cierre vuelve a bloquear
 la aceptación. No se añade otro runner ni un test del producto que lea estado de Factory.
+
+Cada llamada de planning recibe el gate determinista calculado sobre su propuesta actual.
+El crítico no hereda los errores guardados de una propuesta anterior a la corrección.
+Los IDs originales de verificaciones siguen siendo obligatorios; el diagnóstico enumera
+los que faltan y las referencias de entrada conservan su vinculación a `project_close`.

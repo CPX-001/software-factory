@@ -88,8 +88,10 @@ def compile_binding(plan, source, templates, definition_id, policy, decisions=()
             raise FactoryError('verification_weakened', 'An original check ID cannot be rebound to another oracle')
         value['checks'].append({**deepcopy(definitions[item['template']]),
             **{k: item[k] for k in ('id', 'gate', 'criteria', 'gate_checks')}})
-    if not set(definitions) <= {c['id'] for c in value['checks']}:
-        raise FactoryError('verification_weakened', 'Every original check must retain its ID and procedure')
+    missing = set(definitions) - {c['id'] for c in value['checks']}
+    if missing:
+        raise FactoryError('verification_weakened', 'Every original check must retain its ID and procedure: ' + ', '.join(sorted(missing)),
+                           details={'pending': ['original_check_id_missing:' + key for key in sorted(missing)]})
     available = {r['path'] for r in templates.get('resources', [])}
     value['harness'] = deepcopy(binding['harness'])
     if any(not set(h['paths']) <= available for h in value['harness']):

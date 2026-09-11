@@ -1,0 +1,254 @@
+{
+  "client": "Fresh Python MCP connection to installed plugin entrypoint; not Codex App UI",
+  "model_calls": 0,
+  "tools": [
+    "factory_project",
+    "factory_status",
+    "factory_message",
+    "factory_decisions",
+    "factory_answer",
+    "factory_inspect",
+    "factory_pause",
+    "factory_resume",
+    "factory_execution_policy",
+    "factory_execute"
+  ],
+  "status": {
+    "ok": true,
+    "data": {
+      "project": {
+        "id": "p_1f2f88a25a7f899c",
+        "name": "Piloto desechable de continuidad (dos slices)",
+        "path": "/tmp/factory-continuation-smoke-bc7lwhrv/product"
+      },
+      "phase": "execution",
+      "state": "ready",
+      "workflow_revision": 15,
+      "current_objective": "Extend an existing local Python records utility with validated category aggregates. Then compose its accepted result into a deterministic category ranking.",
+      "progress": {
+        "knowledge_items": 11,
+        "discovery_ready": true,
+        "architecture_stage": "completed",
+        "architecture_calls": 2,
+        "planning_stage": "completed",
+        "planning_calls": 2,
+        "roadmap_revision": 1
+      },
+      "last_message": null,
+      "questions": [],
+      "pending_decisions": {
+        "count": 0,
+        "items": []
+      },
+      "blockers": [],
+      "next_action": {
+        "action": "execute_next_slice",
+        "reason": null
+      },
+      "architecture_revision": {
+        "revision": 1,
+        "fingerprint": "sha256:0614144e2c848df843390d1518510726810a66c418c288ef652cfcc1a1ac5ce1"
+      },
+      "autonomous_run": {
+        "run_id": null,
+        "status": "idle",
+        "paused": false,
+        "reason": null
+      },
+      "execution": {
+        "enabled": true,
+        "state": "not_started",
+        "continuation_policy": {
+          "enabled": true,
+          "max_calls": 4,
+          "max_seconds": 300,
+          "max_slices": 2,
+          "max_tokens": 30000
+        }
+      },
+      "continuation": null,
+      "capabilities": {
+        "implemented_phases": [
+          "discovery",
+          "architecture",
+          "planning",
+          "execution"
+        ],
+        "planning_implemented": true,
+        "execution_slice_limit": 2
+      }
+    }
+  },
+  "inspection": {
+    "ok": true,
+    "data": {
+      "enabled": true,
+      "state": "not_started",
+      "policy": {
+        "authorized_at": 1789085284.5610745,
+        "context_paths": [
+          "records.py",
+          "record_rules.py",
+          "test_records.py",
+          "category_report.py",
+          "test_category_report.py"
+        ],
+        "continuation": {
+          "enabled": true,
+          "max_calls": 4,
+          "max_seconds": 300,
+          "max_slices": 2,
+          "max_tokens": 30000
+        },
+        "definition_id": "sha256:62036d7827e9c82b9d286ab44517654772be1c434a472a4f281d47676358b180",
+        "effort": "low",
+        "enabled": true,
+        "max_attempts": 2,
+        "max_seconds": 180,
+        "max_tokens": 12000,
+        "model": "gpt-5.6-terra",
+        "quota_bucket": "codex",
+        "quota_max_age_seconds": 60,
+        "quota_reserve_percent": 25,
+        "repository": {
+          "device": 2096,
+          "git_dir": "/tmp/factory-continuation-smoke-bc7lwhrv/product/.git",
+          "inode": 738651,
+          "path": "/tmp/factory-continuation-smoke-bc7lwhrv/product"
+        },
+        "write_paths": [
+          "records.py",
+          "category_report.py"
+        ]
+      },
+      "definition": {
+        "sources": {
+          "architecture": {
+            "fingerprint": "sha256:0614144e2c848df843390d1518510726810a66c418c288ef652cfcc1a1ac5ce1",
+            "revision": 1
+          },
+          "plan": {
+            "fingerprint": "sha256:628c340bd45a75dbbd774485e8f5cd99241f329be03bcca89b8b5414a4fd930b",
+            "revision": 1
+          }
+        },
+        "verification": {
+          "checks": [
+            {
+              "cases": [],
+              "criteria": [
+                0,
+                1
+              ],
+              "gate": "local_gate",
+              "gate_checks": [
+                0
+              ],
+              "id": "acceptance",
+              "kind": "python_unittest",
+              "min_tests": 10,
+              "target": "test_records.py",
+              "timeout_seconds": 5
+            },
+            {
+              "cases": [
+                {
+                  "args_json": "[[]]",
+                  "expected_json": "{\"count\":0,\"total\":0,\"by_category\":{}}"
+                },
+                {
+                  "args_json": "[[{\"category\":\" X \",\"amount\":3},{\"category\":\"x\",\"amount\":2}]]",
+                  "expected_json": "{\"count\":2,\"total\":5,\"by_category\":{\"x\":{\"count\":2,\"total\":5}}}"
+                }
+              ],
+              "criteria": [
+                0
+              ],
+              "gate": "local_gate",
+              "gate_checks": [
+                0
+              ],
+              "id": "examples",
+              "kind": "python_behavior",
+              "min_tests": 2,
+              "target": "records:summarize",
+              "timeout_seconds": 5
+            },
+            {
+              "cases": [],
+              "criteria": [
+                0,
+                1
+              ],
+              "gate": "ranking_gate",
+              "gate_checks": [
+                0
+              ],
+              "id": "ranking_acceptance",
+              "kind": "python_unittest",
+              "min_tests": 4,
+              "target": "test_category_report.py",
+              "timeout_seconds": 5
+            },
+            {
+              "cases": [
+                {
+                  "args_json": "[[{\"category\":\"X\",\"amount\":2},{\"category\":\"y\",\"amount\":4},{\"category\":\" x \",\"amount\":1}]]",
+                  "expected_json": "[{\"category\":\"y\",\"count\":1,\"total\":4},{\"category\":\"x\",\"count\":2,\"total\":3}]"
+                }
+              ],
+              "criteria": [
+                0
+              ],
+              "gate": "ranking_gate",
+              "gate_checks": [
+                0
+              ],
+              "id": "ranking_examples",
+              "kind": "python_behavior",
+              "min_tests": 1,
+              "target": "category_report:rank_categories",
+              "timeout_seconds": 5
+            }
+          ],
+          "harness": [
+            {
+              "id": "unit",
+              "paths": [
+                "test_records.py",
+                "record_rules.py"
+              ]
+            }
+          ],
+          "schema_version": 1
+        }
+      },
+      "continuation": null
+    }
+  },
+  "installed_manifest": {
+    "name": "software-factory",
+    "version": "0.1.0+codex.20260911000925",
+    "description": "Conversational interface to the persistent Software Factory controller.",
+    "author": {
+      "name": "Local developer"
+    },
+    "skills": "./skills/",
+    "interface": {
+      "displayName": "Software Factory",
+      "shortDescription": "Manage Factory projects from Codex.",
+      "longDescription": "Run discovery, architecture, planning and explicitly authorized single-slice execution. Inspect verification evidence and answer decisions.",
+      "developerName": "Local developer",
+      "category": "Productivity",
+      "capabilities": [],
+      "defaultPrompt": [
+        "Continúa mi proyecto de Software Factory.",
+        "¿Qué decisiones necesita mi proyecto?",
+        "Enséñame la arquitectura vigente.",
+        "Implementa la próxima slice preparada.",
+        "¿Por qué no puedes iniciar la ejecución?"
+      ]
+    },
+    "mcpServers": "./.mcp.json"
+  }
+}

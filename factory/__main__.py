@@ -66,9 +66,14 @@ def converse(store, *, message=None, once=False, model=None):
 def main():
     parser = argparse.ArgumentParser(description="Local deterministic software factory")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show"):
+    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show", "execution-policy", "execute", "execution-show"):
         command = commands.add_parser(name)
         command.add_argument("project", nargs="?", default=".")
+        if name == 'execution-policy':
+            command.add_argument('--policy', required=True, help='Reviewed JSON policy file')
+            command.add_argument('--verification', required=True, help='Typed verification JSON file')
+        if name == 'execute':
+            command.add_argument('--request-id', required=True)
         if name == "planning-show":
             command.add_argument("--view", choices=("plan", "milestones", "next_slice", "requirements", "verification", "markdown"), default="plan")
         if name == "architecture-show":
@@ -100,7 +105,15 @@ def main():
             if work and result["routing"]["status"] == "blocked":
                 parser.exit(2)
             return
-        if args.command == "allow-root":
+        if args.command == 'execution-policy':
+            from pathlib import Path
+            result = service.configure_execution(json.loads(Path(args.policy).read_text()),
+                                                 json.loads(Path(args.verification).read_text()))
+        elif args.command == 'execute':
+            result = service.execute_next_slice(request_id=args.request_id)
+        elif args.command == 'execution-show':
+            result = service.inspect(view='execution')
+        elif args.command == "allow-root":
             result = service.authorize_root(args.project)
         elif args.command == "discovery":
             converse(service, message=args.message, once=args.once)
@@ -138,7 +151,7 @@ def main():
         elif args.command == "next":
             result = service.get_next_action()
         else:
-            result = service.snapshot()
+            result = service.get_status() if service.snapshot()['phase'] == 'execution' else service.snapshot()
     except (WorkflowError, sqlite3.Error, OSError) as exc:
         parser.exit(1, f"factory: {exc}\n")
     except KeyboardInterrupt:

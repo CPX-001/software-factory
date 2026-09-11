@@ -1,0 +1,54 @@
+{
+  "observed_at": 1789081729.3481724,
+  "sdk_version": "0.147.0",
+  "bundled_runtime": {
+    "path": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+    "version": "codex-cli 0.147.0",
+    "sha256": "cb0a15567e9a60a5820d54b0f6ae86d504dc3805c1eab21a47f70e3eb7b73a40"
+  },
+  "terminal_runtime": {
+    "path": "/opt/openai-codex/packages/standalone/releases/0.149.1-x86_64-unknown-linux-musl/bin/codex",
+    "version": "codex-cli 0.149.1",
+    "sha256": "73dc5888888f411c1f0fa7b81d866e721dcc86b527ce8e3b2cf4708661e823ba"
+  },
+  "method": "account/rateLimits/read",
+  "model_calls": 0,
+  "environment_presence": {
+    "CODEX_HOME": false,
+    "HTTPS_PROXY": false,
+    "HTTP_PROXY": false,
+    "ALL_PROXY": false,
+    "SSL_CERT_FILE": false,
+    "SSL_CERT_DIR": false,
+    "OPENAI_API_KEY": false,
+    "CODEX_API_KEY": false
+  },
+  "reserve_percent": 25,
+  "isolation": {
+    "available": true,
+    "profile": "linux-namespaces-seccomp-v1",
+    "tested_at": 1789081731.3947015
+  },
+  "runtime": {
+    "sdk_version": "0.147.0",
+    "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+    "runtime_selection": "sdk_pinned_dependency",
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "provider": "openai",
+    "configuration": "private_chatgpt_read_only_no_tools",
+    "initialized": true,
+    "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)",
+    "authentication": "chatgpt"
+  },
+  "status": "blocked",
+  "diagnostic": {
+    "code": "quota_transport",
+    "message": "failed to fetch codex rate limits: error sending request",
+    "method": "account/rateLimits/read",
+    "next_step": "Restore network/TLS access for the detached controller and its isolated runtime, then resume.",
+    "exception": "InternalRpcError",
+    "rpc_code": -32603
+  },
+  "launch_context": "Codex App command filter"
+}

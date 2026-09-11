@@ -66,7 +66,7 @@ class Store:
             db.execute("PRAGMA synchronous = FULL")
             db.execute("BEGIN IMMEDIATE" if write or initialize else "BEGIN")
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (1, 2, 3, 4, 5) and not (initialize and version == 0):
+            if version not in (1, 2, 3, 4, 5, 6, 7, 8) and not (initialize and version == 0):
                 raise WorkflowError(f"Unsupported schema version: {version}")
             if version == 1 and (write or initialize):
                 from .discovery import migrate
@@ -79,6 +79,15 @@ class Store:
                 migrate(db)
             if version in (1, 2, 3, 4) and (write or initialize):
                 from .planning import migrate
+                migrate(db)
+            if version in (1, 2, 3, 4, 5) and (write or initialize):
+                from .execution_store import migrate
+                migrate(db)
+            if version in (1, 2, 3, 4, 5, 6) and (write or initialize):
+                from .continuation_store import migrate
+                migrate(db)
+            if version in (1, 2, 3, 4, 5, 6, 7) and (write or initialize):
+                from .milestone_store import migrate
                 migrate(db)
             yield db
             db.commit()
@@ -111,6 +120,12 @@ class Store:
             from .runtime import migrate
             migrate(db)
             from .planning import migrate
+            migrate(db)
+            from .execution_store import migrate
+            migrate(db)
+            from .continuation_store import migrate
+            migrate(db)
+            from .milestone_store import migrate
             migrate(db)
 
     @staticmethod

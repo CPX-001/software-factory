@@ -9,14 +9,17 @@
   "interface": {
     "displayName": "Software Factory",
     "shortDescription": "Manage Factory projects from Codex.",
-    "longDescription": "Run discovery and architecture through Factory workers, inspect state and answer decisions.",
+    "longDescription": "Run discovery, architecture, planning and explicitly authorized execution. Validate and close milestones, continue within persistent budgets, inspect evidence and answer decisions.",
     "developerName": "Local developer",
     "category": "Productivity",
     "capabilities": [],
     "defaultPrompt": [
       "Continúa mi proyecto de Software Factory.",
       "¿Qué decisiones necesita mi proyecto?",
-      "Enséñame la arquitectura vigente."
+      "Enséñame la arquitectura vigente.",
+      "Implementa la próxima slice preparada.",
+      "¿Por qué no puedes iniciar la ejecución?",
+      "Continúa el proyecto entre milestones dentro de la política autorizada y detente si necesitas una decisión."
     ]
   },
   "mcpServers": "./.mcp.json"

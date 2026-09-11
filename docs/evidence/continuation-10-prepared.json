@@ -1,0 +1,202 @@
+{
+  "root": "/tmp/factory-continuation-smoke-bc7lwhrv",
+  "project": {
+    "id": "p_1f2f88a25a7f899c",
+    "name": "Disposable records smoke",
+    "path": "/tmp/factory-continuation-smoke-bc7lwhrv/product"
+  },
+  "registry_home": "/tmp/factory-continuation-smoke-bc7lwhrv/registry",
+  "policy": {
+    "enabled": true,
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "max_attempts": 2,
+    "max_seconds": 180,
+    "max_tokens": 12000,
+    "quota_reserve_percent": 25,
+    "quota_max_age_seconds": 60,
+    "quota_bucket": "codex",
+    "write_paths": [
+      "records.py",
+      "category_report.py"
+    ],
+    "context_paths": [
+      "records.py",
+      "record_rules.py",
+      "test_records.py",
+      "category_report.py",
+      "test_category_report.py"
+    ],
+    "continuation": {
+      "enabled": true,
+      "max_slices": 2,
+      "max_calls": 4,
+      "max_seconds": 300,
+      "max_tokens": 30000,
+      "inter_milestone": true
+    }
+  },
+  "verification": {
+    "schema_version": 1,
+    "checks": [
+      {
+        "id": "acceptance",
+        "gate": "local_gate",
+        "kind": "python_unittest",
+        "target": "test_records.py",
+        "cases": [],
+        "min_tests": 10,
+        "timeout_seconds": 5,
+        "criteria": [
+          0,
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "examples",
+        "gate": "local_gate",
+        "kind": "python_behavior",
+        "target": "records:summarize",
+        "cases": [
+          {
+            "args_json": "[[]]",
+            "expected_json": "{\"count\":0,\"total\":0,\"by_category\":{}}"
+          },
+          {
+            "args_json": "[[{\"category\":\" X \",\"amount\":3},{\"category\":\"x\",\"amount\":2}]]",
+            "expected_json": "{\"count\":2,\"total\":5,\"by_category\":{\"x\":{\"count\":2,\"total\":5}}}"
+          }
+        ],
+        "min_tests": 2,
+        "timeout_seconds": 5,
+        "criteria": [
+          0
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "ranking_acceptance",
+        "gate": "ranking_gate",
+        "kind": "python_unittest",
+        "target": "test_category_report.py",
+        "cases": [],
+        "min_tests": 4,
+        "timeout_seconds": 5,
+        "criteria": [
+          0,
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "ranking_examples",
+        "gate": "ranking_gate",
+        "kind": "python_behavior",
+        "target": "category_report:rank_categories",
+        "cases": [
+          {
+            "args_json": "[[{\"category\":\"X\",\"amount\":2},{\"category\":\"y\",\"amount\":4},{\"category\":\" x \",\"amount\":1}]]",
+            "expected_json": "[{\"category\":\"y\",\"count\":1,\"total\":4},{\"category\":\"x\",\"count\":2,\"total\":3}]"
+          }
+        ],
+        "min_tests": 1,
+        "timeout_seconds": 5,
+        "criteria": [
+          0
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "summary_close",
+        "gate": "milestone_gate",
+        "kind": "python_unittest",
+        "target": "test_records.py",
+        "cases": [],
+        "min_tests": 10,
+        "timeout_seconds": 5,
+        "criteria": [
+          0,
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "rank_close",
+        "gate": "ranking_close",
+        "kind": "python_unittest",
+        "target": "test_category_report.py",
+        "cases": [],
+        "min_tests": 4,
+        "timeout_seconds": 5,
+        "criteria": [
+          0
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "summary_regression",
+        "gate": "ranking_close",
+        "kind": "python_unittest",
+        "target": "test_records.py",
+        "cases": [],
+        "min_tests": 10,
+        "timeout_seconds": 5,
+        "criteria": [
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "summary_close_examples",
+        "gate": "milestone_gate",
+        "kind": "python_behavior",
+        "target": "records:summarize",
+        "cases": [
+          {
+            "args_json": "[[]]",
+            "expected_json": "{\"count\":0,\"total\":0,\"by_category\":{}}"
+          },
+          {
+            "args_json": "[[{\"category\":\" X \",\"amount\":3},{\"category\":\"x\",\"amount\":2}]]",
+            "expected_json": "{\"count\":2,\"total\":5,\"by_category\":{\"x\":{\"count\":2,\"total\":5}}}"
+          }
+        ],
+        "min_tests": 2,
+        "timeout_seconds": 5,
+        "criteria": [
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      }
+    ],
+    "harness": [
+      {
+        "id": "unit",
+        "paths": [
+          "test_records.py",
+          "record_rules.py"
+        ]
+      }
+    ]
+  },
+  "baseline_commit": "328ad120012a24d67a93a0f43ded990ca8ea3e2f",
+  "real_model_requested": false,
+  "client": "Real Python MCP stdio client; not Codex App UI"
+}

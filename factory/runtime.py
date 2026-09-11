@@ -40,12 +40,17 @@ class Runtime:
         self.store = store
 
     @contextmanager
-    def lock(self, name='run'):
+    def lock(self, name='run', *, timeout=0):
         with (self.store.path.parent / (name + '.lock')).open('a') as handle:
-            try:
-                fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError as exc:
-                raise FactoryError('run_busy', 'Factory is already working; consult status before sending another input') from exc
+            deadline = time.monotonic() + timeout
+            while True:
+                try:
+                    fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError as exc:
+                    if time.monotonic() >= deadline:
+                        raise FactoryError('run_busy', 'Factory is already working; consult status before sending another input') from exc
+                    time.sleep(.01)  # Only short admission may wait, never the worker lock.
             try:
                 yield
             finally:

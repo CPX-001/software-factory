@@ -2,6 +2,7 @@
 
 import json
 import tempfile
+from copy import deepcopy
 
 from .planning_contract import PLAN_SCHEMA, INSTRUCTIONS, REVIEW_SCHEMA
 from .workflow import WorkflowError
@@ -31,6 +32,11 @@ class CodexPlanning:
                     inputs = [TextInput(json.dumps(context, ensure_ascii=False))]
                     inputs += [SkillInput(name=s['name'], path=s['path']) for s in skill_inputs]
                     schema = REVIEW_SCHEMA if context['role'].startswith('critic') else PLAN_SCHEMA
+                    if schema is PLAN_SCHEMA:
+                        # New model outputs declare subjective indices explicitly;
+                        # stored v1 plans may omit the additive field for compatibility.
+                        schema = deepcopy(schema)
+                        schema['properties']['milestones']['items']['required'].append('subjective_criteria')
                     result = thread.run(inputs, output_schema=schema)
                     if getattr(result.status, 'value', result.status) != 'completed':
                         raise WorkflowError('Codex planning turn did not complete; resume planning to retry')

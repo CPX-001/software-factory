@@ -1,0 +1,12 @@
+{
+  "client": "MCP stdio client using installed plugin entrypoint, not Codex App UI",
+  "tool_count": 10,
+  "state": "checkpoint",
+  "execution_id": "bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+  "commit": "3a1a02d88d9482b64d67cd433e0517a10ad4c012",
+  "existing_app_connection": {
+    "result": "Unsupported schema version: 6",
+    "cause": "Old already-running MCP process; new thread required after reinstall"
+  },
+  "model_calls": 0
+}

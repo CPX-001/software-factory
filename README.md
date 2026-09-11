@@ -3,7 +3,7 @@
 La factory convierte una idea incompleta en conocimiento estructurado suficiente para
 producir una baseline arquitectónica estructurada y versionada. Codex conduce discovery
 y diseña/revisa arquitectura; Python valida, persiste y controla los gates y transiciones.
-Planning produce un roadmap progresivo versionado con gates de cobertura/verificación y necesidades de harness. El proceso se detiene en `execution` antes de implementar producto.
+Planning produce un roadmap progresivo versionado con gates de cobertura/verificación y necesidades de harness. La ejecución requiere habilitación explícita, con worktree aislado, verificaciones reales, reparaciones acotadas y checkpoint recuperable. La autorización original conserva una slice por run; una política adicional permite [continuidad autónoma y cierre de milestones](docs/continuation.md), con validación integrada, remediación acotada, refinamiento justo a tiempo y límites agregados. El salto entre milestones requiere `continuation.inter_milestone=true`. Consulta [el motor de ejecución](docs/execution.md).
 
 La interfaz principal es Codex App mediante el plugin local y MCP. Consulta
 [instalación y uso desde Codex](docs/codex.md). La CLI se conserva para recovery, debugging
@@ -132,11 +132,11 @@ discovery -> architecture -> planning -> execution -> verification -> completed
 
 `requirements` se conserva únicamente para poder leer y avanzar proyectos antiguos que
 ya estuvieran en esa fase. El nuevo discovery reúne la información de producto y requisitos
-y pasa directamente a arquitectura. Architecture y planning tienen handlers y gates propios; execution y las fases posteriores aún no se implementan.
+y pasa directamente a arquitectura. Architecture y planning tienen handlers y gates propios. Execution conserva la fase `execution` tras aceptar slices; la continuidad valida el código integrado y publica recibos de cierre de milestones. El salto automático requiere `continuation.inter_milestone=true`. Al cerrar el roadmap queda `project_ready_for_validation`; el gate final del proyecto sigue pendiente.
 
 ## Persistencia y recuperación
 
-Fuente autoritativa: `.factory/state.sqlite3`, esquema v5. La migración aditiva desde v1/v2/v3/v4
+Fuente autoritativa: `.factory/state.sqlite3`, esquema v8. La migración aditiva desde v1–v7
 ocurre en `init` o la siguiente escritura y conserva fase, revisión, eventos y decisiones.
 Las lecturas de v1 siguen funcionando sin migrarlo; versiones desconocidas se rechazan.
 
@@ -147,6 +147,9 @@ Tablas originales: `workflow`, `decisions`, `events`. Tablas nuevas:
 - `discovery_decisions`: vínculo de claves estables y recomendaciones a decisiones humanas.
 - `discovery_turns`: entrada durable, estado pendiente/completado y salida validada para auditoría.
 - `discovery_meta`: evaluación, evidencias, gate y fecha de finalización.
+
+Los journals de [ejecución](docs/execution.md) y [continuidad](docs/continuation.md) conservan
+intentos, presupuestos, refinamientos, código integrado, validaciones y recibos de milestones.
 
 Primero se confirma la entrada; después se invoca Codex fuera de cualquier transacción.
 El resultado se valida y aplica con revisión optimista: una respuesta obsoleta no puede

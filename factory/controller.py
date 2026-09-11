@@ -35,9 +35,27 @@ class Controller:
             try:
                 for _ in range(MAX_PHASE_STEPS):
                     if runtime.paused():
+                        from .execution_store import ExecutionStore
+                        execution = ExecutionStore(store).latest()
+                        if execution and execution['run_id'] == run_id and execution['state'] != 'checkpoint':
+                            execution.update(state='paused', reason='Paused before a new attempt')
+                            ExecutionStore(store).save(execution)
                         runtime.update(run_id, 'paused', 'Pause saved at a worker checkpoint')
                         return
                     snapshot = store.snapshot()
+                    if snapshot['phase'] == 'execution':
+                        from .continuation import Continuation
+                        continuation = Continuation(self.service, store)
+                        group = continuation.journal.latest()
+                        if group and group['runtime_id'] == run_id:
+                            continuation.run(run_id)
+                            return
+                        from .execution import Execution
+                        from .execution_store import ExecutionStore
+                        execution = ExecutionStore(store).latest()
+                        if execution and execution['run_id'] == run_id:
+                            Execution(self.service, store).run(run_id)
+                            return
                     reason = stop_reason(snapshot)
                     if reason:
                         runtime.update(run_id, reason, reason)

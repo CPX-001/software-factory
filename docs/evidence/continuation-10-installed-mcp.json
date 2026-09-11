@@ -1,0 +1,46 @@
+{
+  "plugin_version": "0.1.0+codex.20260911004932",
+  "transport": "Installed entrypoint, real Python MCP stdio client; not Codex App UI",
+  "tools": [
+    "factory_project",
+    "factory_status",
+    "factory_message",
+    "factory_decisions",
+    "factory_answer",
+    "factory_inspect",
+    "factory_pause",
+    "factory_resume",
+    "factory_execution_policy",
+    "factory_execute"
+  ],
+  "inter_milestone_schema": true,
+  "project": {
+    "id": "p_1f2f88a25a7f899c",
+    "name": "Disposable records smoke",
+    "path": "/tmp/factory-continuation-smoke-bc7lwhrv/product"
+  },
+  "policy": {
+    "enabled": true,
+    "inter_milestone": true,
+    "max_calls": 4,
+    "max_seconds": 300,
+    "max_slices": 2,
+    "max_tokens": 30000
+  },
+  "milestones": [
+    {
+      "id": "m1",
+      "status": "open",
+      "dependencies": []
+    },
+    {
+      "id": "m2",
+      "status": "open",
+      "dependencies": [
+        "m1"
+      ]
+    }
+  ],
+  "model_calls": 0,
+  "execution_started": false
+}

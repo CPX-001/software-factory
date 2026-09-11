@@ -8,7 +8,7 @@ from .application import FactoryService
 from .registry import FactoryError, Registry
 from .workflow import WorkflowError
 
-INSTRUCTIONS = '''Software Factory owns the workflow and its persistent state. In registered projects, use these tools to relay user input and show results; do not perform discovery, architecture or planning yourself. factory_project selects a project once. Pin the returned project ID in subsequent calls; server cwd is not the conversation workspace. factory_message and factory_answer resume eligible work automatically. Runs survive MCP/chat disconnection; query factory_status for progress, decisions or blockers. Never poll tightly. Planning is implemented; runs stop at execution before any product implementation.'''
+INSTRUCTIONS = '''Software Factory owns workflow and persistent state. Pin the registered project ID; server cwd is not the conversation workspace. Relay user answers verbatim. Runs survive MCP/chat disconnection. Execution requires explicit factory_execution_policy authorization with reviewed permissions, budget and typed checks. factory_execute returns a durable ID promptly; reuse request_id on retries. Existing authorization remains one slice unless continuation.enabled is explicitly authorized with aggregate limits. A continuation refines, executes and validates integrated milestone criteria. Cross-milestone advancement requires continuation.inter_milestone=true; it is disabled by default. The detached controller prepares only the next eligible milestone and preserves aggregate limits including remediation. checkpoint is a work limit; milestone_ready is validation pending; milestone_closed has a receipt; project_ready_for_validation still needs final project validation. Mandatory subjective reviews require actual human answers. Never act as an LLM supervisor or poll tightly. Use factory_status on user request, factory_inspect execution for evidence, and factory_pause/factory_resume for recovery.'''
 
 PROJECT = {'type': 'string', 'pattern': '^p_[0-9a-f]{16}$'}
 TEXT = {'type': 'string', 'minLength': 1, 'maxLength': 8000}
@@ -36,6 +36,13 @@ TOOLS = {
     'factory_pause': ('Persist a cooperative pause. The current worker call may finish; the controller starts no subsequent call.', schema({'project': PROJECT})),
     'factory_resume': ('Start or resume a durable run until input, a blocker, a limit, a pause or the boundary of implemented phases. Idempotent while active.', schema({'project': PROJECT})),
 }
+from .execution_contract import POLICY_SCHEMA, VERIFICATION_SCHEMA
+TOOLS['factory_execution_policy'] = ('Explicitly authorize bounded execution in the registered Git repository. Bind typed verification definitions to the current plan. No arbitrary commands. Does not start a worker.',
+    schema({'project': PROJECT, 'policy': POLICY_SCHEMA, 'verification': VERIFICATION_SCHEMA}, ['policy', 'verification']))
+TOOLS['factory_execute'] = ('Start authorized execution and return promptly. Default: one prepared slice. Explicit continuation policy: execute and close milestones within persistent limits; inter_milestone=true authorizes automatic advancement. Reuse request_id on retries.',
+    schema({'project': PROJECT, 'request_id': {'type': 'string', 'minLength': 1, 'maxLength': 128}}, ['request_id']))
+TOOLS['factory_inspect'][1]['properties']['view']['enum'].append('execution')
+TOOLS['factory_pause'] = ('Persist pause; implementation requests runtime interruption and remains pause_requested until the active turn/process stops. Prevents new attempts.', schema({'project': PROJECT}))
 READ_ONLY = {'factory_status', 'factory_decisions', 'factory_inspect'}
 OUTPUT_SCHEMA = schema({'ok': {'type': 'boolean'}, 'data': {}, 'error': {'type': 'object'}}, ['ok'])
 
@@ -80,6 +87,10 @@ class FactoryTools:
                 result = self.service.pause(**args)
             elif name == 'factory_resume':
                 result = self.service.resume(**args)
+            elif name == 'factory_execution_policy':
+                result = self.service.configure_execution(**args)
+            elif name == 'factory_execute':
+                result = self.service.execute_next_slice(**args)
             return {'ok': True, 'data': result}
         except FactoryError as exc:
             return {'ok': False, 'error': {'code': exc.code, 'message': str(exc)[:1000], 'details': exc.details}}

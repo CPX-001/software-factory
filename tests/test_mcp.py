@@ -98,7 +98,7 @@ class ToolTests(unittest.TestCase):
                 self.assertIn('code', result['error'])
         self.assertEqual(self.service.get_status()['phase'], 'discovery')
         self.assertFalse(self.jobs)
-        self.assertEqual(len(TOOLS), 8)
+        self.assertEqual(len(TOOLS), 10)
 
     def test_ambiguous_missing_and_unregistered_projects_are_structured(self):
         self.assertEqual(self.tools.call('factory_status', {})['error']['code'], 'project_selection_required')

@@ -67,10 +67,11 @@ def validate(value, schema=RESPONSE_SCHEMA, path="response"):
     if "enum" in schema and value not in schema["enum"]:
         raise WorkflowError(f"{path}: unsupported value")
     if expected is dict:
-        if set(value) != set(schema["properties"]):
+        if not set(schema.get("required", schema["properties"])) <= set(value) or not set(value) <= set(schema["properties"]):
             raise WorkflowError(f"{path}: missing or unexpected fields")
         for key, child in schema["properties"].items():
-            validate(value[key], child, f"{path}.{key}")
+            if key in value:
+                validate(value[key], child, f"{path}.{key}")
     elif expected is list:
         if len(value) > schema["maxItems"]:
             raise WorkflowError(f"{path}: too many entries")

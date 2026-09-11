@@ -1,8 +1,8 @@
 # Usar Software Factory desde Codex
 
-La interfaz principal es el plugin local **Software Factory**: una skill corta y ocho
+La interfaz principal es el plugin local **Software Factory**: una skill corta y diez
 MCP tools por STDIO. CLI y MCP usan `FactoryService`; el estado, los gates y el controller
-pertenecen a Factory. Planning ya produce un roadmap progresivo; la ejecución de producto todavía está deshabilitada.
+pertenecen a Factory. Planning produce un roadmap progresivo; la ejecución de producto se habilita explícitamente con presupuesto, permisos y checks versionados. La autorización original permite una slice; el [piloto multislice](continuation.md) requiere una política adicional explícita. Consulta [ejecución y recuperación](execution.md).
 
 ## Instalar en este host
 
@@ -49,17 +49,20 @@ operaciones que cambian el proyecto activo.
 
 `factory_project` (list/init/select), `factory_status`, `factory_message`,
 `factory_decisions`, `factory_answer`, `factory_inspect`, `factory_pause`, `factory_resume`.
+`factory_execution_policy` autoriza la política y definición tipada; `factory_execute`
+selecciona la próxima slice preparada y devuelve su ID sin esperar a que termine.
 Las respuestas usan `{ok, data}` o `{ok:false, error:{code,message,details}}`; los errores
 MCP también llevan `isError`. Status es compacto; inspect pide documentos completos.
 
 Message y answer guardan la entrada y arrancan trabajo elegible sin esperar a su resultado.
-Resume es una orden de continuación, no una fase: ahora puede procesar discovery y
-architecture y planning y se detiene antes de implementación, por preguntas/decisiones, bloqueo, fallo,
+Resume es una orden de continuación, no una fase: procesa discovery,
+architecture y planning; también recupera una ejecución previamente autorizada. Se detiene por preguntas/decisiones, bloqueo, fallo,
 límite o pausa. Un fallo no se reintenta automáticamente. Los checkpoints sobreviven a
 reinicios; `request_id` permite reintentar un mensaje de discovery sin duplicarlo.
 
-El proceso de Factory se separa de MCP y no necesita una conversación abierta. Pause es
-cooperativo: una llamada iniciada puede terminar y guardarse, pero no empieza la siguiente.
+El proceso de Factory se separa de MCP y no necesita una conversación abierta. En las fases
+de análisis pause es cooperativo. En ejecución solicita interrupción del runtime y conserva
+`pause_requested` hasta que se detenga el turno/proceso; no empieza otro intento.
 Si muere el worker o se reinicia la máquina, el estado sobrevive; usa resume para recuperarlo.
 No es un daemon que se relance automáticamente al arrancar el sistema.
 

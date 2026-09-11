@@ -1,0 +1,568 @@
+{
+  "root": "/tmp/factory-records-smoke-mlzxlicn",
+  "project": {
+    "id": "p_48f4da23ac158c1c",
+    "name": "Disposable records smoke",
+    "path": "/tmp/factory-records-smoke-mlzxlicn/product"
+  },
+  "registry_home": "/tmp/factory-records-smoke-mlzxlicn/registry",
+  "policy": {
+    "enabled": true,
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "max_attempts": 2,
+    "max_seconds": 180,
+    "max_tokens": 8000,
+    "quota_reserve_percent": 25,
+    "quota_max_age_seconds": 60,
+    "quota_bucket": "codex",
+    "write_paths": [
+      "records.py"
+    ],
+    "context_paths": [
+      "records.py",
+      "record_rules.py",
+      "test_records.py"
+    ]
+  },
+  "verification": {
+    "schema_version": 1,
+    "checks": [
+      {
+        "id": "acceptance",
+        "gate": "local_gate",
+        "kind": "python_unittest",
+        "target": "test_records.py",
+        "cases": [],
+        "min_tests": 10,
+        "timeout_seconds": 5,
+        "criteria": [
+          0,
+          1
+        ],
+        "gate_checks": [
+          0
+        ]
+      },
+      {
+        "id": "examples",
+        "gate": "local_gate",
+        "kind": "python_behavior",
+        "target": "records:summarize",
+        "cases": [
+          {
+            "args_json": "[[]]",
+            "expected_json": "{\"count\":0,\"total\":0,\"by_category\":{}}"
+          },
+          {
+            "args_json": "[[{\"category\":\" X \",\"amount\":3},{\"category\":\"x\",\"amount\":2}]]",
+            "expected_json": "{\"count\":2,\"total\":5,\"by_category\":{\"x\":{\"count\":2,\"total\":5}}}"
+          }
+        ],
+        "min_tests": 2,
+        "timeout_seconds": 5,
+        "criteria": [
+          0
+        ],
+        "gate_checks": [
+          0
+        ]
+      }
+    ],
+    "harness": [
+      {
+        "id": "unit",
+        "paths": [
+          "test_records.py",
+          "record_rules.py"
+        ]
+      }
+    ]
+  },
+  "baseline_commit": "ccc9ec2dfd9ee7778ff99df264a726bfcd90da37",
+  "real_model_requested": true,
+  "phase_inputs": "synthetic_validated",
+  "client": "Python MCP stdio client, not Codex App UI",
+  "solution_source": "runtime model only",
+  "launch_seconds": 0.10858459300106915,
+  "execution_id": "bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+  "run_id": "af2065af-5c2a-4b02-81ed-d21f63d169bb",
+  "state_at_disconnect": "queued",
+  "client_disconnected_at": 1789082088.1876037,
+  "execution": {
+    "id": "bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+    "run_id": "af2065af-5c2a-4b02-81ed-d21f63d169bb",
+    "state": "checkpoint",
+    "reason": "One-slice run limit reached intentionally",
+    "diagnostic": null,
+    "slice_id": "s1",
+    "sources": {
+      "architecture": {
+        "fingerprint": "sha256:0614144e2c848df843390d1518510726810a66c418c288ef652cfcc1a1ac5ce1",
+        "revision": 1
+      },
+      "plan": {
+        "fingerprint": "sha256:7974161c3b4ac3eb88ec9f6457672169dd2455b57fb2c98331844221b6870579",
+        "revision": 1
+      }
+    },
+    "definition_id": "sha256:e84a58565ed59ce0b8464acfac4e8d064ba6eaac8ab840b333783a8f0a18a241",
+    "harness_revision": "sha256:155dd46fec5738b3f7f6c5abf43e60e8b51c8d20637d2c520b3e293df4bf3865",
+    "base_commit": "ccc9ec2dfd9ee7778ff99df264a726bfcd90da37",
+    "branch": "factory/slice-bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+    "commit": "3a1a02d88d9482b64d67cd433e0517a10ad4c012",
+    "worktree": "/tmp/factory-records-smoke-mlzxlicn/product/.factory/worktrees/bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+    "runtime_info": {
+      "authentication": "chatgpt",
+      "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+      "configuration": "private_chatgpt_read_only_no_tools",
+      "effort": "low",
+      "initialized": true,
+      "model": "gpt-5.6-terra",
+      "provider": "openai",
+      "runtime_selection": "sdk_pinned_dependency",
+      "sdk_version": "0.147.0",
+      "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)"
+    },
+    "usage": {
+      "last": {
+        "cacheWriteInputTokens": 0,
+        "cachedInputTokens": 0,
+        "inputTokens": 6973,
+        "outputTokens": 525,
+        "reasoningOutputTokens": 102,
+        "totalTokens": 7498
+      },
+      "modelContextWindow": 258400,
+      "total": {
+        "cacheWriteInputTokens": 0,
+        "cachedInputTokens": 0,
+        "inputTokens": 6973,
+        "outputTokens": 525,
+        "reasoningOutputTokens": 102,
+        "totalTokens": 7498
+      }
+    },
+    "quota_before": {
+      "buckets": {
+        "codex": {
+          "limitId": "codex",
+          "limitName": null,
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789462830,
+            "usedPercent": 73,
+            "windowDurationMins": 10080
+          },
+          "rateLimitReachedType": null,
+          "secondary": null,
+          "spendControlReached": false
+        },
+        "codex_bengalfox": {
+          "limitId": "codex_bengalfox",
+          "limitName": "GPT-5.3-Codex-Spark",
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789100091,
+            "usedPercent": 0,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789686891,
+            "usedPercent": 0,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      },
+      "method": "account/rateLimits/read",
+      "observed_at": 1789082092.4628444,
+      "scope": "shared_codex_account"
+    },
+    "quota_after": {
+      "buckets": {
+        "codex": {
+          "limitId": "codex",
+          "limitName": null,
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789462830,
+            "usedPercent": 73,
+            "windowDurationMins": 10080
+          },
+          "rateLimitReachedType": null,
+          "secondary": null,
+          "spendControlReached": false
+        },
+        "codex_bengalfox": {
+          "limitId": "codex_bengalfox",
+          "limitName": "GPT-5.3-Codex-Spark",
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789100103,
+            "usedPercent": 0,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789686903,
+            "usedPercent": 0,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      },
+      "method": "account/rateLimits/read",
+      "observed_at": 1789082104.094096,
+      "scope": "shared_codex_account"
+    },
+    "quota_after_diagnostic": null,
+    "quota": {
+      "buckets": {
+        "codex": {
+          "limitId": "codex",
+          "limitName": null,
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789462830,
+            "usedPercent": 73,
+            "windowDurationMins": 10080
+          },
+          "rateLimitReachedType": null,
+          "secondary": null,
+          "spendControlReached": false
+        },
+        "codex_bengalfox": {
+          "limitId": "codex_bengalfox",
+          "limitName": "GPT-5.3-Codex-Spark",
+          "planType": "prolite",
+          "primary": {
+            "resetsAt": 1789100103,
+            "usedPercent": 0,
+            "windowDurationMins": 300
+          },
+          "rateLimitReachedType": null,
+          "secondary": {
+            "resetsAt": 1789686903,
+            "usedPercent": 0,
+            "windowDurationMins": 10080
+          },
+          "spendControlReached": null
+        }
+      },
+      "method": "account/rateLimits/read",
+      "observed_at": 1789082104.094096,
+      "scope": "shared_codex_account"
+    },
+    "isolation": {
+      "available": true,
+      "profile": "linux-namespaces-seccomp-v1",
+      "tested_at": 1789082088.2932265
+    },
+    "verification": [
+      {
+        "check_id": "acceptance",
+        "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+        "command": [
+          "/usr/bin/python3",
+          "-I",
+          "/verification_runner.py"
+        ],
+        "criteria": [
+          0,
+          1
+        ],
+        "duration_seconds": 0.2661,
+        "environment": "linux-namespaces-seccomp-v1",
+        "exit_code": 0,
+        "gate": "local_gate",
+        "gate_checks": [
+          0
+        ],
+        "log": "test_aggregate_existing_records (factory_slice_test.Acceptance.test_aggregate_existing_records) ... ok\ntest_empty (factory_slice_test.Acceptance.test_empty) ... ok\ntest_no_mutation (factory_slice_test.Acceptance.test_no_mutation) ... ok\ntest_normalization_and_zero (factory_slice_test.Acceptance.test_normalization_and_zero) ... ok\ntest_reject_bad_amount (factory_slice_test.Acceptance.test_reject_bad_amount) ... ok\ntest_reject_bad_category (factory_slice_test.Acceptance.test_reject_bad_category) ... ok\ntest_reject_missing_fields (factory_slice_test.Acceptance.test_reject_missing_fields) ... ok\ntest_reject_non_list (factory_slice_test.Acceptance.test_reject_non_list) ... ok\ntest_reject_non_record (factory_slice_test.Acceptance.test_reject_non_record) ... ok\ntest_valid_then_invalid (factory_slice_test.Acceptance.test_valid_then_invalid) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\nFACTORY_CHECK_COMPLETED_V1\n",
+        "log_limit_bytes": 24000,
+        "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+        "reason": null,
+        "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+        "started_at": 1789082104.2811806,
+        "status": "PASS",
+        "trigger": "after_slice"
+      },
+      {
+        "check_id": "examples",
+        "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+        "command": [
+          "/usr/bin/python3",
+          "-I",
+          "/verification_runner.py"
+        ],
+        "criteria": [
+          0
+        ],
+        "duration_seconds": 0.2702,
+        "environment": "linux-namespaces-seccomp-v1",
+        "exit_code": 0,
+        "gate": "local_gate",
+        "gate_checks": [
+          0
+        ],
+        "log": "Executed 2 fixed behavior cases\nFACTORY_CHECK_COMPLETED_V1\n",
+        "log_limit_bytes": 24000,
+        "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+        "reason": null,
+        "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+        "started_at": 1789082104.569272,
+        "status": "PASS",
+        "trigger": "after_slice"
+      }
+    ],
+    "attempts": [
+      {
+        "completed_at": 1789082104.0944002,
+        "id": "bffb59b1-ed9a-41c0-bcd7-d0b660e23fc5",
+        "kind": "implementation",
+        "ordinal": 1,
+        "response": {
+          "architecture": {
+            "impact": "none",
+            "reason": "Change is confined to the existing records.py pure function.",
+            "references": []
+          },
+          "changes": [
+            {
+              "content": "import math\n\nfrom record_rules import normalized_category\n\n\ndef summarize(records):\n    \"\"\"Return validated whole-list and canonical-category record aggregates.\"\"\"\n    if not isinstance(records, list):\n        raise ValueError(\"records must be a list\")\n\n    total = 0\n    by_category = {}\n\n    for row in records:\n        if not isinstance(row, dict):\n            raise ValueError(\"each record must be a dictionary\")\n        if \"amount\" not in row or \"category\" not in row:\n            raise ValueError(\"each record must include amount and category\")\n\n        amount = row[\"amount\"]\n        if (isinstance(amount, bool) or not isinstance(amount, (int, float))\n                or not math.isfinite(amount) or amount < 0):\n            raise ValueError(\"amount must be a finite nonnegative number\")\n\n        try:\n            category = normalized_category(row[\"category\"])\n        except (TypeError, ValueError):\n            raise ValueError(\"category must be valid\") from None\n\n        total += amount\n        category_summary = by_category.setdefault(category, {\"count\": 0, \"total\": 0})\n        category_summary[\"count\"] += 1\n        category_summary[\"total\"] += amount\n\n    return {\"count\": len(records), \"total\": total, \"by_category\": by_category}\n",
+              "operation": "write",
+              "path": "records.py"
+            }
+          ],
+          "checks_declared": [
+            "test_records.py unittest acceptance suite",
+            "records:summarize fixed behavior examples"
+          ],
+          "criteria_addressed": [
+            0,
+            1
+          ],
+          "harness_paths": [],
+          "questions": [],
+          "read_paths": [],
+          "risks": [],
+          "summary": "Implemented validated category aggregation in records.summarize."
+        },
+        "runtime": {
+          "thread_id": "01a08d9a-43de-7902-ad0a-acc46e1c5324",
+          "turn_id": "01a08d9a-4402-7033-a657-8eaac12e6abc"
+        },
+        "runtime_info": {
+          "authentication": "chatgpt",
+          "binary": "/home/cpx/repos/software-factory/.venv/lib/python3.12/site-packages/codex_cli_bin/bin/codex",
+          "configuration": "private_chatgpt_read_only_no_tools",
+          "effort": "low",
+          "initialized": true,
+          "model": "gpt-5.6-terra",
+          "provider": "openai",
+          "runtime_selection": "sdk_pinned_dependency",
+          "sdk_version": "0.147.0",
+          "server_version": "0.147.0 (Linux Unknown; x86_64) unknown (codex_python_sdk; 0.147.0)"
+        },
+        "started_at": 1789082092.4799,
+        "state": "verified",
+        "usage": {
+          "last": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 0,
+            "inputTokens": 6973,
+            "outputTokens": 525,
+            "reasoningOutputTokens": 102,
+            "totalTokens": 7498
+          },
+          "modelContextWindow": 258400,
+          "total": {
+            "cacheWriteInputTokens": 0,
+            "cachedInputTokens": 0,
+            "inputTokens": 6973,
+            "outputTokens": 525,
+            "reasoningOutputTokens": 102,
+            "totalTokens": 7498
+          }
+        },
+        "verification": [
+          {
+            "check_id": "acceptance",
+            "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+            "command": [
+              "/usr/bin/python3",
+              "-I",
+              "/verification_runner.py"
+            ],
+            "criteria": [
+              0,
+              1
+            ],
+            "duration_seconds": 0.2661,
+            "environment": "linux-namespaces-seccomp-v1",
+            "exit_code": 0,
+            "gate": "local_gate",
+            "gate_checks": [
+              0
+            ],
+            "log": "test_aggregate_existing_records (factory_slice_test.Acceptance.test_aggregate_existing_records) ... ok\ntest_empty (factory_slice_test.Acceptance.test_empty) ... ok\ntest_no_mutation (factory_slice_test.Acceptance.test_no_mutation) ... ok\ntest_normalization_and_zero (factory_slice_test.Acceptance.test_normalization_and_zero) ... ok\ntest_reject_bad_amount (factory_slice_test.Acceptance.test_reject_bad_amount) ... ok\ntest_reject_bad_category (factory_slice_test.Acceptance.test_reject_bad_category) ... ok\ntest_reject_missing_fields (factory_slice_test.Acceptance.test_reject_missing_fields) ... ok\ntest_reject_non_list (factory_slice_test.Acceptance.test_reject_non_list) ... ok\ntest_reject_non_record (factory_slice_test.Acceptance.test_reject_non_record) ... ok\ntest_valid_then_invalid (factory_slice_test.Acceptance.test_valid_then_invalid) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\nFACTORY_CHECK_COMPLETED_V1\n",
+            "log_limit_bytes": 24000,
+            "process": {
+              "boot": "ff9eacc0-2b46-4fdc-9f99-d15e2c99b5a7",
+              "pid": 77588,
+              "start": "981650"
+            },
+            "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+            "reason": null,
+            "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+            "started_at": 1789082104.2811806,
+            "status": "PASS",
+            "trigger": "after_slice"
+          },
+          {
+            "check_id": "examples",
+            "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+            "command": [
+              "/usr/bin/python3",
+              "-I",
+              "/verification_runner.py"
+            ],
+            "criteria": [
+              0
+            ],
+            "duration_seconds": 0.2702,
+            "environment": "linux-namespaces-seccomp-v1",
+            "exit_code": 0,
+            "gate": "local_gate",
+            "gate_checks": [
+              0
+            ],
+            "log": "Executed 2 fixed behavior cases\nFACTORY_CHECK_COMPLETED_V1\n",
+            "log_limit_bytes": 24000,
+            "process": {
+              "boot": "ff9eacc0-2b46-4fdc-9f99-d15e2c99b5a7",
+              "pid": 77591,
+              "start": "981678"
+            },
+            "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+            "reason": null,
+            "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+            "started_at": 1789082104.569272,
+            "status": "PASS",
+            "trigger": "after_slice"
+          }
+        ],
+        "verification_status": "PASS",
+        "worker_status": "completed"
+      }
+    ],
+    "publication": {
+      "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+      "commit": "3a1a02d88d9482b64d67cd433e0517a10ad4c012",
+      "tree": "828d61b22c3910231105a64e989ccfa2a3232786"
+    },
+    "receipt": {
+      "accepted_at": 1789082104.981381,
+      "before_evidence": [],
+      "branch": "factory/slice-bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+      "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+      "commit": "3a1a02d88d9482b64d67cd433e0517a10ad4c012",
+      "definition_id": "sha256:e84a58565ed59ce0b8464acfac4e8d064ba6eaac8ab840b333783a8f0a18a241",
+      "evidence": [
+        {
+          "check_id": "acceptance",
+          "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+          "command": [
+            "/usr/bin/python3",
+            "-I",
+            "/verification_runner.py"
+          ],
+          "criteria": [
+            0,
+            1
+          ],
+          "duration_seconds": 0.2661,
+          "environment": "linux-namespaces-seccomp-v1",
+          "exit_code": 0,
+          "gate": "local_gate",
+          "gate_checks": [
+            0
+          ],
+          "log": "test_aggregate_existing_records (factory_slice_test.Acceptance.test_aggregate_existing_records) ... ok\ntest_empty (factory_slice_test.Acceptance.test_empty) ... ok\ntest_no_mutation (factory_slice_test.Acceptance.test_no_mutation) ... ok\ntest_normalization_and_zero (factory_slice_test.Acceptance.test_normalization_and_zero) ... ok\ntest_reject_bad_amount (factory_slice_test.Acceptance.test_reject_bad_amount) ... ok\ntest_reject_bad_category (factory_slice_test.Acceptance.test_reject_bad_category) ... ok\ntest_reject_missing_fields (factory_slice_test.Acceptance.test_reject_missing_fields) ... ok\ntest_reject_non_list (factory_slice_test.Acceptance.test_reject_non_list) ... ok\ntest_reject_non_record (factory_slice_test.Acceptance.test_reject_non_record) ... ok\ntest_valid_then_invalid (factory_slice_test.Acceptance.test_valid_then_invalid) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\nFACTORY_CHECK_COMPLETED_V1\n",
+          "log_limit_bytes": 24000,
+          "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+          "reason": null,
+          "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+          "started_at": 1789082104.2811806,
+          "status": "PASS",
+          "trigger": "after_slice"
+        },
+        {
+          "check_id": "examples",
+          "code_id": "sha256:46753b5c0bbfab0dcc97df1e7aa6b6b2d6b3e49327f25aac151eb9d53e98490c",
+          "command": [
+            "/usr/bin/python3",
+            "-I",
+            "/verification_runner.py"
+          ],
+          "criteria": [
+            0
+          ],
+          "duration_seconds": 0.2702,
+          "environment": "linux-namespaces-seccomp-v1",
+          "exit_code": 0,
+          "gate": "local_gate",
+          "gate_checks": [
+            0
+          ],
+          "log": "Executed 2 fixed behavior cases\nFACTORY_CHECK_COMPLETED_V1\n",
+          "log_limit_bytes": 24000,
+          "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+          "reason": null,
+          "runner_sha256": "29770c54a33b356697935c46f7fbfe132e94b8e97c1c41766494a4dc2319cb43",
+          "started_at": 1789082104.569272,
+          "status": "PASS",
+          "trigger": "after_slice"
+        }
+      ],
+      "execution_id": "bdddd848-b760-47c1-8082-61c2ff1b2fe1",
+      "harness_revision": "sha256:155dd46fec5738b3f7f6c5abf43e60e8b51c8d20637d2c520b3e293df4bf3865",
+      "scope": "slice_only",
+      "slice_id": "s1",
+      "sources": {
+        "architecture": {
+          "fingerprint": "sha256:0614144e2c848df843390d1518510726810a66c418c288ef652cfcc1a1ac5ce1",
+          "revision": 1
+        },
+        "plan": {
+          "fingerprint": "sha256:7974161c3b4ac3eb88ec9f6457672169dd2455b57fb2c98331844221b6870579",
+          "revision": 1
+        }
+      },
+      "tree": "828d61b22c3910231105a64e989ccfa2a3232786",
+      "unverified": "Milestone closure and global product requirements"
+    }
+  },
+  "completed_after_disconnect": true,
+  "finished_at": 1789082106.2325392,
+  "app_registered_project": {
+    "id": "p_48f4da23ac158c1c",
+    "name": "Disposable records smoke",
+    "path": "/tmp/factory-records-smoke-mlzxlicn/product"
+  },
+  "postconditions": {
+    "single_attempt": true,
+    "one_receipt": true,
+    "user_branch_unchanged": true,
+    "only_records_changed": true,
+    "branch_matches_commit": true,
+    "worktree_matches_evidence": true,
+    "receipt_matches_commit": true,
+    "verification_matches_code": true,
+    "model_proposal_matches_commit": true,
+    "private_credentials_removed": true,
+    "sandbox_stopped": true
+  }
+}

@@ -495,7 +495,12 @@ class PlanningAdapterTests(unittest.TestCase):
         with patch.dict(sys.modules, {'openai_codex': sdk}):
             adapter = CodexPlanning()
             adapter.respond({'role': 'propose'}, skill_inputs=[{'name': 'policy', 'path': '/skills/SKILL.md'}])
-            self.assertEqual(codex.thread_start.return_value.run.call_args.kwargs['output_schema'], PLAN_SCHEMA)
+            schema = codex.thread_start.return_value.run.call_args.kwargs['output_schema']
+            self.assertEqual(schema['required'], PLAN_SCHEMA['required'])
+            milestone = schema['properties']['milestones']['items']
+            self.assertIn('subjective_criteria', milestone['required'])
+            self.assertNotIn('subjective_criteria', PLAN_SCHEMA['properties']['milestones']['items']['required'])
+            self.assertEqual(milestone['properties'], PLAN_SCHEMA['properties']['milestones']['items']['properties'])
             self.assertEqual(codex.thread_start.return_value.run.call_args.args[0][1].kind, 'skill')
             adapter.respond({'role': 'critic'}, skill_inputs=[])
             self.assertEqual(codex.thread_start.return_value.run.call_args.kwargs['output_schema'], REVIEW_SCHEMA)

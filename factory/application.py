@@ -1,6 +1,7 @@
 """Stable Factory use cases shared by CLI, MCP and detached workers."""
 from dataclasses import asdict
 from pathlib import Path
+import json
 import subprocess
 import sys
 
@@ -18,10 +19,12 @@ def short(value, limit=400):
 
 class FactoryService:
     def __init__(self, registry=None, *, discovery_model=None, architecture_model=None, planning_model=None, router=None, launcher=None,
-                 local_project=None, scope='default'):
+                 local_project=None, scope='default', execution_worker_factory=None, refinement_worker_factory=None):
         self.registry = registry or Registry()
         self.discovery_model, self.architecture_model = discovery_model, architecture_model
         self.planning_model = planning_model
+        self.execution_worker_factory = execution_worker_factory
+        self.refinement_worker_factory = refinement_worker_factory
         self.router, self.launcher = router, launcher or self._launch
         self.local_project = Path(local_project).expanduser().resolve() if local_project is not None else None
         self.scope = scope
@@ -74,6 +77,8 @@ class FactoryService:
 
     def get_next_action(self, project=None):
         project = self._project(project)['id']
+        if self.snapshot(project)['phase'] == 'execution':
+            return self.get_status(project)['next_action']
         return self._next(self.snapshot(project), Runtime(self._store(project)).state())
 
     def list_pending_decisions(self, project=None, *, offset=0, limit=5):
@@ -106,6 +111,44 @@ class FactoryService:
         if runtime['status'] in ('failed', 'interrupted') and not runtime['paused']:
             state = runtime['status']
         action = self._next(snapshot, runtime)
+        from .execution_store import ExecutionStore
+        execution = ExecutionStore(store).inspect()
+        continuation_policy = ExecutionStore(store).policy().get('continuation', {})
+        execution['continuation_policy'] = continuation_policy
+        if snapshot['phase'] == 'execution':
+            if execution['state'] != 'not_started':
+                state = execution['state']
+                if runtime['paused'] and (runtime['status'] in ACTIVE or execution.get('sandbox_alive')):
+                    state = 'pause_requested'
+                elif runtime['paused']:
+                    state = 'paused'
+                blockers = list(dict.fromkeys((execution.get('blockers') or []) + blockers))[:5]
+            action = {'action': 'authorize_execution' if not execution['enabled'] else
+                      'get_status' if runtime['status'] in ACTIVE else
+                      'wait_for_human' if pending else 'resume' if runtime['paused'] else
+                      'execute_next_slice' if execution['state'] in ('not_started', 'checkpoint') else 'inspect_execution',
+                      'reason': execution.get('reason')}
+            if execution['state'] == 'not_started' and execution['enabled']:
+                from .execution import Execution
+                try:
+                    Execution(self, store).prerequisites()
+                except FactoryError as exc:
+                    execution['diagnostic'] = {'code': exc.code, 'message': str(exc), **exc.details}
+                    action.update(action='inspect_execution', reason=str(exc))
+            if (execution.get('diagnostic') or {}).get('next_step'):
+                action['next_step'] = execution['diagnostic']['next_step']
+        from .continuation_store import ContinuationStore, TERMINAL
+        continuation = ContinuationStore(store).inspect()
+        if snapshot['phase'] == 'execution' and continuation and (
+                continuation['state'] not in TERMINAL or
+                runtime['run_id'] == continuation['runtime_id']):
+            state = continuation['state']
+            action = {'action': 'wait_for_human' if pending else 'resume' if runtime['paused'] else
+                      'inspect_execution', 'reason': continuation['reason']}
+            if continuation.get('diagnostic'):
+                blockers = [continuation['diagnostic'].get('code', continuation['reason'])]
+                if continuation['diagnostic'].get('next_step'):
+                    action['next_step'] = continuation['diagnostic']['next_step']
         action = {k: v for k, v in action.items() if k not in ('readiness', 'pending_questions', 'blockers')}
         if 'decision_ids' in action:
             action['decision_ids'] = action['decision_ids'][:3]
@@ -122,7 +165,9 @@ class FactoryService:
                 'blockers': [short(b, 500) for b in blockers], 'next_action': action,
                 'architecture_revision': {k: baseline[k] for k in ('revision', 'fingerprint')} if baseline else None,
                 'autonomous_run': {k: runtime.get(k) for k in ('run_id', 'status', 'paused', 'reason')},
-                'capabilities': {'implemented_phases': ['discovery', 'architecture', 'planning'], 'planning_implemented': True}}
+                'execution': execution, 'continuation': continuation,
+                'capabilities': {'implemented_phases': ['discovery', 'architecture', 'planning', 'execution'],
+                                 'planning_implemented': True, 'execution_slice_limit': continuation_policy['max_slices'] if continuation_policy.get('enabled') else 1}}
 
     def get_discovery(self, project=None):
         return self.snapshot(project)['discovery']
@@ -156,16 +201,42 @@ class FactoryService:
         if view == 'plan':
             return {**metadata, 'plan': plan, 'blockers': state['blockers']}
         if view == 'refinement':
-            return refinement_snapshot(snapshot, slice_id)
+            result = refinement_snapshot(snapshot, slice_id)
+            with self._store(project)._connection() as db:
+                available = db.execute('PRAGMA user_version').fetchone()[0] >= 7
+                rows = db.execute('SELECT data FROM refinement_revisions').fetchall() if available else []
+                units = db.execute('SELECT data FROM refinements').fetchall() if available else []
+            revisions = [json.loads(row[0]) for row in rows]
+            attempts = [json.loads(row[0]) for row in units]
+            fields = ('id', 'slice_id', 'input_key', 'state', 'attempts', 'deadline', 'runtime_info',
+                      'base_commit', 'revision_id', 'quota_before', 'quota', 'quota_after', 'quota_after_diagnostic',
+                      'before_verification', 'errors', 'proposal', 'decision_ids')
+            return {**result, 'execution_refinements': [r for r in revisions if r['slice']['id'] == slice_id],
+                    'refinement_attempts': [{k: r.get(k) for k in fields} for r in attempts if r['slice_id'] == slice_id]}
         if view == 'markdown':
             return roadmap['projection'] if roadmap else None
         if view == 'milestones':
-            return {**metadata, 'milestones': plan['milestones'] if plan else []}
+            from .milestone_store import MilestoneStore
+            return {**metadata, **MilestoneStore(self._store(project)).progress(snapshot)}
         if view == 'next_slice':
-            candidates = executable_slices(plan) if roadmap else []
-            return {**metadata, 'slice': candidates[0] if candidates else None,
-                    'implementation_enabled': False}
+            from .execution import select_slice
+            from .execution_store import ExecutionStore
+            journal = ExecutionStore(self._store(project))
+            selected, reasons = select_slice(snapshot, journal.acceptances()) if roadmap else (None, [])
+            from .continuation import Continuation
+            controller = Continuation(self, self._store(project))
+            group = controller.journal.latest()
+            if group and journal.policy().get('continuation', {}).get('enabled'):
+                try:
+                    selected, reason = controller.choose(group, snapshot)
+                    reasons = [reason] if reason else []
+                except FactoryError as exc:
+                    selected, reasons = None, [exc.code]
+            return {**metadata, 'slice': selected, 'reasons': reasons,
+                    'implementation_enabled': journal.policy()['enabled']}
         if view == 'requirements':
+            from .milestone_store import MilestoneStore
+            progress = {r['requirement']: r for r in MilestoneStore(self._store(project)).progress(snapshot)['requirements']}
             slices = {s['id']: s for s in plan['slices']} if plan else {}
             coverage = {c['requirement']: c for c in plan['coverage']} if plan else {}
             items = []
@@ -173,17 +244,26 @@ class FactoryService:
                 if r['status'] == 'superseded':
                     continue
                 c = coverage.get(r['key'])
-                done = bool(roadmap and c and c['disposition'] == 'covered' and c['slices'] and
-                            all(slices[s]['maturity'] == 'completed' for s in c['slices']))
+                evidence = progress.get(r['key'], {})
+                done = evidence.get('status') == 'satisfied'
                 items.append({'key': r['key'], 'text': r['text'], 'coverage': c,
+                              'progress': evidence,
                               'pending': not done and (not c or c['disposition'] != 'out_of_scope')})
             return {**metadata, 'requirements': items}
         if view == 'verification':
+            from .milestone_store import MilestoneStore
+            journal = MilestoneStore(self._store(project))
             return {**metadata, 'gates': plan['gates'] if plan else [],
-                    'harness': plan['harness'] if plan else []}
+                    'harness': plan['harness'] if plan else [],
+                    'milestone_validations': journal.rows('milestone_validations'), 'closure_issues': journal.issues()}
         raise FactoryError('invalid_view', 'Unknown planning view')
 
     def inspect(self, project=None, *, view, slice_id=None):
+        if view == 'execution':
+            from .execution_store import ExecutionStore
+            from .continuation_store import ContinuationStore
+            store = self._store(project)
+            return {**ExecutionStore(store).inspect(full=True), 'continuation': ContinuationStore(store).inspect()}
         if view in ('plan', 'milestones', 'next_slice', 'requirements', 'verification', 'refinement'):
             return self.get_planning(project, view=view, slice_id=slice_id)
         if slice_id is not None:
@@ -263,12 +343,33 @@ class FactoryService:
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
         Runtime(store).pause()
+        from .execution_store import ExecutionStore
+        execution = ExecutionStore(store).latest()
+        if execution and execution['state'] != 'checkpoint':
+            guard = store.path.parent / 'executions' / execution['id']
+            guard.mkdir(parents=True, exist_ok=True)
+            (guard / 'pause').touch()
+        from .continuation import Continuation
+        controller = Continuation(self, store)
+        continuation = controller.journal.latest()
+        if continuation:
+            controller.pause(continuation)
         return self.get_status(project)
 
     def resume(self, project=None):
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
         runtime = Runtime(store)
+        if store.snapshot()['phase'] == 'execution':
+            from .continuation import Continuation
+            from .continuation_store import TERMINAL
+            controller = Continuation(self, store)
+            group = controller.journal.latest()
+            if group and (group['state'] not in TERMINAL or
+                          runtime.state()['run_id'] == group['runtime_id']):
+                controller.resume()
+                return self.get_status(project)
+            return self._resume_execution(project)
         with runtime.lock('launch'):
             runtime.unpause()
             if runtime.state()['status'] in ACTIVE or runtime.live():
@@ -286,6 +387,94 @@ class FactoryService:
             except Exception as exc:
                 runtime.update(run_id, 'failed', 'Worker could not start', str(exc)[:1000])
                 raise FactoryError('worker_start_failed', 'Run intent is saved; resume to retry') from exc
+        return self.get_status(project)
+
+    def configure_execution(self, policy, verification, project=None):
+        from .execution import configure
+        store = self._store(project); store.initialize()
+        runtime = Runtime(store)
+        with runtime.lock('launch'), runtime.lock():
+            if runtime.state()['status'] in ACTIVE:
+                raise FactoryError('run_busy', 'A run is already starting')
+            return configure(store, policy, verification)
+
+    def execute_next_slice(self, project=None, *, request_id):
+        """One durable intent per logical client request; selection belongs to Factory."""
+        from .execution import Execution
+        from .execution_store import ExecutionStore
+        if not isinstance(request_id, str) or not 1 <= len(request_id) <= 128:
+            raise FactoryError('invalid_request', 'Use a stable request_id for this execution request')
+        project = self._project(project)['id']
+        store = self._store(project); store.initialize()
+        runtime, journal = Runtime(store), ExecutionStore(store)
+        if journal.policy().get('continuation', {}).get('enabled'):
+            from .continuation import Continuation
+            identifier = Continuation(self, store).start(request_id)
+            return {**self.get_status(project), 'requested_continuation_id': identifier}
+        with runtime.lock('launch'):
+            with store._connection() as db:
+                prior = db.execute('SELECT execution_id FROM execution_requests WHERE id=?', (request_id,)).fetchone()
+            if prior:
+                return {**self.get_status(project), 'requested_execution_id': prior[0]}
+            previous = journal.latest()
+            if (previous and previous['state'] != 'checkpoint') or runtime.live() or runtime.state()['status'] in ACTIVE:
+                if previous:
+                    with store._connection(write=True) as db:
+                        db.execute('INSERT INTO execution_requests VALUES (?,?)', (request_id, previous['id']))
+                return self.get_status(project)
+            engine = Execution(self, store)
+            engine.prerequisites()
+            run_id = runtime.queue()
+            try:
+                engine.queue(run_id, request_id)
+            except Exception as exc:
+                runtime.update(run_id, 'blocked', str(exc))
+                raise
+            self._launch_registered(project, run_id, runtime)
+        return self.get_status(project)
+
+    def _launch_registered(self, project, run_id, runtime):
+        target = self._project(project)
+        if target['id'] is None:
+            target = self.registry.register(target['path'], trusted=True)
+        try:
+            self.launcher(target['id'], run_id)
+        except Exception as exc:
+            runtime.update(run_id, 'failed', 'Worker could not start', str(exc)[:1000])
+            raise FactoryError('worker_start_failed', 'Intent is durable; resume to recover') from exc
+
+    def _resume_execution(self, project):
+        from .execution_store import ExecutionStore
+        from .execution_sandbox import LinuxSandbox
+        from .architecture import canonical
+        store = self._store(project)
+        runtime, journal = Runtime(store), ExecutionStore(store)
+        with runtime.lock('launch'):
+            runtime.unpause()
+            data = journal.latest()
+            if data:
+                (store.path.parent / 'executions' / data['id'] / 'pause').unlink(missing_ok=True)
+            if not data or data['state'] == 'checkpoint':
+                if data:
+                    from .integrated_code import reconcile
+                    reconcile(store)
+                if data and runtime.state()['run_id'] == data['run_id'] and not runtime.live():
+                    runtime.update(data['run_id'], 'checkpoint', 'One-slice checkpoint recovered from its durable acceptance')
+                return self.get_status(project)  # Updating/resuming never auto-enables a product run.
+            if runtime.live() or runtime.state()['status'] in ACTIVE:
+                return self.get_status(project)
+            sandbox = LinuxSandbox(store.path.parent / 'executions' / data['id'])
+            if sandbox.live():
+                return self.get_status(project)  # A lost connection is not evidence of death.
+            if any(d['answer'] is None for d in store.snapshot()['decisions']):
+                return self.get_status(project)
+            run_id = runtime.queue()
+            data.update(run_id=run_id, state='queued')
+            with store._connection(write=True) as db:
+                db.execute('UPDATE executions SET run_id=?,state=?,data=? WHERE id=?',
+                           (run_id, 'queued', canonical(data), data['id']))
+                journal.event(db, data['id'], 'recovery_queued')
+            self._launch_registered(project, run_id, runtime)
         return self.get_status(project)
 
     def _launch(self, project, run_id):

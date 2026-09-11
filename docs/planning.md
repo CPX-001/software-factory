@@ -3,7 +3,9 @@
 Factory transforma los conceptos activos de discovery y la baseline aceptada en un roadmap
 versionado. No crea Tasks, código de producto, workers de ejecución ni infraestructura de
 harness. El proceso autónomo atraviesa `discovery → architecture → planning → execution`
-y se detiene con `implementation_boundary` antes de implementar.
+y se detiene con `implementation_boundary` antes de implementar. El [motor del paso 8](execution.md)
+requiere una autorización explícita independiente. Por defecto ejecuta una slice preparada;
+la [continuidad](continuation.md) añade refinamiento, ejecución secuencial y cierre integrado. El salto entre milestones requiere `continuation.inter_milestone=true` y conserva los límites del run.
 
 ## Contrato
 
@@ -83,10 +85,11 @@ salida: 130.000. Se rechaza un exceso de forma explícita, nunca se truncan hech
 inputs nativos del SDK y las recomendaciones son pocas y opcionales. No hay agente selector.
 El adaptador usa hilos efímeros independientes, sandbox read-only y login Codex/ChatGPT.
 
-`refinement_snapshot` prepara un futuro refinamiento con slice/milestone, arquitectura actual
+`refinement_snapshot` describe el contexto de refinamiento con slice/milestone, arquitectura actual
 (y binding anterior para detectar deriva), elementos/ADRs relevantes, dependencias, requisitos
-pendientes, riesgos, gates/harness y evidencia suministrada explícitamente. No ejecuta el
-refinamiento ni implementa replanning post-ejecución.
+pendientes, riesgos, gates/harness y evidencia suministrada explícitamente. El controller de
+continuidad ejecuta el refinador aislado y publica revisiones por slice separadas del roadmap;
+la consulta por sí misma nunca llama al modelo ni inicia replanning.
 
 Solo decisiones de alcance, experiencia, arquitectura, coste significativo, dependencia o
 tradeoff relevante se elevan al humano. `factory_answer` persiste la respuesta literal y
@@ -120,7 +123,7 @@ es reparable y nunca alimenta el runtime.
 
 ## Consultas
 
-`factory_inspect(view=...)` conserva las ocho tools MCP existentes:
+`factory_inspect(view=...)` conserva estas vistas de planning; ejecución añade dos tools:
 
 | Pregunta | View |
 | --- | --- |
@@ -133,7 +136,8 @@ es reparable y nunca alimenta el runtime.
 
 `factory_decisions` responde qué necesita decidir el humano. `status` mantiene progreso
 compacto y revisión actual; las vistas muestran si un plan es borrador o aceptado. La próxima
-slice se devuelve solo para un roadmap aceptado, con `implementation_enabled: false`.
+slice se devuelve solo para un roadmap aceptado. `implementation_enabled` refleja la
+autorización explícita; las dependencias se resuelven con recibos de aceptación de Factory.
 
 CLI secundaria: `planning`, `planning-show --view plan|milestones|next_slice|requirements|verification|markdown`.
 

@@ -165,6 +165,7 @@ def quality_gate(plan, source, decisions=(), review_passed=True, *, initial=True
         refs(m['dependencies'], milestones, 'milestone_dependencies:' + mid)
         refs(m['risks'], risks, 'milestone_risks:' + mid)
         require(bool(m['success_criteria']) and bool(m['closure_conditions']), 'milestone_criteria:' + mid)
+        require(all(i < len(m['success_criteria'] + m['closure_conditions']) for i in m.get('subjective_criteria', [])), 'subjective_criteria:' + mid)
         refs(m['verification_gates'], gates, 'milestone_gates:' + mid, True)
         require(any(g['kind'] == 'milestone' and g['target'] == mid and g['id'] in m['verification_gates']
                     for g in gates.values()), 'milestone_gate_missing:' + mid)
@@ -207,12 +208,14 @@ def quality_gate(plan, source, decisions=(), review_passed=True, *, initial=True
             require(key in milestones[c['milestone']]['requirements'], 'coverage_milestone_link:' + key)
         for sid in c['slices']:
             if sid in slices:
-                require(key in slices[sid]['requirements'] and slices[sid]['milestone'] == c['milestone'], 'coverage_slice_link:' + key)
+                require(key in slices[sid]['requirements'] and
+                        key in milestones.get(slices[sid]['milestone'], {}).get('requirements', []), 'coverage_slice_link:' + key)
     for key in requirements:
         require(key in coverage, 'unowned_requirement:' + key)
     for mid, m in milestones.items():
         for key in m['requirements']:
-            require(key in coverage and coverage[key]['milestone'] == mid, 'reverse_milestone_coverage:' + key)
+            require(key in coverage and (coverage[key]['milestone'] == mid or
+                    any(slices[s]['milestone'] == mid for s in coverage[key]['slices'] if s in slices)), 'reverse_milestone_coverage:' + key)
     for sid, s in slices.items():
         for key in s['requirements']:
             require(key in coverage and sid in coverage[key]['slices'], 'reverse_slice_coverage:' + key)

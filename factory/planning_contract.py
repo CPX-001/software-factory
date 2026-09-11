@@ -11,6 +11,7 @@ MILESTONE = obj({
     'architecture': BINDING, 'verification_gates': REFS,
     'status': enum(('open', 'completed')),
 })
+MILESTONE['properties']['subjective_criteria'] = array({'type': 'integer', 'minimum': 0}, 100)
 SLICE = obj({
     'id': KEY, 'milestone': KEY, 'title': string(200), 'objective': string(2000),
     'kind': enum(('vertical', 'risk_probe')), 'requirements': REFS, 'dependencies': REFS,
@@ -75,7 +76,12 @@ Do not generate hundreds of detailed tasks. No tasks in this phase.
 All source.requirements, including constraints/exclusions, need exactly one coverage record:
 covered (milestone and one or more related slices), deferred, out_of_scope or blocked.
 Even deferred/excluded/blocked requirements have an owning milestone and a rationale.
-Milestone/slice requirements and coverage must agree in both directions. Changes to scope,
+Milestone/slice requirements and coverage must agree in both directions. Coverage retains
+one owning milestone, but its slices may contribute across several milestones; all those
+milestones list the requirement. Never equate a contribution with full satisfaction.
+subjective_criteria lists indices in success_criteria followed by closure_conditions that
+require explicit human review; mechanical checks cannot establish subjective acceptance.
+Changes to scope,
 product experience, significant cost/dependency or architecture need a human question.
 Ask only such decisions with stable keys/options/consequences. Incorporate human answers,
 list their planning keys in decision_keys; never infer human approval. Exact answer 'accept'

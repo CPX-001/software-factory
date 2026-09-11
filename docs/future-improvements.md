@@ -45,9 +45,10 @@ Codex App. Los tests con modelos simulados y transporte MCP real no lo sustituye
 histórico del paso 11 conserva `quota_reserve`. En el paso 12, una autorización explícita retiró
 la reserva para el único piloto y se completaron discovery, arquitectura y planning con modelo
 real. El [recorrido actual](end-to-end-acceptance.md) ya tiene producto, dos milestones
-cerrados, validación limpia y entrega. La vinculación inicial automática para planes nuevos
-está implementada con opt-in y probada con modelos simulados; quedan su comprobación real
-y la observación humana de la entrega final en otro chat. La vinculación de aquel roadmap
-fue una intervención revisada y no se presenta como autonomía general.
+cerrados, validación limpia y entrega. La vinculación inicial automática con opt-in también
+se comprobó con modelo real en el [segundo piloto autorizado](automatic-pilot-result.md),
+incluida su entrega validada. Queda la observación humana del informe final en otro chat.
+Las recuperaciones de planning y la autorización de evidencia adicional están registradas;
+el recorrido no se presenta como una ejecución sin intervenciones operativas.
 No propongo en este paso nuevos lenguajes,
 paralelismo, despliegue ni resolución automática de propuestas arquitectónicas.

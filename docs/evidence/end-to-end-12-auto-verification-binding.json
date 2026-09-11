@@ -1,0 +1,727 @@
+{
+  "sources": {
+    "architecture": {
+      "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+      "revision": 1
+    },
+    "plan": {
+      "fingerprint": "sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e",
+      "revision": 1
+    }
+  },
+  "verification": {
+    "checks": [
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0,
+          1,
+          2
+        ],
+        "gate": "gl_summary_local",
+        "gate_checks": [
+          0
+        ],
+        "id": "summary_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 10,
+        "source_sha256": "d2b968b2d1f362f20b9e97a7ae0a120d4f5e7e4b43b0dcf495824d26d0c459f9",
+        "target": "test_records.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gi_summary_composition",
+        "gate_checks": [
+          0
+        ],
+        "id": "summary_integration_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "6e6db05c6f76d2a5d45a66468dad5c7e55f79ffb23e34a9993e55697ef4b604e",
+        "target": "test_summary_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0,
+          2
+        ],
+        "gate": "gm_validated_summary",
+        "gate_checks": [
+          0
+        ],
+        "id": "summary_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 10,
+        "source_sha256": "d2b968b2d1f362f20b9e97a7ae0a120d4f5e7e4b43b0dcf495824d26d0c459f9",
+        "target": "test_records.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          1,
+          2
+        ],
+        "gate": "gm_validated_summary",
+        "gate_checks": [
+          1
+        ],
+        "id": "summary_integration_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "6e6db05c6f76d2a5d45a66468dad5c7e55f79ffb23e34a9993e55697ef4b604e",
+        "target": "test_summary_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gl_ranked_cli",
+        "gate_checks": [
+          0
+        ],
+        "id": "ranking_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 4,
+        "source_sha256": "60700febae6b8b5587057bf9b7238948b9428137f462f305ca077366721ca79b",
+        "target": "test_category_report.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          1
+        ],
+        "entrypoint": {
+          "args": [
+            "examples/valid.json"
+          ],
+          "path": "category_report.py",
+          "stdout": "[{\"category\":\"food\",\"count\":2,\"total\":12},{\"category\":\"books\",\"count\":1,\"total\":7}]\n"
+        },
+        "gate": "gl_ranked_cli",
+        "gate_checks": [
+          1
+        ],
+        "id": "cli_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 5,
+        "source_sha256": "dbdb477c2fa508b399963570105c876bea9dc23befd6fda3c62dafc095198765",
+        "target": "test_product_cli.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gi_report_composition",
+        "gate_checks": [
+          0
+        ],
+        "id": "report_integration_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "2db690fdd150b59b9abf82c523eb8e32e67026163c3a371b5c29745141970867",
+        "target": "test_report_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2
+        ],
+        "gate": "gi_report_composition",
+        "gate_checks": [
+          1
+        ],
+        "id": "delivery_contract_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "9ca850530ea9a626d1b2521e1d997fb12e5302a696a4e2b3460b556556f55893",
+        "target": "test_delivery_contract.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2
+        ],
+        "gate": "gi_report_composition",
+        "gate_checks": [
+          2
+        ],
+        "id": "no_residual_storage_local",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 1,
+        "source_sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8",
+        "target": "test_no_residual_storage.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0,
+          3
+        ],
+        "gate": "gm_ranked_cli",
+        "gate_checks": [
+          0
+        ],
+        "id": "ranking_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 4,
+        "source_sha256": "60700febae6b8b5587057bf9b7238948b9428137f462f305ca077366721ca79b",
+        "target": "test_category_report.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          1,
+          3
+        ],
+        "entrypoint": {
+          "args": [
+            "examples/valid.json"
+          ],
+          "path": "category_report.py",
+          "stdout": "[{\"category\":\"food\",\"count\":2,\"total\":12},{\"category\":\"books\",\"count\":1,\"total\":7}]\n"
+        },
+        "gate": "gm_ranked_cli",
+        "gate_checks": [
+          1
+        ],
+        "id": "cli_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 5,
+        "source_sha256": "dbdb477c2fa508b399963570105c876bea9dc23befd6fda3c62dafc095198765",
+        "target": "test_product_cli.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0,
+          3
+        ],
+        "gate": "gm_ranked_cli",
+        "gate_checks": [
+          2
+        ],
+        "id": "report_integration_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "2db690fdd150b59b9abf82c523eb8e32e67026163c3a371b5c29745141970867",
+        "target": "test_report_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2,
+          3
+        ],
+        "gate": "gm_ranked_cli",
+        "gate_checks": [
+          3
+        ],
+        "id": "delivery_contract_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "9ca850530ea9a626d1b2521e1d997fb12e5302a696a4e2b3460b556556f55893",
+        "target": "test_delivery_contract.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2,
+          3
+        ],
+        "gate": "gm_ranked_cli",
+        "gate_checks": [
+          4
+        ],
+        "id": "no_residual_storage_milestone",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 1,
+        "source_sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8",
+        "target": "test_no_residual_storage.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          0
+        ],
+        "id": "summary",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 10,
+        "source_sha256": "d2b968b2d1f362f20b9e97a7ae0a120d4f5e7e4b43b0dcf495824d26d0c459f9",
+        "target": "test_records.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          1
+        ],
+        "id": "ranking",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 4,
+        "source_sha256": "60700febae6b8b5587057bf9b7238948b9428137f462f305ca077366721ca79b",
+        "target": "test_category_report.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          1
+        ],
+        "entrypoint": {
+          "args": [
+            "examples/valid.json"
+          ],
+          "path": "category_report.py",
+          "stdout": "[{\"category\":\"food\",\"count\":2,\"total\":12},{\"category\":\"books\",\"count\":1,\"total\":7}]\n"
+        },
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          2
+        ],
+        "id": "cli",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 5,
+        "source_sha256": "dbdb477c2fa508b399963570105c876bea9dc23befd6fda3c62dafc095198765",
+        "target": "test_product_cli.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          1
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          3
+        ],
+        "id": "summary_integration",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "6e6db05c6f76d2a5d45a66468dad5c7e55f79ffb23e34a9993e55697ef4b604e",
+        "target": "test_summary_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          0
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          4
+        ],
+        "id": "report_integration",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "2db690fdd150b59b9abf82c523eb8e32e67026163c3a371b5c29745141970867",
+        "target": "test_report_integration.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          5
+        ],
+        "id": "delivery_contract",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 2,
+        "source_sha256": "9ca850530ea9a626d1b2521e1d997fb12e5302a696a4e2b3460b556556f55893",
+        "target": "test_delivery_contract.py",
+        "timeout_seconds": 20
+      },
+      {
+        "cases": [],
+        "clean_copy": true,
+        "criteria": [
+          2
+        ],
+        "gate": "gs_project_acceptance",
+        "gate_checks": [
+          6
+        ],
+        "id": "no_residual_storage",
+        "integration_mode": "local",
+        "kind": "python_unittest",
+        "min_tests": 1,
+        "source_sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8",
+        "target": "test_no_residual_storage.py",
+        "timeout_seconds": 20
+      }
+    ],
+    "harness": [],
+    "project_acceptance": {
+      "delivery_paths": [
+        "records.py",
+        "category_report.py",
+        "USAGE.md"
+      ],
+      "entry_checks": [
+        "cli"
+      ],
+      "exclusions": [
+        {
+          "prior_input": {
+            "quote": "No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\notros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.",
+            "request_id": "records-v1-discovery-once"
+          },
+          "requirement": "out_of_scope"
+        }
+      ],
+      "runtime": "python_stdlib"
+    },
+    "requirement_acceptance": [
+      {
+        "checks": [
+          "summary_milestone",
+          "summary"
+        ],
+        "condition": "`records.summarize(records)` acepta una lista de diccionarios con `category` y `amount`, permite claves extra, no muta la entrada, valida cada registro y devuelve `count`, `total` y `by_category`; para vacío devuelve 0, 0 y {}.",
+        "milestones": [
+          "ms_validated_summary"
+        ],
+        "requirement": "summary_capability"
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary_integration_milestone",
+          "summary",
+          "summary_integration"
+        ],
+        "condition": "La categoría debe ser string no vacío tras quitar espacios y se normaliza con `strip().casefold()` del helper existente. El importe debe ser int o float finito, no negativo y no bool. Cualquier entrada inválida lanza ValueError.",
+        "milestones": [
+          "ms_validated_summary"
+        ],
+        "requirement": "validation_rules"
+      },
+      {
+        "checks": [
+          "summary_integration_milestone",
+          "summary_integration"
+        ],
+        "condition": "No hay integraciones externas; la única dependencia interna relevante es `record_rules.py`, cuya normalización `strip().casefold()` debe conservarse.",
+        "milestones": [
+          "ms_validated_summary"
+        ],
+        "requirement": "integrations"
+      },
+      {
+        "checks": [
+          "ranking_milestone",
+          "report_integration_milestone",
+          "ranking",
+          "report_integration"
+        ],
+        "condition": "`category_report.rank_categories(records)` usa el resumen anterior y devuelve objetos `category`/`count`/`total`, ordenados por total descendente y categoría ascendente como desempate; conserva validación y no mutación; vacío devuelve [].",
+        "milestones": [
+          "ms_ranked_cli"
+        ],
+        "requirement": "ranking_capability"
+      },
+      {
+        "checks": [
+          "cli_milestone",
+          "cli"
+        ],
+        "condition": "`python category_report.py examples/valid.json` carga una lista JSON y escribe el ranking como JSON compacto, con claves ordenadas, ASCII escapado y salto de línea final, sin mensajes extra en stdout. Una entrada/archivo inválido termina con código 2, diagnóstico en stderr y sin salida parcial.",
+        "milestones": [
+          "ms_ranked_cli"
+        ],
+        "requirement": "cli_capability"
+      },
+      {
+        "checks": [
+          "delivery_contract_milestone",
+          "delivery_contract"
+        ],
+        "condition": "`USAGE.md` debe documentar los comandos realmente comprobados antes de fijar el commit final.",
+        "milestones": [
+          "ms_ranked_cli"
+        ],
+        "requirement": "usage_documentation"
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary_integration_milestone",
+          "ranking_milestone",
+          "cli_milestone",
+          "report_integration_milestone",
+          "delivery_contract_milestone",
+          "no_residual_storage_milestone",
+          "summary",
+          "ranking",
+          "cli",
+          "summary_integration",
+          "report_integration",
+          "delivery_contract",
+          "no_residual_storage"
+        ],
+        "condition": "La aceptación exige los tests independientes declarados: 10 de `test_records.py`, 4 de `test_category_report.py`, 5 de CLI y las suites de integración/contrato indicadas; la validación final se ejecuta desde una copia limpia con evidencia independiente y sin editar los oráculos.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "success_criteria"
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking",
+          "cli",
+          "summary_integration",
+          "report_integration",
+          "delivery_contract"
+        ],
+        "condition": "Entregables del piloto: `records.py`, `category_report.py` y `USAGE.md`; se preserva la normalización del helper `record_rules.py` y se cubren resumen, ranking y CLI.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "scope_mvp"
+      },
+      {
+        "checks": [
+          "summary_integration_milestone",
+          "no_residual_storage_milestone",
+          "summary_integration",
+          "no_residual_storage"
+        ],
+        "condition": "Debe funcionar con Python y únicamente biblioteca estándar; no requiere base de datos ni archivos residuales.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "runtime_constraint"
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "cli_milestone",
+          "cli"
+        ],
+        "condition": "Se asume que los datos sintéticos se procesan localmente por el desarrollador, sin cuentas, aislamiento multiusuario, red ni almacenamiento persistente.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "security"
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking"
+        ],
+        "condition": "Necesita validar, agregar por categoría normalizada y obtener un ranking determinista de registros sin servicios externos.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "problem"
+      },
+      {
+        "checks": [
+          "summary",
+          "cli"
+        ],
+        "condition": "Utilidad local en Python para resumir y ordenar pequeños conjuntos de registros sintéticos, utilizable como biblioteca y desde terminal.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "vision"
+      },
+      {
+        "checks": [
+          "summary",
+          "cli"
+        ],
+        "condition": "Desarrollador que revisa registros sintéticos en su propia máquina.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "users"
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking"
+        ],
+        "condition": "Se asume carga de pequeños conjuntos de registros sintéticos procesados localmente; no se indican requisitos de concurrencia ni latencia.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "scale"
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking",
+          "cli",
+          "delivery_contract"
+        ],
+        "condition": "El trabajo debe tener al menos dos slices dependientes: primero el resumen validado reutilizable y después el informe/CLI basado en ese resumen; ambos deben cerrar sus comprobaciones.",
+        "milestones": [
+          "ms_validated_summary",
+          "ms_ranked_cli"
+        ],
+        "requirement": "delivery_slices"
+      }
+    ],
+    "resources": [
+      {
+        "path": ".gitignore",
+        "sha256": "0729b25dbaa8e73a7e03d3da9b341ee5f998b5b93a9ffe6ef339a01ddf34f8ff"
+      },
+      {
+        "path": "PILOT.md",
+        "sha256": "1d0ea08bd94d205301f872529db41f02239c2df6d2dd14ef80d6acc41076cd9f"
+      },
+      {
+        "path": "examples/boolean.json",
+        "sha256": "dbcfb5cedb3f437b6bc040ee7874524628cd659717669e7ace8d0dff1d668296"
+      },
+      {
+        "path": "examples/empty.json",
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "path": "examples/malformed.json",
+        "sha256": "9baf9b3760fed55b5472574159a0a714b0a949dd843fe696e3daf1e8a79359d9"
+      },
+      {
+        "path": "examples/negative.json",
+        "sha256": "6c45128781c5ffc6d226422a7e2296363110f6933c47c4fccb0147508cdaa2dd"
+      },
+      {
+        "path": "examples/reordered.json",
+        "sha256": "97aeb8109e7ec95abce97276f14cbed5ed1f5720043decb646a4c8e0e2f4d554"
+      },
+      {
+        "path": "examples/valid.json",
+        "sha256": "a801c683cfdd58ba6aecbc000622101c6bae2db8e96b4901010ab1e5eceb1f25"
+      },
+      {
+        "path": "pilot-contract.json",
+        "sha256": "9d001e229733bb2b458d256eba543484b07b800cff1e331bb8300b17ba68f4bd"
+      },
+      {
+        "path": "record_rules.py",
+        "sha256": "82292f97612cefd628767f5efeb93898cc753d76697fad549a1ef536986b7d44"
+      },
+      {
+        "path": "test_category_report.py",
+        "sha256": "60700febae6b8b5587057bf9b7238948b9428137f462f305ca077366721ca79b"
+      },
+      {
+        "path": "test_delivery_contract.py",
+        "sha256": "9ca850530ea9a626d1b2521e1d997fb12e5302a696a4e2b3460b556556f55893"
+      },
+      {
+        "path": "test_no_residual_storage.py",
+        "sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8"
+      },
+      {
+        "path": "test_product_cli.py",
+        "sha256": "dbdb477c2fa508b399963570105c876bea9dc23befd6fda3c62dafc095198765"
+      },
+      {
+        "path": "test_records.py",
+        "sha256": "d2b968b2d1f362f20b9e97a7ae0a120d4f5e7e4b43b0dcf495824d26d0c459f9"
+      },
+      {
+        "path": "test_report_integration.py",
+        "sha256": "2db690fdd150b59b9abf82c523eb8e32e67026163c3a371b5c29745141970867"
+      },
+      {
+        "path": "test_summary_integration.py",
+        "sha256": "6e6db05c6f76d2a5d45a66468dad5c7e55f79ffb23e34a9993e55697ef4b604e"
+      }
+    ],
+    "schema_version": 1,
+    "scope_authorizations": [
+      {
+        "disposition": "out_of_scope",
+        "id": "initial_exclusions",
+        "prior_input": {
+          "quote": "No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\notros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.",
+          "request_id": "records-v1-discovery-once"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "recorded_at": 1789146149.9083896,
+  "project": "p_ba973102351c9eac",
+  "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+  "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+  "resource_commit": "3f84d77a3f327c37b02cc2235e2465e2744a87a9",
+  "resource_path": "test_no_residual_storage.py",
+  "resource_sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8",
+  "actual_human_answer": "Sí, incorpora la prueba y continúa  ",
+  "decision_id": 1,
+  "previous_definition": "sha256:4259e8e72166a577dd889649ca8ae4588a703d815b41ddbdef95be5432095d8d",
+  "new_definition": "sha256:ef66d185d68f5abbc8db27aefe0af15f266b92bc0e099bc80e48b270f826703e",
+  "before_answer": {
+    "state": "waiting_for_human",
+    "pending_count": 1,
+    "calls": 23
+  },
+  "after_answer": {
+    "state": "working",
+    "pending_count": 0,
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+  },
+  "budget_amendment": {
+    "original_created_at": 1789136147.1839242,
+    "before_max_seconds": 7200,
+    "after_max_seconds": 14400,
+    "deadline": 1789150547.1839242,
+    "preserved_calls": 23,
+    "preserved_tokens": 557832,
+    "max_calls": 28,
+    "max_tokens": 750000
+  },
+  "evidence_scope": "Independent audit events on the six pre-existing CLI examples: file writes, SQLite and child processes. Limited to exercised Python paths. Preserves the original 25 tests; adds one test with six subcases.",
+  "transport": "Fresh MCP client using installed plugin launcher; disconnected after real answer. Not a separate human UI observation.",
+  "original_definition_immutable": true,
+  "original_procedures_preserved": 6,
+  "original_resources_preserved": 16,
+  "scope_and_delivery_unchanged": true
+}

@@ -1,0 +1,169 @@
+{
+  "recorded_at": "2026-09-11T17:08:21.614Z",
+  "transport": "Native Software Factory tools in this Codex conversation; separate human UI observation pending",
+  "project": {
+    "id": "p_ba973102351c9eac",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product"
+  },
+  "run": {
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+    "status": "project_verified",
+    "paused": false,
+    "reason": "Recorded project conditions verified on the accepted commit; local delivery prepared"
+  },
+  "validation": {
+    "state": "project_verified",
+    "candidate_commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "validated_version": {
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "receipt": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+      "current": true
+    },
+    "contract_id": "sha256:6603f9ef542b147237316826b9ed2a74f2a8cb0189b1bfdb8ce5e1d9bd3a72b6",
+    "pending_criteria": [],
+    "checks": [
+      {
+        "check_id": "summary_integration_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_integration_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "ranking_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "cli_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "ranking",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "cli",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_integration",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      }
+    ],
+    "blocker": null,
+    "remediation": null,
+    "delivery": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product/.factory/deliveries/sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1/REPORT.md",
+    "exclusions": [
+      {
+        "disposition": "out_of_scope",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Authorized by initial_exclusions.",
+        "requirement": "out_of_scope",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      }
+    ],
+    "delivery_ready": true
+  },
+  "repeat": {
+    "tool": "factory_execute",
+    "action": "validate_project",
+    "request_id": "records-auto-final-repeat-once",
+    "ok": true,
+    "same_run": true,
+    "same_receipt": true,
+    "calls_before": 29,
+    "calls_after": 29,
+    "tokens_before": 715259,
+    "tokens_after": 715259
+  },
+  "inspection": {
+    "receipt_count": 1,
+    "validation_count": 1,
+    "delivery_ready": true
+  },
+  "human_ui_observation": false
+}

@@ -90,8 +90,9 @@ del proceso separado respecto al host MCP también conserva sus tests existentes
 El piloto real anterior conserva sus 17 llamadas, commit y recibo. No se atribuye a ese
 recorrido esta vinculación automática: allí hubo una intervención revisada. El usuario
 autorizó después un [segundo piloto real con Fast](automatic-pilot-result.md), que completó
-discovery y arquitectura y quedó bloqueado en el gate de planning. No produjo un binding
-aceptado ni entrega. La comprobación humana del informe final en otro chat sigue pendiente.
+discovery, arquitectura, planning con vinculación automática y la entrega verificada tras
+dos milestones. Sus recuperaciones de planning y la autorización humana de un oráculo adicional
+quedan registradas. La comprobación humana del informe final en otro chat sigue pendiente.
 
 La versión inicial de esta corrección pasó **321 tests en 533,917 segundos**. Su [evidencia](evidence/end-to-end-12-automatic-binding.json)
 incluye hashes de fuentes, log, versión instalada del plugin y la consulta al piloto sin

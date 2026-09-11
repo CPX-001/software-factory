@@ -13,8 +13,9 @@ y la de una posible remediación final son explícitas; no incluye publicación 
 El [piloto end-to-end desde discovery](docs/end-to-end-acceptance.md) tiene una entrega validada
 con modelo real en una ubicación persistente. Necesitó vincular su plan a las pruebas mediante
 una intervención revisada. La [vinculación automática autorizada](docs/planning-binding.md)
-corrige esa transición y está probada con modelos simulados; su aceptación real y la consulta
-humana de la entrega final en otro chat de Codex App siguen pendientes.
+también alcanzó una entrega verificada en el [segundo piloto real](docs/automatic-pilot-result.md),
+con las recuperaciones e intervenciones registradas. Queda la consulta humana de la entrega
+final en otro chat de Codex App.
 
 La interfaz principal es Codex App mediante el plugin local y MCP. Consulta
 [instalación y uso desde Codex](docs/codex.md). La CLI se conserva para recovery, debugging

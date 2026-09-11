@@ -1,7 +1,7 @@
-# Paso 12: primera entrega real; segundo piloto esperando evidencia
+# Paso 12: entregas reales; comprobación humana final pendiente
 
-El [segundo piloto autorizado](automatic-pilot-result.md) conserva su mismo run y espera
-una decisión humana sobre una comprobación adicional. Todavía no tiene entrega aceptada.
+El [segundo piloto autorizado](automatic-pilot-result.md) completó la vinculación automática,
+dos milestones y la entrega validada en su mismo run. Falta la consulta humana del informe.
 Este documento conserva la evidencia del primer piloto, que llegó a `project_verified`
 con la intervención de vinculación registrada.
 
@@ -157,8 +157,8 @@ un piloto. El plan resultante necesita un binding revisado: el de esta instancia
 aplica silenciosamente a otro roadmap. La nueva opción `--automatic-binding` prepara los
 oráculos y la propuesta de autorización para que el planning normal produzca esa vinculación.
 Su segunda ejecución real fue autorizada posteriormente y está documentada en
-[el resultado del piloto automático](automatic-pilot-result.md); quedó bloqueada antes de
-aceptar el plan. No hay autorización implícita para crear más instancias con inferencia.
+[el resultado del piloto automático](automatic-pilot-result.md); ya aceptó el plan y entregó
+el producto verificado. No hay autorización implícita para crear más instancias con inferencia.
 
 El usuario ya comprobó selección, reenvío pausado e inspección en dos chats; esa
 [evidencia de App](evidence/end-to-end-12-codex-app.json) no necesita repetirse. Las tools
@@ -166,10 +166,10 @@ nativas de esta conversación consultaron ejecución activa y resultado final. E
 MCP instalado se desconectó mientras el controller avanzaba entre slices, milestones y
 validación. Esto no equivale a observar todos los pasos en la UI humana.
 
-El piloto real utilizó el plugin `0.1.0+codex.20260911131027`. Para la comprobación humana final,
-el mensaje pendiente en otro chat es:
+El primer piloto utilizó el plugin `0.1.0+codex.20260911131027`. La comprobación humana final
+se hará sobre la segunda instancia, con el launcher actualizado. El mensaje en otro chat es:
 
-> Usa Software Factory. Consulta el proyecto p_3084354cc76d1c23. Muestra la versión
+> Usa Software Factory. Selecciona el proyecto p_ba973102351c9eac y muestra la versión
 > validada, sus exclusiones y la ruta del informe de entrega local. No inicies ni
 > reanudes ejecuciones.
 

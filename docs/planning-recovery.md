@@ -43,8 +43,10 @@ tras caída. El escenario existente de dos milestones también recorre mediante 
 autorización, desconexión, corrección, revisión, implementación y entrega verificada.
 Esto no sustituye la evidencia del recorrido con modelo real.
 
-La revisión puede referirse a la raíz `execution_binding` y a IDs de sus checks, además
-de requisitos y elementos del plan. Reconocer esas referencias conserva los hallazgos;
+La revisión puede referirse a la raíz `execution_binding`, a IDs de sus checks y a códigos
+de diagnósticos presentes en el contexto guardado de esa llamada, además de requisitos y
+elementos del plan. Los códigos ausentes se rechazan, incluso si existen en otra propuesta.
+Reconocer esas referencias conserva los hallazgos;
 no los convierte en aprobación. Si el modelo terminó y falló el guardado/validación del
 checkpoint, planning reutiliza la respuesta del ledger de análisis con el mismo contexto,
 esquema, instrucciones, fuentes y autorizaciones. No repite inferencia ni incrementa

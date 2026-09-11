@@ -1,0 +1,1808 @@
+{
+  "revision": 1,
+  "parent_revision": null,
+  "architecture_revision": 1,
+  "architecture_fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+  "fingerprint": "sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e",
+  "plan": {
+    "architecture": {
+      "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+      "revision": 1
+    },
+    "blockers": [],
+    "coverage": [
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "The report slice owns terminal parsing, exact output, and controlled failure behavior.",
+        "requirement": "cli_capability",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "Slice and milestone dependencies enforce summary delivery before reporting.",
+        "requirement": "delivery_slices",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "The summary slice invokes the sole internal helper dependency.",
+        "requirement": "integrations",
+        "slices": [
+          "sl_summary_core"
+        ]
+      },
+      {
+        "disposition": "out_of_scope",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Authorized by initial_exclusions.",
+        "requirement": "out_of_scope",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "Validated aggregation and derived ranking address the stated local problem.",
+        "requirement": "problem",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "The report slice owns deterministic ranking through summarize.",
+        "requirement": "ranking_capability",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "Standard-library checks and the authorized residual-storage oracle establish the exercised runtime condition.",
+        "requirement": "runtime_constraint",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "The in-memory utility remains aligned with the stated small local workload assumption.",
+        "requirement": "scale",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Final delivery checks bind the required delivery surface.",
+        "requirement": "scope_mvp",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Validation and no-partial-output CLI behavior implement the local-input boundary.",
+        "requirement": "security",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Milestone and final clean-copy bindings preserve declared independent acceptance evidence.",
+        "requirement": "success_criteria",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "The first slice implements the reusable summary contract.",
+        "requirement": "summary_capability",
+        "slices": [
+          "sl_summary_core"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "The report slice documents only verified declared commands.",
+        "requirement": "usage_documentation",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_ranked_cli",
+        "rationale": "The library and local CLI provide the stated developer-facing usage modes.",
+        "requirement": "users",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "The summary slice owns category and amount validation.",
+        "requirement": "validation_rules",
+        "slices": [
+          "sl_summary_core"
+        ]
+      },
+      {
+        "disposition": "covered",
+        "milestone": "ms_validated_summary",
+        "rationale": "Together the slices provide local library and terminal use.",
+        "requirement": "vision",
+        "slices": [
+          "sl_summary_core",
+          "sl_ranked_cli"
+        ]
+      }
+    ],
+    "decision_keys": [
+      "residual_storage_evidence"
+    ],
+    "execution_binding": {
+      "checks": [
+        {
+          "criteria": [
+            0,
+            1,
+            2
+          ],
+          "gate": "gl_summary_local",
+          "gate_checks": [
+            0
+          ],
+          "id": "summary_local",
+          "template": "summary"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gi_summary_composition",
+          "gate_checks": [
+            0
+          ],
+          "id": "summary_integration_local",
+          "template": "summary_integration"
+        },
+        {
+          "criteria": [
+            0,
+            2
+          ],
+          "gate": "gm_validated_summary",
+          "gate_checks": [
+            0
+          ],
+          "id": "summary_milestone",
+          "template": "summary"
+        },
+        {
+          "criteria": [
+            1,
+            2
+          ],
+          "gate": "gm_validated_summary",
+          "gate_checks": [
+            1
+          ],
+          "id": "summary_integration_milestone",
+          "template": "summary_integration"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gl_ranked_cli",
+          "gate_checks": [
+            0
+          ],
+          "id": "ranking_local",
+          "template": "ranking"
+        },
+        {
+          "criteria": [
+            1
+          ],
+          "gate": "gl_ranked_cli",
+          "gate_checks": [
+            1
+          ],
+          "id": "cli_local",
+          "template": "cli"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gi_report_composition",
+          "gate_checks": [
+            0
+          ],
+          "id": "report_integration_local",
+          "template": "report_integration"
+        },
+        {
+          "criteria": [
+            2
+          ],
+          "gate": "gi_report_composition",
+          "gate_checks": [
+            1
+          ],
+          "id": "delivery_contract_local",
+          "template": "delivery_contract"
+        },
+        {
+          "criteria": [
+            2
+          ],
+          "gate": "gi_report_composition",
+          "gate_checks": [
+            2
+          ],
+          "id": "no_residual_storage_local",
+          "template": "no_residual_storage"
+        },
+        {
+          "criteria": [
+            0,
+            3
+          ],
+          "gate": "gm_ranked_cli",
+          "gate_checks": [
+            0
+          ],
+          "id": "ranking_milestone",
+          "template": "ranking"
+        },
+        {
+          "criteria": [
+            1,
+            3
+          ],
+          "gate": "gm_ranked_cli",
+          "gate_checks": [
+            1
+          ],
+          "id": "cli_milestone",
+          "template": "cli"
+        },
+        {
+          "criteria": [
+            0,
+            3
+          ],
+          "gate": "gm_ranked_cli",
+          "gate_checks": [
+            2
+          ],
+          "id": "report_integration_milestone",
+          "template": "report_integration"
+        },
+        {
+          "criteria": [
+            2,
+            3
+          ],
+          "gate": "gm_ranked_cli",
+          "gate_checks": [
+            3
+          ],
+          "id": "delivery_contract_milestone",
+          "template": "delivery_contract"
+        },
+        {
+          "criteria": [
+            2,
+            3
+          ],
+          "gate": "gm_ranked_cli",
+          "gate_checks": [
+            4
+          ],
+          "id": "no_residual_storage_milestone",
+          "template": "no_residual_storage"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            0
+          ],
+          "id": "summary",
+          "template": "summary"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            1
+          ],
+          "id": "ranking",
+          "template": "ranking"
+        },
+        {
+          "criteria": [
+            1
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            2
+          ],
+          "id": "cli",
+          "template": "cli"
+        },
+        {
+          "criteria": [
+            1
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            3
+          ],
+          "id": "summary_integration",
+          "template": "summary_integration"
+        },
+        {
+          "criteria": [
+            0
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            4
+          ],
+          "id": "report_integration",
+          "template": "report_integration"
+        },
+        {
+          "criteria": [
+            2
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            5
+          ],
+          "id": "delivery_contract",
+          "template": "delivery_contract"
+        },
+        {
+          "criteria": [
+            2
+          ],
+          "gate": "gs_project_acceptance",
+          "gate_checks": [
+            6
+          ],
+          "id": "no_residual_storage",
+          "template": "no_residual_storage"
+        }
+      ],
+      "definition_id": "sha256:ef66d185d68f5abbc8db27aefe0af15f266b92bc0e099bc80e48b270f826703e",
+      "exclusions": [
+        {
+          "authorization": "initial_exclusions",
+          "requirement": "out_of_scope"
+        }
+      ],
+      "harness": [],
+      "requirements": [
+        {
+          "checks": [
+            "summary_milestone",
+            "summary"
+          ],
+          "milestones": [
+            "ms_validated_summary"
+          ],
+          "requirement": "summary_capability"
+        },
+        {
+          "checks": [
+            "summary_milestone",
+            "summary_integration_milestone",
+            "summary",
+            "summary_integration"
+          ],
+          "milestones": [
+            "ms_validated_summary"
+          ],
+          "requirement": "validation_rules"
+        },
+        {
+          "checks": [
+            "summary_integration_milestone",
+            "summary_integration"
+          ],
+          "milestones": [
+            "ms_validated_summary"
+          ],
+          "requirement": "integrations"
+        },
+        {
+          "checks": [
+            "ranking_milestone",
+            "report_integration_milestone",
+            "ranking",
+            "report_integration"
+          ],
+          "milestones": [
+            "ms_ranked_cli"
+          ],
+          "requirement": "ranking_capability"
+        },
+        {
+          "checks": [
+            "cli_milestone",
+            "cli"
+          ],
+          "milestones": [
+            "ms_ranked_cli"
+          ],
+          "requirement": "cli_capability"
+        },
+        {
+          "checks": [
+            "delivery_contract_milestone",
+            "delivery_contract"
+          ],
+          "milestones": [
+            "ms_ranked_cli"
+          ],
+          "requirement": "usage_documentation"
+        },
+        {
+          "checks": [
+            "summary_milestone",
+            "summary_integration_milestone",
+            "ranking_milestone",
+            "cli_milestone",
+            "report_integration_milestone",
+            "delivery_contract_milestone",
+            "no_residual_storage_milestone",
+            "summary",
+            "ranking",
+            "cli",
+            "summary_integration",
+            "report_integration",
+            "delivery_contract",
+            "no_residual_storage"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "success_criteria"
+        },
+        {
+          "checks": [
+            "summary",
+            "ranking",
+            "cli",
+            "summary_integration",
+            "report_integration",
+            "delivery_contract"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "scope_mvp"
+        },
+        {
+          "checks": [
+            "summary_integration_milestone",
+            "no_residual_storage_milestone",
+            "summary_integration",
+            "no_residual_storage"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "runtime_constraint"
+        },
+        {
+          "checks": [
+            "summary_milestone",
+            "cli_milestone",
+            "cli"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "security"
+        },
+        {
+          "checks": [
+            "summary",
+            "ranking"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "problem"
+        },
+        {
+          "checks": [
+            "summary",
+            "cli"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "vision"
+        },
+        {
+          "checks": [
+            "summary",
+            "cli"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "users"
+        },
+        {
+          "checks": [
+            "summary",
+            "ranking"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "scale"
+        },
+        {
+          "checks": [
+            "summary",
+            "ranking",
+            "cli",
+            "delivery_contract"
+          ],
+          "milestones": [
+            "ms_validated_summary",
+            "ms_ranked_cli"
+          ],
+          "requirement": "delivery_slices"
+        }
+      ]
+    },
+    "gates": [
+      {
+        "checks": [
+          "Run the authorized summary oracle unchanged."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "gl_summary_local",
+        "kind": "local",
+        "rationale": "Focused local evidence for the first executable slice.",
+        "signals": [
+          "routine"
+        ],
+        "target": "sl_summary_core",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Run the authorized summary-composition oracle unchanged."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "gi_summary_composition",
+        "kind": "integration",
+        "rationale": "The slice crosses the summary and rule-helper boundary.",
+        "signals": [
+          "cross_component",
+          "boundary"
+        ],
+        "target": "sl_summary_core",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "The reusable summary contract passes its authorized summary oracle.",
+          "The summary-to-helper composition contract passes its authorized integration oracle."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "gm_validated_summary",
+        "kind": "milestone",
+        "rationale": "Closes preserved summary criteria before reporting work is selected.",
+        "signals": [
+          "milestone"
+        ],
+        "target": "ms_validated_summary",
+        "trigger": "milestone_close"
+      },
+      {
+        "checks": [
+          "Run the authorized ranking oracle unchanged.",
+          "Run the authorized CLI oracle unchanged."
+        ],
+        "cost": "cheap",
+        "harness": [],
+        "id": "gl_ranked_cli",
+        "kind": "local",
+        "rationale": "Focused local evidence for ranking and the public terminal entry.",
+        "signals": [
+          "routine",
+          "public_api"
+        ],
+        "target": "sl_ranked_cli",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "Run the authorized report-composition oracle unchanged.",
+          "Run the authorized delivery-contract oracle unchanged.",
+          "Run the authorized residual-storage oracle unchanged."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "gi_report_composition",
+        "kind": "integration",
+        "rationale": "The report-to-summary boundary, verified delivery surface, and exercised storage boundary require composition evidence.",
+        "signals": [
+          "cross_component",
+          "boundary",
+          "public_api",
+          "persistence"
+        ],
+        "target": "sl_ranked_cli",
+        "trigger": "after_slice"
+      },
+      {
+        "checks": [
+          "The ranking oracle passes.",
+          "The CLI oracle passes including the prescribed real entry.",
+          "The report-composition oracle passes.",
+          "The delivery-contract oracle passes unchanged.",
+          "The residual-storage oracle passes unchanged on declared CLI paths."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "gm_ranked_cli",
+        "kind": "milestone",
+        "rationale": "Closes ranking, terminal behavior, documentation, delivery, and exercised residual-storage criteria without relying on project close.",
+        "signals": [
+          "milestone",
+          "public_api",
+          "persistence"
+        ],
+        "target": "ms_ranked_cli",
+        "trigger": "milestone_close"
+      },
+      {
+        "checks": [
+          "Run the authorized summary oracle unchanged in a clean copy.",
+          "Run the authorized ranking oracle unchanged in a clean copy.",
+          "Run the authorized CLI oracle unchanged in a clean copy, including its prescribed entry.",
+          "Run the authorized summary-integration oracle unchanged in a clean copy.",
+          "Run the authorized report-integration oracle unchanged in a clean copy.",
+          "Run the authorized delivery-contract oracle unchanged in a clean copy.",
+          "Run the authorized residual-storage oracle unchanged in a clean copy."
+        ],
+        "cost": "moderate",
+        "harness": [],
+        "id": "gs_project_acceptance",
+        "kind": "system",
+        "rationale": "Final integrated acceptance preserves every immutable product oracle, including the authorized exercised residual-storage check.",
+        "signals": [
+          "release",
+          "public_api",
+          "cross_component",
+          "boundary",
+          "persistence"
+        ],
+        "target": "ms_ranked_cli",
+        "trigger": "project_close"
+      }
+    ],
+    "harness": [],
+    "milestones": [
+      {
+        "architecture": {
+          "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+          "revision": 1
+        },
+        "closure_conditions": [
+          "gm_validated_summary passes its declared summary and summary-composition checks."
+        ],
+        "dependencies": [],
+        "id": "ms_validated_summary",
+        "objective": "Provide the reusable normalized summary capability.",
+        "observable_outcome": "Library callers can obtain validated normalized category summaries.",
+        "requirements": [
+          "summary_capability",
+          "validation_rules",
+          "integrations",
+          "runtime_constraint",
+          "scope_mvp",
+          "delivery_slices",
+          "problem",
+          "vision",
+          "users",
+          "scale",
+          "security",
+          "success_criteria"
+        ],
+        "risks": [],
+        "status": "open",
+        "subjective_criteria": [],
+        "success_criteria": [
+          "summarize validates records, preserves caller input, and returns the specified empty and normalized aggregate forms.",
+          "The summary uses record_rules normalization and only standard-library local processing."
+        ],
+        "title": "Reusable validated summary",
+        "verification_gates": [
+          "gm_validated_summary"
+        ]
+      },
+      {
+        "architecture": {
+          "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+          "revision": 1
+        },
+        "closure_conditions": [
+          "gm_ranked_cli passes ranking, report-composition, CLI, delivery-contract, and residual-storage checks."
+        ],
+        "dependencies": [
+          "ms_validated_summary"
+        ],
+        "id": "ms_ranked_cli",
+        "objective": "Expose the accepted summary through deterministic ranking and terminal output.",
+        "observable_outcome": "A developer can run the prescribed local CLI and receive the deterministic ranking.",
+        "requirements": [
+          "ranking_capability",
+          "cli_capability",
+          "usage_documentation",
+          "success_criteria",
+          "delivery_slices",
+          "scope_mvp",
+          "out_of_scope",
+          "runtime_constraint",
+          "problem",
+          "vision",
+          "users",
+          "scale",
+          "security"
+        ],
+        "risks": [
+          "risk_contract_drift"
+        ],
+        "status": "open",
+        "subjective_criteria": [],
+        "success_criteria": [
+          "rank_categories derives ordered category/count/total entries from the reusable summary without mutating input.",
+          "The CLI produces the specified compact successful JSON and controlled invalid-input behavior.",
+          "Required delivery paths, documented verified commands, clean-copy evidence, and unchanged oracle integrity are present."
+        ],
+        "title": "Deterministic ranked report and CLI",
+        "verification_gates": [
+          "gm_ranked_cli"
+        ]
+      }
+    ],
+    "near_term": [
+      "sl_summary_core",
+      "sl_ranked_cli"
+    ],
+    "objective": "Deliver a local standard-library Python utility with reusable validated record summaries and deterministic ranked CLI output.",
+    "rationale": "Reconciled the reported binding error by mapping every ranked-CLI milestone gate check to its existing closure condition, without changing architecture, procedures, oracle templates, acceptance criteria, or scope.",
+    "risks": [
+      {
+        "acceptance_key": "",
+        "blocks": [],
+        "description": "Duplicating validation or category normalization in reporting could diverge from record_rules.py or the reusable summary contract.",
+        "id": "risk_contract_drift",
+        "mitigation": "Keep ranking dependent on summarize, route every category through the shared helper, and use the declared composition checks.",
+        "owner": "ms_ranked_cli",
+        "severity": "medium",
+        "validation_slice": "sl_ranked_cli"
+      }
+    ],
+    "schema_version": 1,
+    "slices": [
+      {
+        "acceptance_criteria": [
+          "Valid records aggregate by strip().casefold() category.",
+          "Invalid categories, amounts, record shapes, and input containers raise ValueError.",
+          "The caller's records and nested values are not mutated."
+        ],
+        "architecture": {
+          "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+          "revision": 1
+        },
+        "architecture_impact": "expected_within_baseline",
+        "boundaries": [
+          "ctr_category_normalization",
+          "ctr_summary_api",
+          "dep_summary_rules",
+          "flow_library_summary"
+        ],
+        "components": [
+          "cmp_records_summary",
+          "cmp_record_rules"
+        ],
+        "dependencies": [],
+        "id": "sl_summary_core",
+        "impact_reason": "Implements the established summary-to-rule-helper boundary.",
+        "kind": "vertical",
+        "maturity": "execution_ready",
+        "milestone": "ms_validated_summary",
+        "objective": "Establish the reusable summary boundary using the canonical helper.",
+        "out_of_scope": [
+          "Ranking, CLI serialization, and usage documentation"
+        ],
+        "requirements": [
+          "summary_capability",
+          "validation_rules",
+          "integrations",
+          "runtime_constraint",
+          "scope_mvp",
+          "delivery_slices",
+          "problem",
+          "vision",
+          "users",
+          "scale",
+          "security",
+          "success_criteria"
+        ],
+        "risks": [],
+        "scope": [
+          "records.py summary behavior",
+          "record_rules.py normalization invocation",
+          "Validation, aggregation, non-mutation, and empty-result behavior"
+        ],
+        "title": "Validated normalized summary",
+        "verification_expectation": "Run focused summary and summary-composition checks after the slice.",
+        "verification_triggers": [
+          "cross_component",
+          "boundary"
+        ]
+      },
+      {
+        "acceptance_criteria": [
+          "Ranking orders total descending then category ascending and reuses summarize.",
+          "CLI success and failure streams, exit status, and formatting meet the terminal contract.",
+          "Declared clean-copy ranking, CLI, report-composition, delivery, and residual-storage checks pass without oracle edits."
+        ],
+        "architecture": {
+          "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+          "revision": 1
+        },
+        "architecture_impact": "expected_within_baseline",
+        "boundaries": [
+          "ctr_summary_api",
+          "ctr_ranking_api",
+          "ctr_cli_output",
+          "dep_report_summary",
+          "flow_ranking"
+        ],
+        "components": [
+          "cmp_category_report",
+          "cmp_records_summary"
+        ],
+        "dependencies": [
+          "sl_summary_core"
+        ],
+        "id": "sl_ranked_cli",
+        "impact_reason": "Completes the existing report-to-summary and terminal-adapter boundaries.",
+        "kind": "vertical",
+        "maturity": "execution_ready",
+        "milestone": "ms_ranked_cli",
+        "objective": "Build deterministic reporting on the accepted summary and document verified entry commands.",
+        "out_of_scope": [
+          "UI, network, persistence, third-party packages, deployment, publication, and architecture changes"
+        ],
+        "requirements": [
+          "ranking_capability",
+          "cli_capability",
+          "usage_documentation",
+          "success_criteria",
+          "delivery_slices",
+          "scope_mvp",
+          "out_of_scope",
+          "runtime_constraint",
+          "problem",
+          "vision",
+          "users",
+          "scale",
+          "security"
+        ],
+        "risks": [
+          "risk_contract_drift"
+        ],
+        "scope": [
+          "category_report ranking delegated to summarize",
+          "CLI JSON loading, serialization, and controlled failures",
+          "USAGE.md commands limited to verified declared procedures"
+        ],
+        "title": "Ranking, CLI, and verified usage",
+        "verification_expectation": "Run focused ranking, CLI, report-composition, delivery-contract, and residual-storage checks after the slice.",
+        "verification_triggers": [
+          "cross_component",
+          "boundary",
+          "public_api",
+          "persistence"
+        ]
+      }
+    ],
+    "unresolved_questions": []
+  },
+  "source": {
+    "adrs": [
+      {
+        "alternatives": [
+          "Place validation, aggregation, ranking, and CLI behavior in one module.",
+          "Create separate services or extensible plugin layers."
+        ],
+        "choice": "Keep canonical normalization in record_rules, reusable validation/summary in records, and ranking/CLI serialization in category_report.",
+        "consequences": [
+          "One canonical validation path prevents reporting drift.",
+          "No service, network, database, or package architecture is introduced.",
+          "The CLI remains a thin adapter around library behavior."
+        ],
+        "evidence": [
+          "summary_capability",
+          "ranking_capability",
+          "delivery_slices",
+          "integrations",
+          "runtime_constraint",
+          "out_of_scope"
+        ],
+        "human_key": "",
+        "id": "dec_system_style",
+        "kind": "system_style",
+        "rationale": "The required dependency from report to reusable summary is explicit, while the product is a small local standard-library utility.",
+        "title": "Use a layered in-process library and CLI design"
+      }
+    ],
+    "architecture": {
+      "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+      "revision": 1
+    },
+    "baseline": {
+      "assumptions": [
+        {
+          "id": "asm_small_local_scale",
+          "rationale": "This supports a single-process, in-memory baseline without scaling infrastructure.",
+          "source_keys": [
+            "scale"
+          ],
+          "statement": "Workloads are small synthetic record sets processed locally, with no stated concurrency or latency target.",
+          "validation": "Confirm representative input sizes and performance expectations before any expansion beyond local utility use."
+        },
+        {
+          "id": "asm_local_security_context",
+          "rationale": "The supplied scope explicitly limits use to a local utility and excludes network and persistence.",
+          "source_keys": [
+            "security"
+          ],
+          "statement": "A developer processes synthetic data locally without accounts, multi-user isolation, network access, or persistent storage.",
+          "validation": "Reassess if real, sensitive, shared, or remotely supplied data is introduced."
+        }
+      ],
+      "components": [
+        {
+          "boundary": "Internal shared rule helper; no I/O or aggregation.",
+          "id": "cmp_record_rules",
+          "name": "Record Rules",
+          "owns": [
+            "Canonical category normalization rule"
+          ],
+          "responsibilities": [
+            "Normalize category values with the existing strip().casefold() behavior."
+          ]
+        },
+        {
+          "boundary": "Reusable in-process domain library; no CLI, file, network, or persistence responsibilities.",
+          "id": "cmp_records_summary",
+          "name": "Records Summary",
+          "owns": [
+            "Record validation",
+            "Summary aggregation contract"
+          ],
+          "responsibilities": [
+            "Validate record collections and individual category/amount values.",
+            "Produce count, total, and normalized by-category summaries without mutating caller input."
+          ]
+        },
+        {
+          "boundary": "In-process reporting and command-entry boundary; delegates validation and aggregation to Records Summary.",
+          "id": "cmp_category_report",
+          "name": "Category Report and CLI",
+          "owns": [
+            "Ranking contract",
+            "CLI serialization and process-result behavior"
+          ],
+          "responsibilities": [
+            "Derive deterministic category rankings from the reusable summary.",
+            "Load the CLI JSON input and emit the specified compact JSON result.",
+            "Map invalid CLI input or processing failures to exit code 2, stderr diagnostics, and no partial stdout."
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "components": [
+            "cmp_record_rules",
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "Implementation runtime is Python with only the standard library.",
+          "id": "con_python_stdlib"
+        },
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "The pilot delivery surface is records.py, category_report.py, and USAGE.md; usage documentation must contain commands actually verified before final commit.",
+          "id": "con_delivery_surface"
+        },
+        {
+          "components": [
+            "cmp_record_rules",
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "UI, network, third-party dependencies, package installation, persistence, other languages, deployment, publication, and automatic architecture changes are excluded.",
+          "id": "con_exclusions"
+        }
+      ],
+      "contracts": [
+        {
+          "description": "Canonical category normalization supplied by the existing helper.",
+          "id": "ctr_category_normalization",
+          "invariants": [
+            "Normalization is exactly strip().casefold().",
+            "A category must be a string and nonempty after surrounding whitespace is removed."
+          ],
+          "participants": [
+            "cmp_records_summary",
+            "cmp_record_rules"
+          ],
+          "protocol": "In-process Python function call."
+        },
+        {
+          "description": "Reusable summary API for a list of record dictionaries.",
+          "id": "ctr_summary_api",
+          "invariants": [
+            "Input must be a list of dictionaries containing category and amount; extra keys are allowed.",
+            "amount is a finite nonnegative int or float, excluding bool.",
+            "Invalid input raises ValueError.",
+            "Caller input is not mutated.",
+            "An empty list returns count 0, total 0, and by_category {}."
+          ],
+          "participants": [
+            "cmp_category_report",
+            "cmp_records_summary"
+          ],
+          "protocol": "In-process Python call: summarize(records) returns count, total, and by_category or raises ValueError."
+        },
+        {
+          "description": "Deterministic ranked report derived from the summary contract.",
+          "id": "ctr_ranking_api",
+          "invariants": [
+            "Uses the summary behavior, including validation and non-mutation.",
+            "Sort order is total descending, then category ascending.",
+            "An empty list returns []."
+          ],
+          "participants": [
+            "cmp_category_report"
+          ],
+          "protocol": "In-process Python call: rank_categories(records) returns a list of category/count/total objects or raises ValueError."
+        },
+        {
+          "description": "Terminal contract for the category report command.",
+          "id": "ctr_cli_output",
+          "invariants": [
+            "Successful output is compact JSON with sorted object keys, ASCII escaping, and one final newline.",
+            "stdout contains no extra messages.",
+            "Invalid input or file ends with exit code 2, a diagnostic on stderr, and no partial stdout."
+          ],
+          "participants": [
+            "cmp_category_report"
+          ],
+          "protocol": "python category_report.py examples/valid.json"
+        }
+      ],
+      "contradictions": [],
+      "coverage": [
+        {
+          "rationale": "Defines the local Python library and terminal utility baseline.",
+          "source_key": "vision",
+          "targets": [
+            "cmp_records_summary",
+            "cmp_category_report",
+            "dec_system_style"
+          ]
+        },
+        {
+          "rationale": "Validation, normalized aggregation, and deterministic ranking address the stated problem.",
+          "source_key": "problem",
+          "targets": [
+            "cmp_records_summary",
+            "cmp_category_report",
+            "flow_ranking"
+          ]
+        },
+        {
+          "rationale": "The runtime and trust boundary serve one local developer.",
+          "source_key": "users",
+          "targets": [
+            "run_local_python",
+            "sec_local_input_boundary"
+          ]
+        },
+        {
+          "rationale": "Captures the command, canonical success output, and controlled failure behavior.",
+          "source_key": "cli_capability",
+          "targets": [
+            "cmp_category_report",
+            "ctr_cli_output",
+            "obs_cli_diagnostics"
+          ]
+        },
+        {
+          "rationale": "Defines reusable summary behavior and output entities.",
+          "source_key": "summary_capability",
+          "targets": [
+            "cmp_records_summary",
+            "ctr_summary_api",
+            "data_summary"
+          ]
+        },
+        {
+          "rationale": "Defines ranked output, sort order, validation, and empty result.",
+          "source_key": "ranking_capability",
+          "targets": [
+            "cmp_category_report",
+            "ctr_ranking_api",
+            "data_ranked_report"
+          ]
+        },
+        {
+          "rationale": "Makes normalization and amount/category validity contractual.",
+          "source_key": "validation_rules",
+          "targets": [
+            "cmp_record_rules",
+            "cmp_records_summary",
+            "ctr_category_normalization",
+            "ctr_summary_api"
+          ]
+        },
+        {
+          "rationale": "Models the sole internal helper dependency and absence of external integrations.",
+          "source_key": "integrations",
+          "targets": [
+            "cmp_record_rules",
+            "dep_summary_rules",
+            "inv_no_persistence_or_external_io"
+          ]
+        },
+        {
+          "rationale": "Sets Python standard-library execution with no database or residual files.",
+          "source_key": "runtime_constraint",
+          "targets": [
+            "run_local_python",
+            "con_python_stdlib"
+          ]
+        },
+        {
+          "rationale": "Maps required deliverables and preserved helper behavior to component boundaries.",
+          "source_key": "scope_mvp",
+          "targets": [
+            "con_delivery_surface",
+            "cmp_records_summary",
+            "cmp_category_report"
+          ]
+        },
+        {
+          "rationale": "The dependency ensures reusable validated summary is the prerequisite for reporting.",
+          "source_key": "delivery_slices",
+          "targets": [
+            "dep_report_summary",
+            "ctr_summary_api",
+            "ctr_ranking_api"
+          ]
+        },
+        {
+          "rationale": "Binds all declared independent clean-copy acceptance suites.",
+          "source_key": "success_criteria",
+          "targets": [
+            "test_summary_contract",
+            "test_report_contract",
+            "test_delivery_contract"
+          ]
+        },
+        {
+          "rationale": "Requires verified commands in USAGE.md.",
+          "source_key": "usage_documentation",
+          "targets": [
+            "con_delivery_surface"
+          ]
+        },
+        {
+          "rationale": "Records all stated exclusions as architecture constraints.",
+          "source_key": "out_of_scope",
+          "targets": [
+            "con_exclusions",
+            "inv_no_persistence_or_external_io"
+          ]
+        },
+        {
+          "rationale": "Records the supplied reversible scale assumption and resulting simple topology.",
+          "source_key": "scale",
+          "targets": [
+            "asm_small_local_scale",
+            "run_local_python"
+          ]
+        },
+        {
+          "rationale": "Records the supplied security-context assumption and local input boundary.",
+          "source_key": "security",
+          "targets": [
+            "asm_local_security_context",
+            "sec_local_input_boundary"
+          ]
+        }
+      ],
+      "data": [
+        {
+          "consistency": "Validated atomically before a successful summary or ranking result is returned; invalid data yields ValueError.",
+          "entities": [
+            "Record(category, amount, extra fields)"
+          ],
+          "id": "data_input_records",
+          "lifecycle": "Created by caller or CLI decoding and discarded after invocation.",
+          "owner": "cmp_records_summary",
+          "persistence": "transient",
+          "storage": "Caller-provided JSON-decoded in-memory list."
+        },
+        {
+          "consistency": "Each aggregate is based on canonical normalized categories and valid amounts only.",
+          "entities": [
+            "Summary(count, total, by_category)",
+            "CategoryAggregate(category, count, total)"
+          ],
+          "id": "data_summary",
+          "lifecycle": "Produced per invocation and consumed by reporting or caller.",
+          "owner": "cmp_records_summary",
+          "persistence": "transient",
+          "storage": "In-memory derived values."
+        },
+        {
+          "consistency": "Ordering is deterministic under ctr_ranking_api.",
+          "entities": [
+            "RankEntry(category, count, total)"
+          ],
+          "id": "data_ranked_report",
+          "lifecycle": "Produced from a summary and discarded after return or CLI completion.",
+          "owner": "cmp_category_report",
+          "persistence": "transient",
+          "storage": "In-memory ordered list serialized by the CLI when invoked."
+        }
+      ],
+      "dependencies": [
+        {
+          "contract": "ctr_category_normalization",
+          "id": "dep_summary_rules",
+          "purpose": "Apply the canonical category normalization during validation and grouping.",
+          "source": "cmp_records_summary",
+          "target": "cmp_record_rules"
+        },
+        {
+          "contract": "ctr_summary_api",
+          "id": "dep_report_summary",
+          "purpose": "Build rankings only from the reusable validated summary.",
+          "source": "cmp_category_report",
+          "target": "cmp_records_summary"
+        }
+      ],
+      "information_flows": [
+        {
+          "description": "Summary validation normalizes each accepted category through the shared rule helper before aggregation.",
+          "id": "flow_library_summary",
+          "steps": [
+            "cmp_records_summary",
+            "cmp_record_rules"
+          ]
+        },
+        {
+          "description": "Ranking delegates to reusable summary validation and aggregation, which applies canonical normalization, then orders derived category aggregates.",
+          "id": "flow_ranking",
+          "steps": [
+            "cmp_category_report",
+            "cmp_records_summary",
+            "cmp_record_rules"
+          ]
+        }
+      ],
+      "integrations": [],
+      "invariants": [
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "summarize and rank_categories do not mutate supplied records or record dictionaries.",
+          "id": "inv_no_mutation"
+        },
+        {
+          "components": [
+            "cmp_record_rules",
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "Equivalent valid input produces canonical normalized aggregates and deterministic ranking/CLI serialization.",
+          "id": "inv_deterministic_result"
+        },
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "Product processing has no database, network integration, residual application storage, or third-party dependency.",
+          "id": "inv_no_persistence_or_external_io"
+        }
+      ],
+      "observability": [
+        {
+          "components": [
+            "cmp_category_report"
+          ],
+          "description": "Normal successful CLI output remains machine-readable stdout; failure diagnostics are limited to stderr with process exit code 2.",
+          "id": "obs_cli_diagnostics"
+        }
+      ],
+      "proposed_decisions": [
+        {
+          "alternatives": [
+            "Place validation, aggregation, ranking, and CLI behavior in one module.",
+            "Create separate services or extensible plugin layers."
+          ],
+          "choice": "Keep canonical normalization in record_rules, reusable validation/summary in records, and ranking/CLI serialization in category_report.",
+          "consequences": [
+            "One canonical validation path prevents reporting drift.",
+            "No service, network, database, or package architecture is introduced.",
+            "The CLI remains a thin adapter around library behavior."
+          ],
+          "evidence": [
+            "summary_capability",
+            "ranking_capability",
+            "delivery_slices",
+            "integrations",
+            "runtime_constraint",
+            "out_of_scope"
+          ],
+          "human_key": "",
+          "id": "dec_system_style",
+          "kind": "system_style",
+          "rationale": "The required dependency from report to reusable summary is explicit, while the product is a small local standard-library utility.",
+          "title": "Use a layered in-process library and CLI design"
+        },
+        {
+          "alternatives": [
+            "Add local persistent storage.",
+            "Add a database or remote store."
+          ],
+          "choice": "Decode, validate, aggregate, rank, and serialize within one invocation without product persistence.",
+          "consequences": [
+            "No migration or retention program is needed.",
+            "Results must be regenerated from supplied input when needed."
+          ],
+          "evidence": [
+            "runtime_constraint",
+            "out_of_scope",
+            "scale"
+          ],
+          "human_key": "",
+          "id": "dec_transient_data",
+          "kind": "minor",
+          "rationale": "The scope explicitly excludes persistence and requires no residual files; data is limited to small local synthetic sets.",
+          "title": "Use invocation-scoped in-memory data only"
+        }
+      ],
+      "rationale": "This baseline uses three deliberately small logical components: an existing normalization rule helper, a reusable validated summary core, and a reporting/CLI adapter. It honors the required summary-before-report dependency, retains all processing in one local Python process, and avoids architecture beyond the stated utility scope.",
+      "risks": [
+        {
+          "acceptance_key": "",
+          "description": "Duplicating validation or category normalization in reporting could diverge from record_rules.py or the reusable summary contract.",
+          "id": "risk_contract_drift",
+          "mitigation": "Keep ranking dependent on Records Summary and route normalization through the shared helper; verify unit and integration contracts.",
+          "severity": "medium"
+        }
+      ],
+      "runtime": [
+        {
+          "components": [
+            "cmp_record_rules",
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "A single local Python process runs library calls or the CLI using only the standard library; there are no services, databases, workers, or deployment topology.",
+          "id": "run_local_python"
+        }
+      ],
+      "schema_version": 1,
+      "security": [
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "The CLI treats supplied JSON and paths as untrusted local input: validation failures produce controlled diagnostics and no partial result. No accounts, network exposure, secrets, or persistent data are in scope.",
+          "id": "sec_local_input_boundary"
+        }
+      ],
+      "style": {
+        "name": "Layered local Python utility",
+        "rationale": "A small standard-library library/CLI separation preserves reusable validated summarization while keeping terminal serialization isolated."
+      },
+      "testing": [
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_record_rules"
+          ],
+          "description": "Independently run the clean-copy test_records.py suite (at least 10 tests) and test_summary_integration.py suite (at least 2 tests) without changing test oracles.",
+          "id": "test_summary_contract"
+        },
+        {
+          "components": [
+            "cmp_category_report",
+            "cmp_records_summary"
+          ],
+          "description": "Independently run clean-copy test_category_report.py (at least 4), test_report_integration.py (at least 2), and test_product_cli.py (at least 5), including the declared valid CLI output.",
+          "id": "test_report_contract"
+        },
+        {
+          "components": [
+            "cmp_records_summary",
+            "cmp_category_report"
+          ],
+          "description": "Independently run clean-copy test_delivery_contract.py (at least 2) and verify the required delivery paths and standard-library runtime.",
+          "id": "test_delivery_contract"
+        }
+      ],
+      "unresolved_questions": []
+    },
+    "decisions": [],
+    "requirements": [
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "capabilities",
+        "key": "cli_capability",
+        "status": "known",
+        "text": "`python category_report.py examples/valid.json` carga una lista JSON y escribe el ranking como JSON compacto, con claves ordenadas, ASCII escapado y salto de línea final, sin mensajes extra en stdout. Una entrada/archivo inválido termina con código 2, diagnóstico en stderr y sin salida parcial."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "scope",
+        "key": "delivery_slices",
+        "status": "known",
+        "text": "El trabajo debe tener al menos dos slices dependientes: primero el resumen validado reutilizable y después el informe/CLI basado en ese resumen; ambos deben cerrar sus comprobaciones."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "integrations",
+        "key": "integrations",
+        "status": "known",
+        "text": "No hay integraciones externas; la única dependencia interna relevante es `record_rules.py`, cuya normalización `strip().casefold()` debe conservarse."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "out_of_scope",
+        "key": "out_of_scope",
+        "status": "known",
+        "text": "No incluye UI, red, dependencias de terceros, instalación de paquetes, persistencia, otros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "problem",
+        "key": "problem",
+        "status": "known",
+        "text": "Necesita validar, agregar por categoría normalizada y obtener un ranking determinista de registros sin servicios externos."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "capabilities",
+        "key": "ranking_capability",
+        "status": "known",
+        "text": "`category_report.rank_categories(records)` usa el resumen anterior y devuelve objetos `category`/`count`/`total`, ordenados por total descendente y categoría ascendente como desempate; conserva validación y no mutación; vacío devuelve []."
+      },
+      {
+        "basis": "Mensaje del usuario y contrato de aceptación suministrado.",
+        "category": "constraints",
+        "key": "runtime_constraint",
+        "status": "known",
+        "text": "Debe funcionar con Python y únicamente biblioteca estándar; no requiere base de datos ni archivos residuales."
+      },
+      {
+        "basis": "Inferencia reversible a partir de «pequeños conjuntos» y uso en máquina local.",
+        "category": "scale",
+        "key": "scale",
+        "status": "assumption",
+        "text": "Se asume carga de pequeños conjuntos de registros sintéticos procesados localmente; no se indican requisitos de concurrencia ni latencia."
+      },
+      {
+        "basis": "Mensaje del usuario y contrato de aceptación suministrado.",
+        "category": "scope",
+        "key": "scope_mvp",
+        "status": "known",
+        "text": "Entregables del piloto: `records.py`, `category_report.py` y `USAGE.md`; se preserva la normalización del helper `record_rules.py` y se cubren resumen, ranking y CLI."
+      },
+      {
+        "basis": "Inferencia reversible a partir de los límites explícitos de uso local y sin red/persistencia.",
+        "category": "security",
+        "key": "security",
+        "status": "assumption",
+        "text": "Se asume que los datos sintéticos se procesan localmente por el desarrollador, sin cuentas, aislamiento multiusuario, red ni almacenamiento persistente."
+      },
+      {
+        "basis": "Mensaje del usuario y verificación predeclarada.",
+        "category": "success",
+        "key": "success_criteria",
+        "status": "known",
+        "text": "La aceptación exige los tests independientes declarados: 10 de `test_records.py`, 4 de `test_category_report.py`, 5 de CLI y las suites de integración/contrato indicadas; la validación final se ejecuta desde una copia limpia con evidencia independiente y sin editar los oráculos."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "capabilities",
+        "key": "summary_capability",
+        "status": "known",
+        "text": "`records.summarize(records)` acepta una lista de diccionarios con `category` y `amount`, permite claves extra, no muta la entrada, valida cada registro y devuelve `count`, `total` y `by_category`; para vacío devuelve 0, 0 y {}."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "constraints",
+        "key": "usage_documentation",
+        "status": "known",
+        "text": "`USAGE.md` debe documentar los comandos realmente comprobados antes de fijar el commit final."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "users",
+        "key": "users",
+        "status": "known",
+        "text": "Desarrollador que revisa registros sintéticos en su propia máquina."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "capabilities",
+        "key": "validation_rules",
+        "status": "known",
+        "text": "La categoría debe ser string no vacío tras quitar espacios y se normaliza con `strip().casefold()` del helper existente. El importe debe ser int o float finito, no negativo y no bool. Cualquier entrada inválida lanza ValueError."
+      },
+      {
+        "basis": "Mensaje del usuario.",
+        "category": "vision",
+        "key": "vision",
+        "status": "known",
+        "text": "Utilidad local en Python para resumir y ordenar pequeños conjuntos de registros sintéticos, utilizable como biblioteca y desde terminal."
+      }
+    ]
+  },
+  "review": {
+    "classification": {
+      "reasons": [
+        "multiusuario",
+        "servicio",
+        "external_integrations_or_uncertainty",
+        "structural_complexity"
+      ],
+      "required": true,
+      "risk": "high"
+    },
+    "limits": {
+      "calls": 24,
+      "critic_passes": 11,
+      "reconciliations": 11
+    },
+    "passes": [
+      {
+        "findings": [
+          {
+            "category": "coverage",
+            "description": "These covered requirements have no execution_binding.requirements entry mapping them to strategic acceptance checks. In particular, the local-input security boundary and the required two-slice progression are only asserted in roadmap prose, not bound to immutable verification evidence for full acceptance.",
+            "id": "finding_unbound_requirement_acceptance",
+            "recommendation": "Add requirement bindings to the existing appropriate milestone/project-close checks where the authorized templates genuinely verify them; retain any aspect not covered by an immutable oracle as an explicit acceptance gap rather than treating prose coverage as verification.",
+            "severity": "high",
+            "targets": [
+              "delivery_slices",
+              "out_of_scope",
+              "problem",
+              "vision",
+              "users",
+              "scale",
+              "security"
+            ]
+          },
+          {
+            "category": "coverage",
+            "description": "The success_criteria requirement covers independent summary, integration, ranking, CLI, and delivery evidence, and sl_summary_core contributes to it, but ms_validated_summary does not list success_criteria and the execution binding associates it only with ms_ranked_cli. This conflicts with the requirement that every contributing milestone list a transversal requirement.",
+            "id": "finding_transversal_success_criteria_ownership",
+            "recommendation": "List success_criteria on ms_validated_summary and bind its summary-related acceptance evidence there, while retaining ms_ranked_cli as the owning coverage milestone and project-close evidence for the integrated requirement.",
+            "severity": "high",
+            "targets": [
+              "success_criteria",
+              "ms_validated_summary",
+              "sl_summary_core"
+            ]
+          }
+        ],
+        "rationale": "The milestone sequence, vertical slice dependency, baseline references, and proportional gate placement are otherwise coherent; the material gaps are requirement-to-strategic-evidence traceability."
+      },
+      {
+        "findings": [],
+        "rationale": "The proposal resolves the prior traceability findings: all contributing milestones list transversal requirements, and execution bindings now cover the previously unbound requirements with appropriate existing immutable checks. Milestone ordering, slice dependencies, baseline references, risk handling, and proportional gates are coherent."
+      },
+      {
+        "findings": [],
+        "rationale": "No important high- or critical-severity roadmap defects identified. Milestone and slice ordering, baseline bindings, coverage, gate placement, and immutable verification-template bindings are coherent."
+      },
+      {
+        "findings": [
+          {
+            "category": "verification",
+            "description": "`delivery_slices` spans both milestones but its requirement binding has no project-close check. The listed milestone checks establish local contracts only; none is bound as final integrated evidence for the required dependent-slice delivery sequence and closure.",
+            "id": "missing_transversal_final_binding",
+            "recommendation": "Add a project-close binding that actually evidences the cross-milestone dependency/closure guarantee, or retain an explicit acceptance gap if no authorized immutable resource can evidence it.",
+            "severity": "high",
+            "targets": [
+              "execution_binding",
+              "gs_project_acceptance",
+              "delivery_slices"
+            ]
+          },
+          {
+            "category": "verification",
+            "description": "The sole FULL-acceptance evidence for `out_of_scope` is `delivery_contract`. That oracle verifies paths, documented commands, and oracle integrity; it does not establish absence of network use, persistence, UI, deployment, publication, or other excluded scope. This is an index mapping that does not test the claimed behavior.",
+            "id": "out_of_scope_evidence_gap",
+            "recommendation": "Do not treat `bind_delivery_final` as full evidence for all exclusions. Bind only behavior actually established by authorized resources and retain the remaining exclusion verification as an acceptance gap or obtain authorized evidence.",
+            "severity": "high",
+            "targets": [
+              "execution_binding",
+              "out_of_scope",
+              "bind_delivery_final"
+            ]
+          }
+        ],
+        "rationale": "The roadmap structure and repaired risk ownership are coherent, but two requirement-to-evidence mappings overclaim final acceptance."
+      },
+      {
+        "findings": [],
+        "rationale": "The reconciled roadmap preserves the architectural baseline, has coherent milestone and slice ordering, corrects risk ownership, and explicitly retains the two unsupported acceptance claims as blocked/out-of-scope rather than overclaiming immutable verification evidence."
+      },
+      {
+        "findings": [
+          {
+            "category": "coverage",
+            "description": "The proposal marks `delivery_slices` covered, but the supplied deterministic gate errors declare `blocked_requirement:delivery_slices` and `unresolved_blockers`. The plan therefore makes an unsupported full-acceptance claim.",
+            "id": "delivery_slices_blocked",
+            "recommendation": "Retain the requirement as blocked with its owning milestone and an explicit rationale until the authoritative binding/receipt issue is resolved, or correct the binding so Factory can verify both dependent slices and milestone closures.",
+            "severity": "high",
+            "targets": [
+              "delivery_slices",
+              "ms_validated_summary",
+              "ms_ranked_cli"
+            ]
+          }
+        ],
+        "rationale": "The roadmap structure is otherwise coherent, but an unresolved authoritative gate error contradicts its coverage declaration."
+      },
+      {
+        "findings": [
+          {
+            "category": "verification",
+            "description": "`scope_mvp` claims the delivered summary, ranking, CLI, preserved helper behavior, and all three required paths, but its full-acceptance binding contains only `delivery_contract`. That oracle checks paths, documentation, and oracle integrity; it does not establish the summary, ranking, CLI, or helper-composition behavior. This leaves the authoritative invalid-verification error unresolved.",
+            "id": "scope_mvp_incomplete_acceptance_binding",
+            "recommendation": "Bind `scope_mvp` at project close to the applicable unchanged strategic product checks—at minimum summary, ranking, CLI, summary-integration, report-integration, and delivery-contract—while retaining both contributing milestone receipts.",
+            "severity": "high",
+            "targets": [
+              "scope_mvp",
+              "ms_validated_summary",
+              "ms_ranked_cli",
+              "gs_project_acceptance"
+            ]
+          }
+        ],
+        "rationale": "The roadmap’s slice ordering and gate structure are otherwise coherent, but the current full-acceptance mapping has a material behavioral coverage gap."
+      },
+      {
+        "findings": [],
+        "rationale": "The reconciled proposal preserves the architecture baseline, orders the two vertical slices correctly, and now binds scope_mvp to both milestone receipts and all applicable unchanged project-close product checks. No high- or critical-severity issue remains."
+      },
+      {
+        "findings": [
+          {
+            "category": "verification",
+            "description": "The runtime constraint and invariant prohibit database/residual application storage, but every bound oracle only checks imports, outputs, files, documentation, and oracle hashes. A product that creates residual files can satisfy all declared gates, so the claimed full acceptance mapping does not test this behavior.",
+            "id": "runtime_no_residual_files_unverified",
+            "recommendation": "Retain this as an acceptance gap or obtain an authorized immutable check that verifies no residual application storage; do not claim runtime_constraint/inv_no_persistence_or_external_io is fully established by the current bindings.",
+            "severity": "high",
+            "targets": [
+              "runtime_constraint",
+              "inv_no_persistence_or_external_io",
+              "gs_project_acceptance"
+            ]
+          }
+        ],
+        "rationale": "The roadmap structure and dependency ordering are otherwise coherent, but the final verification mapping overclaims evidence for the no-residual-storage constraint."
+      },
+      {
+        "findings": [
+          {
+            "category": "verification",
+            "description": "The current proposal has deterministic binding errors: the ranked-CLI milestone closure condition stating that its gate passes ranking, composition, CLI, delivery, and residual-storage checks is not mapped as a planned criterion. Therefore the milestone’s declared closure evidence cannot be established by the current binding.",
+            "id": "unmapped_ranked_cli_closure_condition",
+            "recommendation": "Reconcile the milestone closure-condition/criterion model with the immutable check bindings so every declared closure condition has explicit evidence mapping, while preserving the existing success criteria and gate procedures unchanged.",
+            "severity": "high",
+            "targets": [
+              "ms_ranked_cli",
+              "gm_ranked_cli",
+              "execution_binding",
+              "verification_binding_invalid",
+              "milestone_criterion_unmapped"
+            ]
+          }
+        ],
+        "rationale": "The added immutable residual-storage oracle appropriately addresses the prior gap for its declared exercised CLI paths. However, the current Factory-reported verification-binding and unmapped-milestone-criterion errors remain an acceptance blocker."
+      },
+      {
+        "findings": [],
+        "rationale": "No concrete high- or critical-severity roadmap defect remains. The two dependent vertical slices, milestone ordering, immutable verification bindings, clean-copy final acceptance, authorized exclusion, and residual-storage evidence align with the supplied baseline and Factory semantics."
+      }
+    ]
+  },
+  "gate": {
+    "errors": [],
+    "passed": true,
+    "verification_binding": "sha256:fa4f4083a503bcd3def68b8fdc905ea0b77763ed3998bee6ef04b884191b6353"
+  },
+  "reason": "Initial progressive roadmap",
+  "projection": "# Roadmap · revision 1\n\nDeliver a local standard-library Python utility with reusable validated record summaries and deterministic ranked CLI output.\n\nArchitecture 1 · sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012\n\nPlan fingerprint: sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e\n\n## Milestones\n\n### ms_validated_summary · Reusable validated summary (open)\n\nProvide the reusable normalized summary capability.\n\nResultado: Library callers can obtain validated normalized category summaries.\n\nSuccess criteria:\n- summarize validates records, preserves caller input, and returns the specified empty and normalized aggregate forms.\n- The summary uses record_rules normalization and only standard-library local processing.\n\nDependencies: \n\n- **sl_summary_core · Validated normalized summary** — execution_ready / vertical: Establish the reusable summary boundary using the canonical helper.\n\n### ms_ranked_cli · Deterministic ranked report and CLI (open)\n\nExpose the accepted summary through deterministic ranking and terminal output.\n\nResultado: A developer can run the prescribed local CLI and receive the deterministic ranking.\n\nSuccess criteria:\n- rank_categories derives ordered category/count/total entries from the reusable summary without mutating input.\n- The CLI produces the specified compact successful JSON and controlled invalid-input behavior.\n- Required delivery paths, documented verified commands, clean-copy evidence, and unchanged oracle integrity are present.\n\nDependencies: ms_validated_summary\n\n- **sl_ranked_cli · Ranking, CLI, and verified usage** — execution_ready / vertical: Build deterministic reporting on the accepted summary and document verified entry commands.\n\n## Next executable slices\n\n- sl_summary_core\n\n## Slices\n\n```json\n[\n  {\n    \"acceptance_criteria\": [\n      \"Valid records aggregate by strip().casefold() category.\",\n      \"Invalid categories, amounts, record shapes, and input containers raise ValueError.\",\n      \"The caller's records and nested values are not mutated.\"\n    ],\n    \"architecture\": {\n      \"fingerprint\": \"sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012\",\n      \"revision\": 1\n    },\n    \"architecture_impact\": \"expected_within_baseline\",\n    \"boundaries\": [\n      \"ctr_category_normalization\",\n      \"ctr_summary_api\",\n      \"dep_summary_rules\",\n      \"flow_library_summary\"\n    ],\n    \"components\": [\n      \"cmp_records_summary\",\n      \"cmp_record_rules\"\n    ],\n    \"dependencies\": [],\n    \"id\": \"sl_summary_core\",\n    \"impact_reason\": \"Implements the established summary-to-rule-helper boundary.\",\n    \"kind\": \"vertical\",\n    \"maturity\": \"execution_ready\",\n    \"milestone\": \"ms_validated_summary\",\n    \"objective\": \"Establish the reusable summary boundary using the canonical helper.\",\n    \"out_of_scope\": [\n      \"Ranking, CLI serialization, and usage documentation\"\n    ],\n    \"requirements\": [\n      \"summary_capability\",\n      \"validation_rules\",\n      \"integrations\",\n      \"runtime_constraint\",\n      \"scope_mvp\",\n      \"delivery_slices\",\n      \"problem\",\n      \"vision\",\n      \"users\",\n      \"scale\",\n      \"security\",\n      \"success_criteria\"\n    ],\n    \"risks\": [],\n    \"scope\": [\n      \"records.py summary behavior\",\n      \"record_rules.py normalization invocation\",\n      \"Validation, aggregation, non-mutation, and empty-result behavior\"\n    ],\n    \"title\": \"Validated normalized summary\",\n    \"verification_expectation\": \"Run focused summary and summary-composition checks after the slice.\",\n    \"verification_triggers\": [\n      \"cross_component\",\n      \"boundary\"\n    ]\n  },\n  {\n    \"acceptance_criteria\": [\n      \"Ranking orders total descending then category ascending and reuses summarize.\",\n      \"CLI success and failure streams, exit status, and formatting meet the terminal contract.\",\n      \"Declared clean-copy ranking, CLI, report-composition, delivery, and residual-storage checks pass without oracle edits.\"\n    ],\n    \"architecture\": {\n      \"fingerprint\": \"sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012\",\n      \"revision\": 1\n    },\n    \"architecture_impact\": \"expected_within_baseline\",\n    \"boundaries\": [\n      \"ctr_summary_api\",\n      \"ctr_ranking_api\",\n      \"ctr_cli_output\",\n      \"dep_report_summary\",\n      \"flow_ranking\"\n    ],\n    \"components\": [\n      \"cmp_category_report\",\n      \"cmp_records_summary\"\n    ],\n    \"dependencies\": [\n      \"sl_summary_core\"\n    ],\n    \"id\": \"sl_ranked_cli\",\n    \"impact_reason\": \"Completes the existing report-to-summary and terminal-adapter boundaries.\",\n    \"kind\": \"vertical\",\n    \"maturity\": \"execution_ready\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"objective\": \"Build deterministic reporting on the accepted summary and document verified entry commands.\",\n    \"out_of_scope\": [\n      \"UI, network, persistence, third-party packages, deployment, publication, and architecture changes\"\n    ],\n    \"requirements\": [\n      \"ranking_capability\",\n      \"cli_capability\",\n      \"usage_documentation\",\n      \"success_criteria\",\n      \"delivery_slices\",\n      \"scope_mvp\",\n      \"out_of_scope\",\n      \"runtime_constraint\",\n      \"problem\",\n      \"vision\",\n      \"users\",\n      \"scale\",\n      \"security\"\n    ],\n    \"risks\": [\n      \"risk_contract_drift\"\n    ],\n    \"scope\": [\n      \"category_report ranking delegated to summarize\",\n      \"CLI JSON loading, serialization, and controlled failures\",\n      \"USAGE.md commands limited to verified declared procedures\"\n    ],\n    \"title\": \"Ranking, CLI, and verified usage\",\n    \"verification_expectation\": \"Run focused ranking, CLI, report-composition, delivery-contract, and residual-storage checks after the slice.\",\n    \"verification_triggers\": [\n      \"cross_component\",\n      \"boundary\",\n      \"public_api\",\n      \"persistence\"\n    ]\n  }\n]\n```\n\n## Gates\n\n```json\n[\n  {\n    \"checks\": [\n      \"Run the authorized summary oracle unchanged.\"\n    ],\n    \"cost\": \"cheap\",\n    \"harness\": [],\n    \"id\": \"gl_summary_local\",\n    \"kind\": \"local\",\n    \"rationale\": \"Focused local evidence for the first executable slice.\",\n    \"signals\": [\n      \"routine\"\n    ],\n    \"target\": \"sl_summary_core\",\n    \"trigger\": \"after_slice\"\n  },\n  {\n    \"checks\": [\n      \"Run the authorized summary-composition oracle unchanged.\"\n    ],\n    \"cost\": \"cheap\",\n    \"harness\": [],\n    \"id\": \"gi_summary_composition\",\n    \"kind\": \"integration\",\n    \"rationale\": \"The slice crosses the summary and rule-helper boundary.\",\n    \"signals\": [\n      \"cross_component\",\n      \"boundary\"\n    ],\n    \"target\": \"sl_summary_core\",\n    \"trigger\": \"after_slice\"\n  },\n  {\n    \"checks\": [\n      \"The reusable summary contract passes its authorized summary oracle.\",\n      \"The summary-to-helper composition contract passes its authorized integration oracle.\"\n    ],\n    \"cost\": \"moderate\",\n    \"harness\": [],\n    \"id\": \"gm_validated_summary\",\n    \"kind\": \"milestone\",\n    \"rationale\": \"Closes preserved summary criteria before reporting work is selected.\",\n    \"signals\": [\n      \"milestone\"\n    ],\n    \"target\": \"ms_validated_summary\",\n    \"trigger\": \"milestone_close\"\n  },\n  {\n    \"checks\": [\n      \"Run the authorized ranking oracle unchanged.\",\n      \"Run the authorized CLI oracle unchanged.\"\n    ],\n    \"cost\": \"cheap\",\n    \"harness\": [],\n    \"id\": \"gl_ranked_cli\",\n    \"kind\": \"local\",\n    \"rationale\": \"Focused local evidence for ranking and the public terminal entry.\",\n    \"signals\": [\n      \"routine\",\n      \"public_api\"\n    ],\n    \"target\": \"sl_ranked_cli\",\n    \"trigger\": \"after_slice\"\n  },\n  {\n    \"checks\": [\n      \"Run the authorized report-composition oracle unchanged.\",\n      \"Run the authorized delivery-contract oracle unchanged.\",\n      \"Run the authorized residual-storage oracle unchanged.\"\n    ],\n    \"cost\": \"moderate\",\n    \"harness\": [],\n    \"id\": \"gi_report_composition\",\n    \"kind\": \"integration\",\n    \"rationale\": \"The report-to-summary boundary, verified delivery surface, and exercised storage boundary require composition evidence.\",\n    \"signals\": [\n      \"cross_component\",\n      \"boundary\",\n      \"public_api\",\n      \"persistence\"\n    ],\n    \"target\": \"sl_ranked_cli\",\n    \"trigger\": \"after_slice\"\n  },\n  {\n    \"checks\": [\n      \"The ranking oracle passes.\",\n      \"The CLI oracle passes including the prescribed real entry.\",\n      \"The report-composition oracle passes.\",\n      \"The delivery-contract oracle passes unchanged.\",\n      \"The residual-storage oracle passes unchanged on declared CLI paths.\"\n    ],\n    \"cost\": \"moderate\",\n    \"harness\": [],\n    \"id\": \"gm_ranked_cli\",\n    \"kind\": \"milestone\",\n    \"rationale\": \"Closes ranking, terminal behavior, documentation, delivery, and exercised residual-storage criteria without relying on project close.\",\n    \"signals\": [\n      \"milestone\",\n      \"public_api\",\n      \"persistence\"\n    ],\n    \"target\": \"ms_ranked_cli\",\n    \"trigger\": \"milestone_close\"\n  },\n  {\n    \"checks\": [\n      \"Run the authorized summary oracle unchanged in a clean copy.\",\n      \"Run the authorized ranking oracle unchanged in a clean copy.\",\n      \"Run the authorized CLI oracle unchanged in a clean copy, including its prescribed entry.\",\n      \"Run the authorized summary-integration oracle unchanged in a clean copy.\",\n      \"Run the authorized report-integration oracle unchanged in a clean copy.\",\n      \"Run the authorized delivery-contract oracle unchanged in a clean copy.\",\n      \"Run the authorized residual-storage oracle unchanged in a clean copy.\"\n    ],\n    \"cost\": \"moderate\",\n    \"harness\": [],\n    \"id\": \"gs_project_acceptance\",\n    \"kind\": \"system\",\n    \"rationale\": \"Final integrated acceptance preserves every immutable product oracle, including the authorized exercised residual-storage check.\",\n    \"signals\": [\n      \"release\",\n      \"public_api\",\n      \"cross_component\",\n      \"boundary\",\n      \"persistence\"\n    ],\n    \"target\": \"ms_ranked_cli\",\n    \"trigger\": \"project_close\"\n  }\n]\n```\n\n## Harness\n\n```json\n[]\n```\n\n## Coverage\n\n```json\n[\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"The report slice owns terminal parsing, exact output, and controlled failure behavior.\",\n    \"requirement\": \"cli_capability\",\n    \"slices\": [\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"Slice and milestone dependencies enforce summary delivery before reporting.\",\n    \"requirement\": \"delivery_slices\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"The summary slice invokes the sole internal helper dependency.\",\n    \"requirement\": \"integrations\",\n    \"slices\": [\n      \"sl_summary_core\"\n    ]\n  },\n  {\n    \"disposition\": \"out_of_scope\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"Authorized by initial_exclusions.\",\n    \"requirement\": \"out_of_scope\",\n    \"slices\": [\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"Validated aggregation and derived ranking address the stated local problem.\",\n    \"requirement\": \"problem\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"The report slice owns deterministic ranking through summarize.\",\n    \"requirement\": \"ranking_capability\",\n    \"slices\": [\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"Standard-library checks and the authorized residual-storage oracle establish the exercised runtime condition.\",\n    \"requirement\": \"runtime_constraint\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"The in-memory utility remains aligned with the stated small local workload assumption.\",\n    \"requirement\": \"scale\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"Final delivery checks bind the required delivery surface.\",\n    \"requirement\": \"scope_mvp\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"Validation and no-partial-output CLI behavior implement the local-input boundary.\",\n    \"requirement\": \"security\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"Milestone and final clean-copy bindings preserve declared independent acceptance evidence.\",\n    \"requirement\": \"success_criteria\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"The first slice implements the reusable summary contract.\",\n    \"requirement\": \"summary_capability\",\n    \"slices\": [\n      \"sl_summary_core\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"The report slice documents only verified declared commands.\",\n    \"requirement\": \"usage_documentation\",\n    \"slices\": [\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_ranked_cli\",\n    \"rationale\": \"The library and local CLI provide the stated developer-facing usage modes.\",\n    \"requirement\": \"users\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"The summary slice owns category and amount validation.\",\n    \"requirement\": \"validation_rules\",\n    \"slices\": [\n      \"sl_summary_core\"\n    ]\n  },\n  {\n    \"disposition\": \"covered\",\n    \"milestone\": \"ms_validated_summary\",\n    \"rationale\": \"Together the slices provide local library and terminal use.\",\n    \"requirement\": \"vision\",\n    \"slices\": [\n      \"sl_summary_core\",\n      \"sl_ranked_cli\"\n    ]\n  }\n]\n```\n\n## Risks\n\n```json\n[\n  {\n    \"acceptance_key\": \"\",\n    \"blocks\": [],\n    \"description\": \"Duplicating validation or category normalization in reporting could diverge from record_rules.py or the reusable summary contract.\",\n    \"id\": \"risk_contract_drift\",\n    \"mitigation\": \"Keep ranking dependent on summarize, route every category through the shared helper, and use the declared composition checks.\",\n    \"owner\": \"ms_ranked_cli\",\n    \"severity\": \"medium\",\n    \"validation_slice\": \"sl_ranked_cli\"\n  }\n]\n```\n\n## Milestones\n\n```json\n[\n  {\n    \"architecture\": {\n      \"fingerprint\": \"sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012\",\n      \"revision\": 1\n    },\n    \"closure_conditions\": [\n      \"gm_validated_summary passes its declared summary and summary-composition checks.\"\n    ],\n    \"dependencies\": [],\n    \"id\": \"ms_validated_summary\",\n    \"objective\": \"Provide the reusable normalized summary capability.\",\n    \"observable_outcome\": \"Library callers can obtain validated normalized category summaries.\",\n    \"requirements\": [\n      \"summary_capability\",\n      \"validation_rules\",\n      \"integrations\",\n      \"runtime_constraint\",\n      \"scope_mvp\",\n      \"delivery_slices\",\n      \"problem\",\n      \"vision\",\n      \"users\",\n      \"scale\",\n      \"security\",\n      \"success_criteria\"\n    ],\n    \"risks\": [],\n    \"status\": \"open\",\n    \"subjective_criteria\": [],\n    \"success_criteria\": [\n      \"summarize validates records, preserves caller input, and returns the specified empty and normalized aggregate forms.\",\n      \"The summary uses record_rules normalization and only standard-library local processing.\"\n    ],\n    \"title\": \"Reusable validated summary\",\n    \"verification_gates\": [\n      \"gm_validated_summary\"\n    ]\n  },\n  {\n    \"architecture\": {\n      \"fingerprint\": \"sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012\",\n      \"revision\": 1\n    },\n    \"closure_conditions\": [\n      \"gm_ranked_cli passes ranking, report-composition, CLI, delivery-contract, and residual-storage checks.\"\n    ],\n    \"dependencies\": [\n      \"ms_validated_summary\"\n    ],\n    \"id\": \"ms_ranked_cli\",\n    \"objective\": \"Expose the accepted summary through deterministic ranking and terminal output.\",\n    \"observable_outcome\": \"A developer can run the prescribed local CLI and receive the deterministic ranking.\",\n    \"requirements\": [\n      \"ranking_capability\",\n      \"cli_capability\",\n      \"usage_documentation\",\n      \"success_criteria\",\n      \"delivery_slices\",\n      \"scope_mvp\",\n      \"out_of_scope\",\n      \"runtime_constraint\",\n      \"problem\",\n      \"vision\",\n      \"users\",\n      \"scale\",\n      \"security\"\n    ],\n    \"risks\": [\n      \"risk_contract_drift\"\n    ],\n    \"status\": \"open\",\n    \"subjective_criteria\": [],\n    \"success_criteria\": [\n      \"rank_categories derives ordered category/count/total entries from the reusable summary without mutating input.\",\n      \"The CLI produces the specified compact successful JSON and controlled invalid-input behavior.\",\n      \"Required delivery paths, documented verified commands, clean-copy evidence, and unchanged oracle integrity are present.\"\n    ],\n    \"title\": \"Deterministic ranked report and CLI\",\n    \"verification_gates\": [\n      \"gm_ranked_cli\"\n    ]\n  }\n]\n```\n",
+  "created_at": "2026-09-11T17:06:18.813Z"
+}

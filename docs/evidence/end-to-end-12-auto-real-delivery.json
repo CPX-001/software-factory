@@ -1,0 +1,2917 @@
+{
+  "recorded_at": 1789146456.3900065,
+  "factory_code_commit": "9ff7630271a44c17ad7367dbf9645f8967759ba3",
+  "scenario": "Same second authorized Records pilot; independent fixtures precede real discovery; no manual product implementation or plan binding",
+  "project": {
+    "id": "p_ba973102351c9eac",
+    "name": "Records end-to-end pilot",
+    "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product"
+  },
+  "state": "project_verified",
+  "run": {
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+    "status": "project_verified",
+    "paused": false,
+    "reason": "Recorded project conditions verified on the accepted commit; local delivery prepared"
+  },
+  "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+  "seed_commit": "ce2299d5292d32f0511890c400ef4ebe014141fa",
+  "contract_sha256": "9d001e229733bb2b458d256eba543484b07b800cff1e331bb8300b17ba68f4bd",
+  "policy": {
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "service_tier": "priority",
+    "max_attempts": 2,
+    "max_seconds": 600,
+    "max_tokens": 50000,
+    "continuation": {
+      "enabled": true,
+      "inter_milestone": true,
+      "max_calls": 30,
+      "max_seconds": 14400,
+      "max_slices": 3,
+      "max_tokens": 850000
+    },
+    "automatic_plan_binding": true,
+    "final_validation": {
+      "automatic_remediation": false,
+      "enabled": true
+    },
+    "quota_bucket": "codex",
+    "quota_reserve_percent": 0,
+    "write_paths": [
+      "records.py",
+      "category_report.py",
+      "USAGE.md"
+    ]
+  },
+  "original_created_at": 1789136147.1839242,
+  "deadline": 1789150547.1839242,
+  "budget": {
+    "calls": 29,
+    "tokens": 715259,
+    "usage_unknown_calls": 0,
+    "rejected_before_inference": 1,
+    "analysis_calls": 27,
+    "analysis_tokens": 675781,
+    "implementation_calls": 2,
+    "refinement_calls": 0,
+    "preparation_calls": 0,
+    "remediation_calls": 0,
+    "implementation_tokens": 39478,
+    "refinement_tokens": 0,
+    "preparation_tokens": 0,
+    "remediation_tokens": 0,
+    "calls_remaining": 1,
+    "tokens_remaining": 134741,
+    "seconds_remaining": 4091.5886795520782,
+    "work_units": 2,
+    "remediations": 0,
+    "units_remaining": 1
+  },
+  "budget_amendments": [
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 20,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 500000
+      },
+      "authorized_at": 1789139759.5586686,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 20,
+        "max_seconds": 1800,
+        "max_slices": 3,
+        "max_tokens": 500000
+      },
+      "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+      "deadline": 1789143347.1839242,
+      "previous_deadline": 1789137947.1839242,
+      "request_id": "records-auto-planning-recovery-once"
+    },
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 24,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 650000
+      },
+      "authorized_at": 1789141098.79173,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 20,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 500000
+      },
+      "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+      "deadline": 1789143347.1839242,
+      "previous_deadline": 1789143347.1839242,
+      "request_id": "records-auto-full-scope-recovery-once"
+    },
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 28,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 750000
+      },
+      "authorized_at": 1789141429.6092975,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 24,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 650000
+      },
+      "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+      "deadline": 1789143347.1839242,
+      "previous_deadline": 1789143347.1839242,
+      "request_id": "records-auto-clean-profile-recovery-once"
+    },
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 28,
+        "max_seconds": 14400,
+        "max_slices": 3,
+        "max_tokens": 750000
+      },
+      "authorized_at": 1789146120.9870183,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 28,
+        "max_seconds": 7200,
+        "max_slices": 3,
+        "max_tokens": 750000
+      },
+      "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+      "deadline": 1789150547.1839242,
+      "previous_deadline": 1789143347.1839242,
+      "request_id": "records-auto-storage-evidence-extension-once"
+    },
+    {
+      "after": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 30,
+        "max_seconds": 14400,
+        "max_slices": 3,
+        "max_tokens": 850000
+      },
+      "authorized_at": 1789146307.8387184,
+      "before": {
+        "enabled": true,
+        "inter_milestone": true,
+        "max_calls": 28,
+        "max_seconds": 14400,
+        "max_slices": 3,
+        "max_tokens": 750000
+      },
+      "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+      "deadline": 1789150547.1839242,
+      "previous_deadline": 1789150547.1839242,
+      "request_id": "records-auto-closure-criterion-recovery-once"
+    }
+  ],
+  "planning_recoveries": [
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:70d062423e55242aebae018f375276267856937fd593ccc1dabf73450d4a3a0a",
+        "reason": "User authorized extending as necessary and correcting obstacles to the active goal. Grant one correction/review of this exact blocked proposal. Extend total elapsed time from 1800 to 7200 seconds from the original start; preserve 20 total calls, 500000 tokens, all prior consumption, terra/low, Fast, original checks and permissions.",
+        "request_id": "records-auto-planning-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789139759.5586686,
+      "calls_consumed": 7,
+      "critic_calls_consumed": 3,
+      "previous_blockers": [
+        "risk_owner:risk_contract_drift",
+        "risk_owner_link:risk_contract_drift"
+      ],
+      "previous_gate": {
+        "errors": [
+          "risk_owner:risk_contract_drift",
+          "risk_owner_link:risk_contract_drift"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:ac76eac2bc2fe19b2cd36614203212b697927fecf4c788402876d1d78754e62f",
+        "reason": "User instructed continued correction of obstacles to the active goal. Authorize one correction/review of the newly revised proposal using the saved acceptance-gap findings. Preserve all original criteria and independent resources, the 20-call/500000-token ceilings, accumulated consumption and existing deadline; do not invent scope approval.",
+        "request_id": "records-auto-binding-review-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789140293.2644918,
+      "calls_consumed": 9,
+      "critic_calls_consumed": 4,
+      "previous_blockers": [
+        "Unresolved review missing_transversal_final_binding: `delivery_slices` spans both milestones but its requirement binding has no project-close check. The listed milestone checks establish local contracts only; none is bound as final integrated evidence for the required dependent-slice delivery sequence and closure.",
+        "Unresolved review out_of_scope_evidence_gap: The sole FULL-acceptance evidence for `out_of_scope` is `delivery_contract`. That oracle verifies paths, documented commands, and oracle integrity; it does not establish absence of network use, persistence, UI, deployment, publication, or other excluded scope. This is an index mapping that does not test the claimed behavior."
+      ],
+      "previous_gate": {
+        "errors": [
+          "risk_owner:risk_contract_drift",
+          "risk_owner_link:risk_contract_drift"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:074f2efe0b23f7e5e494833845ff733a95398f61e77dbfbce6cad9dd243a6741",
+        "reason": "Continue authorized correction of obstacles to the active goal. Grant one correction/review of this changed proposal after clarifying existing mandatory closure evidence. Preserve original requirements, independent product checks, scope authorizations, deadline, 20-call/500000-token ceilings and all consumption. Do not substitute closure receipts for product behavior checks.",
+        "request_id": "records-auto-closure-evidence-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789140584.2233326,
+      "calls_consumed": 11,
+      "critic_calls_consumed": 5,
+      "previous_blockers": [
+        "blocked_requirement:delivery_slices",
+        "unresolved_blockers"
+      ],
+      "previous_gate": {
+        "errors": [
+          "blocked_requirement:delivery_slices",
+          "unresolved_blockers"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:79dce9f9a4fc259570d8931ede4067c172233e94f5ea674757ad7399d2a11c46",
+        "reason": "Continue the user-authorized correction of obstacles. One correction/review on this changed proposal after fixing stale critic gate input and exposing missing original check IDs. Preserve original acceptance, resources, policies, deadline, all consumption and the 20-call/500000-token aggregate ceilings.",
+        "request_id": "records-auto-current-gates-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789140885.325155,
+      "calls_consumed": 13,
+      "critic_calls_consumed": 6,
+      "previous_blockers": [
+        "Unresolved review delivery_slices_blocked: The proposal marks `delivery_slices` covered, but the supplied deterministic gate errors declare `blocked_requirement:delivery_slices` and `unresolved_blockers`. The plan therefore makes an unsupported full-acceptance claim."
+      ],
+      "previous_gate": {
+        "errors": [
+          "blocked_requirement:delivery_slices",
+          "unresolved_blockers"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:5fd85b52b63b992f543fd2273d0eff3753c9cc6b16a98933307d4e66bfd0568d",
+        "reason": "User authorized extending as necessary and correcting all obstacles to the active goal. One correction/review of this revised proposal preserving original acceptance and independent oracles. Explicit total extension from 20 to 24 calls and 500000 to 650000 tokens; preserve all 18 calls/415240 tokens already consumed, current original-start deadline, model/effort, permissions and work-unit limit. Scope behavior must retain complete strategic product evidence.",
+        "request_id": "records-auto-full-scope-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789141098.79173,
+      "calls_consumed": 15,
+      "critic_calls_consumed": 7,
+      "previous_blockers": [
+        "Unresolved review scope_mvp_incomplete_acceptance_binding: `scope_mvp` claims the delivered summary, ranking, CLI, preserved helper behavior, and all three required paths, but its full-acceptance binding contains only `delivery_contract`. That oracle checks paths, documentation, and oracle integrity; it does not establish the summary, ranking, CLI, or helper-composition behavior. This leaves the authoritative invalid-verification error unresolved."
+      ],
+      "previous_gate": {
+        "errors": [
+          "blocked_requirement:delivery_slices",
+          "unresolved_blockers"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:798a1f6ec5d1e51a8904961c834ab20f26921fd9ab2ef5098ed03891a012787a",
+        "reason": "Continue authorized correction of obstacles to the active goal. One correction/review of this revised proposal using precise missing-criterion diagnostics. Preserve all original criterion texts, independent oracles and scope; do not replace evidence with blanket index coverage. Preserve 24-call/650000-token total ceilings, current deadline and all prior consumption.",
+        "request_id": "records-auto-criterion-bindings-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789141238.9312558,
+      "calls_consumed": 17,
+      "critic_calls_consumed": 8,
+      "previous_blockers": [
+        "verification_binding_invalid",
+        "acceptance_coverage_missing",
+        "milestone_criteria_unmapped",
+        "Approved conditions lack executable authorized coverage"
+      ],
+      "previous_gate": {
+        "errors": [
+          "verification_binding_invalid",
+          "acceptance_coverage_missing",
+          "milestone_criteria_unmapped",
+          "Approved conditions lack executable authorized coverage"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:75a3df4be12eb836acc05ebfe546c6199f4cb625d5d261d503e34e8d2eb85b3a",
+        "reason": "User authorized extending as necessary and fixing obstacles. One correction/review of the changed proposal after supplying actual existing clean-copy guarantees AND limits. Preserve original conditions and independent oracles; do not claim universal absence of side effects. Explicit total extension 24 to 28 calls and 650000 to 750000 tokens, preserving 22 consumed calls/527317 tokens and the current original-start deadline, all permissions and model/effort.",
+        "request_id": "records-auto-clean-profile-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789141429.6092975,
+      "calls_consumed": 19,
+      "critic_calls_consumed": 9,
+      "previous_blockers": [
+        "Unresolved review runtime_no_residual_files_unverified: The runtime constraint and invariant prohibit database/residual application storage, but every bound oracle only checks imports, outputs, files, documentation, and oracle hashes. A product that creates residual files can satisfy all declared gates, so the claimed full acceptance mapping does not test this behavior."
+      ],
+      "previous_gate": {
+        "errors": [
+          "verification_binding_invalid",
+          "acceptance_coverage_missing",
+          "milestone_criteria_unmapped",
+          "Approved conditions lack executable authorized coverage"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:15931a4dc6c0472df8f11a9956d5874306ff5afad7f45f54492f24a465380dfe",
+        "reason": "Actual human answer to decision 1: Sí, incorpora la prueba y continúa. Add the independent storage-side-effect oracle on the six original CLI examples before product implementation, preserving all original criteria, procedures, resources, architecture, scope and delivery. Under the prior explicit authorization to extend as necessary, extend elapsed allowance from 7200 to 14400 seconds from the original start because the deadline expired while awaiting this answer. Preserve the same run, all consumed budget, 28 calls, 750000 tokens, model, effort, Fast, permissions and zero reserve. Do not synthesize or answer the pending decision; the actual user answer follows through factory_answer.",
+        "request_id": "records-auto-storage-evidence-extension-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+        "verification_extension": true
+      },
+      "authorized_at": 1789146120.9870183,
+      "calls_consumed": 20,
+      "critic_calls_consumed": 9,
+      "previous_blockers": [],
+      "previous_gate": {
+        "errors": [
+          "verification_binding_invalid",
+          "acceptance_coverage_missing",
+          "milestone_criteria_unmapped",
+          "Approved conditions lack executable authorized coverage"
+        ],
+        "passed": false
+      }
+    },
+    {
+      "request": {
+        "proposal_fingerprint": "sha256:d41c1d4952f1373f8e336487275d608df92abeebbae1840cab69c41789670fac",
+        "reason": "Continue the user-authorized correction of obstacles after the actual answer approving storage evidence. Grant one correction/review of this revised proposal to bind its existing ranked-CLI milestone closure criterion. Preserve all original criteria, all seven immutable checks/resources, actual human answer, scope, architecture and permissions. Under the explicit authorization to extend as necessary, increase total limits from 28 calls/750000 tokens to 30/850000 for review and the two planned implementations; retain all 25 calls/617036 tokens consumed and the original-start deadline.",
+        "request_id": "records-auto-closure-criterion-recovery-once",
+        "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db"
+      },
+      "authorized_at": 1789146307.8387184,
+      "calls_consumed": 22,
+      "critic_calls_consumed": 10,
+      "previous_blockers": [
+        "Unresolved review unmapped_ranked_cli_closure_condition: The current proposal has deterministic binding errors: the ranked-CLI milestone closure condition stating that its gate passes ranking, composition, CLI, delivery, and residual-storage checks is not mapped as a planned criterion. Therefore the milestone’s declared closure evidence cannot be established by the current binding."
+      ],
+      "previous_gate": {
+        "errors": [
+          "verification_binding_invalid",
+          "acceptance_coverage_missing",
+          "milestone_criteria_unmapped",
+          "Approved conditions lack executable authorized coverage"
+        ],
+        "passed": false
+      }
+    }
+  ],
+  "usage_by_phase": {
+    "discovery": {
+      "calls": 1,
+      "raw_usage_missing_calls": 0,
+      "rejected_before_inference": 0,
+      "tokens": 9370,
+      "unknown_usage_calls": 0
+    },
+    "architecture": {
+      "calls": 2,
+      "raw_usage_missing_calls": 0,
+      "rejected_before_inference": 0,
+      "tokens": 23585,
+      "unknown_usage_calls": 0
+    },
+    "planning": {
+      "calls": 24,
+      "raw_usage_missing_calls": 1,
+      "rejected_before_inference": 1,
+      "tokens": 642826,
+      "unknown_usage_calls": 0
+    },
+    "implementation": {
+      "calls": 2,
+      "raw_usage_missing_calls": 0,
+      "rejected_before_inference": 0,
+      "tokens": 39478,
+      "unknown_usage_calls": 0
+    }
+  },
+  "calls": [
+    {
+      "phase": "discovery",
+      "id": "2313edc2-cc1e-4f32-9f5b-4c69e7dc4fb4",
+      "state": "completed",
+      "started_at": 1789136148.6831787,
+      "completed_at": 1789136169.0608609,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 7975,
+          "outputTokens": 1395,
+          "reasoningOutputTokens": 68,
+          "totalTokens": 9370
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 7975,
+          "outputTokens": 1395,
+          "reasoningOutputTokens": 68,
+          "totalTokens": 9370
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d3-18e6-75d3-9c9d-7d12c3e6df2a",
+        "turn_id": "01a090d3-18fc-7a22-80b4-47cb7140788f"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "architecture",
+      "id": "bbca991d-b55a-445c-98e2-1b1426c64092",
+      "state": "completed",
+      "started_at": 1789136171.7729292,
+      "completed_at": 1789136209.8729265,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 9117,
+          "outputTokens": 2918,
+          "reasoningOutputTokens": 166,
+          "totalTokens": 12035
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 9117,
+          "outputTokens": 2918,
+          "reasoningOutputTokens": 166,
+          "totalTokens": 12035
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d3-730e-7d63-811a-9b16e1f27fc6",
+        "turn_id": "01a090d3-7325-7f32-a940-ceb3c4d5226a"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "architecture",
+      "id": "c4039359-1767-4fc2-b62c-de9bca8cec39",
+      "state": "completed",
+      "started_at": 1789136211.0236728,
+      "completed_at": 1789136217.8807178,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 11216,
+          "outputTokens": 334,
+          "reasoningOutputTokens": 269,
+          "totalTokens": 11550
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 11216,
+          "outputTokens": 334,
+          "reasoningOutputTokens": 269,
+          "totalTokens": 11550
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090d4-0c5e-7681-8484-47ec78fb32ec",
+        "turn_id": "01a090d4-0c75-7781-a070-3e0b93f4b24c"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "ddbfad75-e2b6-40ed-bb2f-72e6a2abcba6",
+      "state": "failed",
+      "started_at": 1789136221.7965562,
+      "completed_at": 1789136224.591142,
+      "sdk_usage": null,
+      "request_rejection": {
+        "code": "invalid_json_schema",
+        "error_sha256": "da09147b4513dd6bbb0059c9d6db721e6ce3c33d6cc15e61b90980d6713ce6ff",
+        "param": "text.format.schema",
+        "provenance": "provider rejection before generation; raw SDK usage remains unreported",
+        "status": 400
+      },
+      "runtime": {
+        "thread_id": "01a090d4-36a3-7113-ac6a-0277ba621c75",
+        "turn_id": "01a090d4-36bf-74e3-9cc9-b210240811e5"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "9e3d114d-df76-4d74-8f29-05c238ee4c5f",
+      "state": "completed",
+      "started_at": 1789136725.400071,
+      "completed_at": 1789136772.0891979,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 20781,
+          "outputTokens": 3588,
+          "reasoningOutputTokens": 232,
+          "totalTokens": 24369
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 20781,
+          "outputTokens": 3588,
+          "reasoningOutputTokens": 232,
+          "totalTokens": 24369
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090db-e5bd-7720-847e-dc05adc1467a",
+        "turn_id": "01a090db-e5e0-7ef2-96b6-4b4977710310"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "1c725773-6468-4e0a-9441-1898c962a6a5",
+      "state": "completed",
+      "started_at": 1789136773.8688781,
+      "completed_at": 1789136791.0246558,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 23613,
+          "outputTokens": 997,
+          "reasoningOutputTokens": 664,
+          "totalTokens": 24610
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 23613,
+          "outputTokens": 997,
+          "reasoningOutputTokens": 664,
+          "totalTokens": 24610
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dc-a325-7861-91b2-2bc8fdf257dd",
+        "turn_id": "01a090dc-a344-72a1-8984-266c91384514"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "a1b1c431-6cb7-417f-a710-fe6ee726e2cf",
+      "state": "completed",
+      "started_at": 1789136792.3218217,
+      "completed_at": 1789136856.75557,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 4864,
+          "inputTokens": 25175,
+          "outputTokens": 5060,
+          "reasoningOutputTokens": 1255,
+          "totalTokens": 30235
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 4864,
+          "inputTokens": 25175,
+          "outputTokens": 5060,
+          "reasoningOutputTokens": 1255,
+          "totalTokens": 30235
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dc-eb12-7481-957c-e692fc2f25c1",
+        "turn_id": "01a090dc-eb36-7932-92d0-77ccbd848704"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "28c473ef-ff30-4fea-b1b9-314831ff67bf",
+      "state": "completed",
+      "started_at": 1789136858.1109505,
+      "completed_at": 1789136869.303618,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24505,
+          "outputTokens": 710,
+          "reasoningOutputTokens": 638,
+          "totalTokens": 25215
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24505,
+          "outputTokens": 710,
+          "reasoningOutputTokens": 638,
+          "totalTokens": 25215
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090dd-ec23-78c2-b48a-168a62cd611e",
+        "turn_id": "01a090dd-ec3f-7f32-9874-e1b78e34c3d0"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "d5b04dc3-0d3d-4cc0-b598-bd9b58b9a0be",
+      "state": "completed",
+      "started_at": 1789136870.6724749,
+      "completed_at": 1789136927.3856492,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25397,
+          "outputTokens": 4291,
+          "reasoningOutputTokens": 516,
+          "totalTokens": 29688
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25397,
+          "outputTokens": 4291,
+          "reasoningOutputTokens": 516,
+          "totalTokens": 29688
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090de-1d20-7292-9af9-c92034f1f173",
+        "turn_id": "01a090de-1d42-7fa2-a9f3-3d9de76b465f"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "7c103623-06f7-4890-9590-d579c5d10462",
+      "state": "completed",
+      "started_at": 1789136929.207123,
+      "completed_at": 1789136942.2696252,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24204,
+          "outputTokens": 869,
+          "reasoningOutputTokens": 814,
+          "totalTokens": 25073
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24204,
+          "outputTokens": 869,
+          "reasoningOutputTokens": 814,
+          "totalTokens": 25073
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a090df-01ef-7453-8f67-dc5c9255ac78",
+        "turn_id": "01a090df-0209-78d1-a011-4882ed5bc067"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "bf50d6fa-38b5-4275-aa3f-52e407a54f99",
+      "state": "completed",
+      "started_at": 1789139762.6463232,
+      "completed_at": 1789139814.3889964,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25485,
+          "outputTokens": 4131,
+          "reasoningOutputTokens": 345,
+          "totalTokens": 29616
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25485,
+          "outputTokens": 4131,
+          "reasoningOutputTokens": 345,
+          "totalTokens": 29616
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0910a-3de4-7d62-aff6-37faa3364447",
+        "turn_id": "01a0910a-3e01-7791-9de8-8e7b9fd41d38"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "948faeb9-b896-4938-bfdc-da09b3fa3e9a",
+      "state": "completed",
+      "started_at": 1789139815.4787407,
+      "completed_at": 1789139841.0700774,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24306,
+          "outputTokens": 1777,
+          "reasoningOutputTokens": 1477,
+          "totalTokens": 26083
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24306,
+          "outputTokens": 1777,
+          "reasoningOutputTokens": 1477,
+          "totalTokens": 26083
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0910b-0c45-7ff3-b1c8-07c3d2f13840",
+        "turn_id": "01a0910b-0c5f-7ad1-9e4d-f1c1a4e84fcf"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "96326a15-4454-40af-a39d-1fd311015a57",
+      "state": "completed",
+      "started_at": 1789140296.4401174,
+      "completed_at": 1789140359.8127568,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 25762,
+          "outputTokens": 4856,
+          "reasoningOutputTokens": 1022,
+          "totalTokens": 30618
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 25762,
+          "outputTokens": 4856,
+          "reasoningOutputTokens": 1022,
+          "totalTokens": 30618
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09112-6309-71d0-9f89-d222cdd28fa0",
+        "turn_id": "01a09112-6327-72d0-9b26-5696e5372cea"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "590337dc-f4c4-4dac-95b3-e32d10d6fe02",
+      "state": "completed",
+      "started_at": 1789140361.1324131,
+      "completed_at": 1789140372.2042441,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24613,
+          "outputTokens": 641,
+          "reasoningOutputTokens": 576,
+          "totalTokens": 25254
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24613,
+          "outputTokens": 641,
+          "reasoningOutputTokens": 576,
+          "totalTokens": 25254
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09113-5fbb-7a22-b8f1-5fa641fcde91",
+        "turn_id": "01a09113-5fd1-7790-8af6-44061cbc53b8"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "5a9bbfe0-bc2e-45cf-92cf-fd30ef84fceb",
+      "state": "completed",
+      "started_at": 1789140587.2089016,
+      "completed_at": 1789140638.9399421,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25773,
+          "outputTokens": 3962,
+          "reasoningOutputTokens": 200,
+          "totalTokens": 29735
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 25773,
+          "outputTokens": 3962,
+          "reasoningOutputTokens": 200,
+          "totalTokens": 29735
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09116-d2d8-7b23-bf78-4fe5e50bb169",
+        "turn_id": "01a09116-d2f2-75b0-9ad2-4f15428a8dde"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "4f283498-600b-4527-b99c-815d91f52c5f",
+      "state": "completed",
+      "started_at": 1789140640.0704517,
+      "completed_at": 1789140656.3714046,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24515,
+          "outputTokens": 879,
+          "reasoningOutputTokens": 716,
+          "totalTokens": 25394
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24515,
+          "outputTokens": 879,
+          "reasoningOutputTokens": 716,
+          "totalTokens": 25394
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09117-a15a-76b2-ab07-04620c25ba0d",
+        "turn_id": "01a09117-a175-7ee3-b775-477e806441fe"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "621ffba6-1d5b-4baa-beb9-dc9b69367781",
+      "state": "completed",
+      "started_at": 1789140888.6546323,
+      "completed_at": 1789140944.1993523,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 25948,
+          "outputTokens": 4324,
+          "reasoningOutputTokens": 511,
+          "totalTokens": 30272
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 25948,
+          "outputTokens": 4324,
+          "reasoningOutputTokens": 511,
+          "totalTokens": 30272
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0911b-6c60-70e3-b4d9-d94847842cc2",
+        "turn_id": "01a0911b-6c7f-7af3-a2ad-8b3425dee445"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "a7af4f6a-8aa7-4bc9-84bd-eea4051fbe5d",
+      "state": "completed",
+      "started_at": 1789140945.5781307,
+      "completed_at": 1789140965.3706253,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24765,
+          "outputTokens": 1358,
+          "reasoningOutputTokens": 1143,
+          "totalTokens": 26123
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 24765,
+          "outputTokens": 1358,
+          "reasoningOutputTokens": 1143,
+          "totalTokens": 26123
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0911c-4ab9-7cf0-87d3-077dca062741",
+        "turn_id": "01a0911c-4ad2-7f33-89a1-de63b60067db"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "f69367d9-600f-490e-9454-c509aac75ae2",
+      "state": "completed",
+      "started_at": 1789141102.7139874,
+      "completed_at": 1789141156.2734745,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 26017,
+          "outputTokens": 4142,
+          "reasoningOutputTokens": 324,
+          "totalTokens": 30159
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 26017,
+          "outputTokens": 4142,
+          "reasoningOutputTokens": 324,
+          "totalTokens": 30159
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0911e-b08f-7373-aca1-99eacc2524f6",
+        "turn_id": "01a0911e-b0ae-77e1-858c-8c797a31fa6e"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "ff656c4b-42b5-4626-a096-617ab481177d",
+      "state": "completed",
+      "started_at": 1789141157.5458918,
+      "completed_at": 1789141170.8291337,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 1792,
+          "inputTokens": 24837,
+          "outputTokens": 864,
+          "reasoningOutputTokens": 798,
+          "totalTokens": 25701
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 1792,
+          "inputTokens": 24837,
+          "outputTokens": 864,
+          "reasoningOutputTokens": 798,
+          "totalTokens": 25701
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0911f-86bb-7262-b494-a1a776b38b50",
+        "turn_id": "01a0911f-86d3-7e91-a365-6da4cf9c2ff8"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "bca41867-87c7-45eb-8c37-5dcbd586c435",
+      "state": "completed",
+      "started_at": 1789141243.2746677,
+      "completed_at": 1789141303.103667,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 25952,
+          "outputTokens": 4769,
+          "reasoningOutputTokens": 951,
+          "totalTokens": 30721
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 25952,
+          "outputTokens": 4769,
+          "reasoningOutputTokens": 951,
+          "totalTokens": 30721
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09120-d5a2-7390-aa40-c4c4d630605e",
+        "turn_id": "01a09120-d5c2-7c12-b12f-cc17c0e4047f"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "930a6b3c-85e6-45ee-bf71-8a9ce5f3aaab",
+      "state": "completed",
+      "started_at": 1789141304.3710442,
+      "completed_at": 1789141318.468918,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24658,
+          "outputTokens": 838,
+          "reasoningOutputTokens": 652,
+          "totalTokens": 25496
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 24658,
+          "outputTokens": 838,
+          "reasoningOutputTokens": 652,
+          "totalTokens": 25496
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09121-c444-7761-905e-5e84dea8dd07",
+        "turn_id": "01a09121-c45d-79a3-a3ea-5b4c622eccd9"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "a4c7d68f-40c1-41e2-b8fd-bc935366c927",
+      "state": "completed",
+      "started_at": 1789141433.3402069,
+      "completed_at": 1789141488.5754402,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 26162,
+          "outputTokens": 4353,
+          "reasoningOutputTokens": 430,
+          "totalTokens": 30515
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 26162,
+          "outputTokens": 4353,
+          "reasoningOutputTokens": 430,
+          "totalTokens": 30515
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a09123-bc11-75c0-a023-182fb0670e8b",
+        "turn_id": "01a09123-bc30-7350-9d37-46031293c313"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "8e1b3a94-c43c-45da-8b31-f61467bed333",
+      "state": "completed",
+      "started_at": 1789146124.246891,
+      "completed_at": 1789146180.1738493,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 27359,
+          "outputTokens": 4330,
+          "reasoningOutputTokens": 330,
+          "totalTokens": 31689
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 27359,
+          "outputTokens": 4330,
+          "reasoningOutputTokens": 330,
+          "totalTokens": 31689
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916b-4fe5-77f3-9ead-0d66d4f7ded1",
+        "turn_id": "01a0916b-5001-71e1-8e23-7a574935af8b"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "2b1148c7-b8e9-4bb3-8a2c-d0d4b9bc956e",
+      "state": "completed",
+      "started_at": 1789146181.4350436,
+      "completed_at": 1789146198.2791364,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 26302,
+          "outputTokens": 1213,
+          "reasoningOutputTokens": 1008,
+          "totalTokens": 27515
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 3840,
+          "inputTokens": 26302,
+          "outputTokens": 1213,
+          "reasoningOutputTokens": 1008,
+          "totalTokens": 27515
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916c-2f4e-7412-8186-22be48541563",
+        "turn_id": "01a0916c-2f68-7ee0-8c73-7bf8e8d9a03c"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "16a01570-77a9-47c0-a711-6c45870afbef",
+      "state": "completed",
+      "started_at": 1789146311.1741807,
+      "completed_at": 1789146365.6353855,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 27513,
+          "outputTokens": 4368,
+          "reasoningOutputTokens": 359,
+          "totalTokens": 31881
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 5888,
+          "inputTokens": 27513,
+          "outputTokens": 4368,
+          "reasoningOutputTokens": 359,
+          "totalTokens": 31881
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916e-2a17-7fa0-b068-06a246473fa1",
+        "turn_id": "01a0916e-2a35-7123-8bbc-b6ab5e2910a2"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "planning",
+      "id": "b25b2c18-a2b5-4687-b8db-9f2db00c6299",
+      "state": "completed",
+      "started_at": 1789146367.156384,
+      "completed_at": 1789146378.6171095,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 1792,
+          "inputTokens": 26281,
+          "outputTokens": 583,
+          "reasoningOutputTokens": 516,
+          "totalTokens": 26864
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 1792,
+          "inputTokens": 26281,
+          "outputTokens": 583,
+          "reasoningOutputTokens": 516,
+          "totalTokens": 26864
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916f-04f1-7761-9c30-329384e71475",
+        "turn_id": "01a0916f-050e-7f51-81a7-9cd822ae3bf9"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "implementation",
+      "id": "830c3c61-2946-43d0-99b1-b52ea638ff0e",
+      "state": "verified",
+      "started_at": 1789146382.8396757,
+      "completed_at": 1789146392.678881,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 18638,
+          "outputTokens": 578,
+          "reasoningOutputTokens": 127,
+          "totalTokens": 19216
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 18638,
+          "outputTokens": 578,
+          "reasoningOutputTokens": 127,
+          "totalTokens": 19216
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916f-4216-7d92-8c31-41f9f80703e2",
+        "turn_id": "01a0916f-4230-7992-959d-5bcedaf07074"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    },
+    {
+      "phase": "implementation",
+      "id": "db4311b4-a7d0-49ee-8240-6b977c93bdbb",
+      "state": "verified",
+      "started_at": 1789146399.1394432,
+      "completed_at": 1789146412.6300204,
+      "sdk_usage": {
+        "last": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 19490,
+          "outputTokens": 772,
+          "reasoningOutputTokens": 233,
+          "totalTokens": 20262
+        },
+        "modelContextWindow": 258400,
+        "total": {
+          "cacheWriteInputTokens": 0,
+          "cachedInputTokens": 0,
+          "inputTokens": 19490,
+          "outputTokens": 772,
+          "reasoningOutputTokens": 233,
+          "totalTokens": 20262
+        }
+      },
+      "request_rejection": null,
+      "runtime": {
+        "thread_id": "01a0916f-81d2-7701-bb85-ac1d4c1d28bb",
+        "turn_id": "01a0916f-81ef-7200-89f1-09224488118e"
+      },
+      "runtime_info": {
+        "authentication": "chatgpt",
+        "provider": "openai",
+        "model": "gpt-5.6-terra",
+        "effort": "low",
+        "sdk_version": "0.147.0",
+        "service_tier_requested": "priority",
+        "service_tier_offered": true,
+        "service_tier_observed": null
+      }
+    }
+  ],
+  "control_event_counts": {
+    "analysis_authorized": 1,
+    "analysis_request_rejection_classified": 1,
+    "automatic_verification_bound": 1,
+    "execution_authorized": 1,
+    "milestone_closed": 2,
+    "pause_requested": 1,
+    "planning_recovery_authorized": 9,
+    "project_verified": 1,
+    "resume_requested": 5,
+    "run_blocked": 8,
+    "run_checkpoint": 2,
+    "run_failed": 3,
+    "run_project_verified": 1,
+    "run_queued": 13,
+    "run_running": 23,
+    "run_waiting_for_human": 1,
+    "verification_evidence_extended": 1,
+    "workflow_budget_extended": 5,
+    "workflow_budget_started": 1
+  },
+  "planning_gate": {
+    "errors": [],
+    "passed": true,
+    "verification_binding": "sha256:fa4f4083a503bcd3def68b8fdc905ea0b77763ed3998bee6ef04b884191b6353"
+  },
+  "roadmap_revision": 1,
+  "blockers": [],
+  "project_validation": {
+    "state": "project_verified",
+    "candidate_commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "validated_version": {
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "receipt": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+      "current": true
+    },
+    "contract_id": "sha256:6603f9ef542b147237316826b9ed2a74f2a8cb0189b1bfdb8ce5e1d9bd3a72b6",
+    "pending_criteria": [],
+    "checks": [
+      {
+        "check_id": "summary_integration_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_integration_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage_local",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "ranking_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "cli_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage_milestone",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "ranking",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "cli",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "summary_integration",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "report_integration",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "delivery_contract",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      },
+      {
+        "check_id": "no_residual_storage",
+        "status": "PASS",
+        "reason": null,
+        "integration_mode": "local"
+      }
+    ],
+    "blocker": null,
+    "remediation": null,
+    "delivery": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product/.factory/deliveries/sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1/REPORT.md",
+    "exclusions": [
+      {
+        "disposition": "out_of_scope",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Authorized by initial_exclusions.",
+        "requirement": "out_of_scope",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      }
+    ],
+    "delivery_ready": true
+  },
+  "independent_acceptance": {
+    "status": "PASS",
+    "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "receipt": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+    "checks": [
+      {
+        "oracle": "summary",
+        "target": "test_records.py",
+        "min_tests": 10,
+        "evidence": "summary_milestone",
+        "status": "PASS"
+      },
+      {
+        "oracle": "ranking",
+        "target": "test_category_report.py",
+        "min_tests": 4,
+        "evidence": "ranking_milestone",
+        "status": "PASS"
+      },
+      {
+        "oracle": "cli",
+        "target": "test_product_cli.py",
+        "min_tests": 5,
+        "evidence": "cli_milestone",
+        "status": "PASS"
+      },
+      {
+        "oracle": "summary_integration",
+        "target": "test_summary_integration.py",
+        "min_tests": 2,
+        "evidence": "summary_integration_local",
+        "status": "PASS"
+      },
+      {
+        "oracle": "report_integration",
+        "target": "test_report_integration.py",
+        "min_tests": 2,
+        "evidence": "report_integration_local",
+        "status": "PASS"
+      },
+      {
+        "oracle": "delivery_contract",
+        "target": "test_delivery_contract.py",
+        "min_tests": 2,
+        "evidence": "delivery_contract_local",
+        "status": "PASS"
+      }
+    ],
+    "method": "Original independent oracles executed by the existing clean project runner"
+  },
+  "milestones": [
+    {
+      "id": "sha256:70154f6ad680d395d916883fd6fbfa76b5e864f98b9166aca2788e7133e6050e",
+      "milestone": "ms_validated_summary",
+      "commit": "5553288e925360489c88e6d42f7dc2721856fc0f",
+      "slices": [
+        {
+          "commit": "5553288e925360489c88e6d42f7dc2721856fc0f",
+          "execution_id": "59ee4ad8-2e2f-4a78-8601-6a1c79af8012",
+          "slice_id": "sl_summary_core"
+        }
+      ]
+    },
+    {
+      "id": "sha256:4991b7d0210ea03e87a0657859a561c6ea75409a74cebe8f04d0adcfaaa9f97b",
+      "milestone": "ms_ranked_cli",
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "slices": [
+        {
+          "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+          "execution_id": "06c7a99b-fa29-49b9-939e-cfbe6774f2ee",
+          "slice_id": "sl_ranked_cli"
+        }
+      ]
+    }
+  ],
+  "initial_branch_head": "3f84d77a3f327c37b02cc2235e2465e2744a87a9",
+  "native_plugin_start": "end-to-end-12-auto-native-start.json",
+  "human_app_checks": {
+    "selection_and_paused_message": "User supplied two separate chats on first Records instance",
+    "final_delivery_observation": "pending"
+  },
+  "interventions": "Factory code fixes, explicit planning recovery grants and budget amendments; detached controller owns phase transitions; no SQLite edits or synthetic approvals",
+  "human_decisions": [
+    {
+      "id": 1,
+      "question": "How should the required absence of residual application storage be accepted when supplied immutable checks do not establish it?",
+      "answer": "Sí, incorpora la prueba y continúa  ",
+      "created_at": "2026-09-11T15:44:49.726Z",
+      "answered_at": "2026-09-11T17:02:01.096Z"
+    }
+  ],
+  "verification_extensions": [
+    {
+      "authorized_at": 1789146120.9870183,
+      "checks_added": [
+        "no_residual_storage"
+      ],
+      "definition_id": "sha256:ef66d185d68f5abbc8db27aefe0af15f266b92bc0e099bc80e48b270f826703e",
+      "previous_definition": "sha256:4259e8e72166a577dd889649ca8ae4588a703d815b41ddbdef95be5432095d8d",
+      "request_id": "records-auto-storage-evidence-extension-once"
+    }
+  ],
+  "storage_evidence_authorization": "end-to-end-12-auto-storage-authorization.json",
+  "human_ui_acceptance_complete": false,
+  "storage_independent_acceptance": {
+    "status": "PASS",
+    "check_ids": [
+      "no_residual_storage_local",
+      "no_residual_storage_milestone",
+      "no_residual_storage"
+    ],
+    "source_sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8",
+    "guarantee": "No audited writes, SQLite or subprocess creation on the six declared Python CLI paths"
+  },
+  "receipt": {
+    "id": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+    "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+    "sources": {
+      "architecture": {
+        "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+        "revision": 1
+      },
+      "plan": {
+        "fingerprint": "sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e",
+        "revision": 1
+      }
+    },
+    "definition_id": "sha256:50f571003983b7f32a41d3b549d8bab98b151f3ca11dfe4327a84de3a0a74b3d",
+    "binding": {
+      "adrs": [
+        {
+          "baseline_revision": 1,
+          "decision": {
+            "alternatives": [
+              "Place validation, aggregation, ranking, and CLI behavior in one module.",
+              "Create separate services or extensible plugin layers."
+            ],
+            "choice": "Keep canonical normalization in record_rules, reusable validation/summary in records, and ranking/CLI serialization in category_report.",
+            "consequences": [
+              "One canonical validation path prevents reporting drift.",
+              "No service, network, database, or package architecture is introduced.",
+              "The CLI remains a thin adapter around library behavior."
+            ],
+            "evidence": [
+              "summary_capability",
+              "ranking_capability",
+              "delivery_slices",
+              "integrations",
+              "runtime_constraint",
+              "out_of_scope"
+            ],
+            "human_key": "",
+            "id": "dec_system_style",
+            "kind": "system_style",
+            "rationale": "The required dependency from report to reusable summary is explicit, while the product is a small local standard-library utility.",
+            "title": "Use a layered in-process library and CLI design"
+          },
+          "human_decision_id": null,
+          "id": 1,
+          "key": "dec_system_style",
+          "supersedes_id": null
+        }
+      ],
+      "authorization": {
+        "authorized_at": 1789146378.9887576,
+        "definition_id": "sha256:50f571003983b7f32a41d3b549d8bab98b151f3ca11dfe4327a84de3a0a74b3d",
+        "enabled": true,
+        "sources": {
+          "architecture": {
+            "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+            "revision": 1
+          },
+          "plan": {
+            "fingerprint": "sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e",
+            "revision": 1
+          }
+        }
+      },
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "contract_id": "sha256:6603f9ef542b147237316826b9ed2a74f2a8cb0189b1bfdb8ce5e1d9bd3a72b6",
+      "decisions": [
+        {
+          "answer": "Sí, incorpora la prueba y continúa  ",
+          "answered_at": "2026-09-11T17:02:01.096Z",
+          "created_at": "2026-09-11T15:44:49.726Z",
+          "id": 1,
+          "question": "How should the required absence of residual application storage be accepted when supplied immutable checks do not establish it?"
+        }
+      ],
+      "definition_id": "sha256:50f571003983b7f32a41d3b549d8bab98b151f3ca11dfe4327a84de3a0a74b3d",
+      "environment": {
+        "environment": "fresh allowlist; empty home and temporary filesystem",
+        "installation": false,
+        "network": false,
+        "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "profile": "linux-namespaces-seccomp-python-stdlib-v1",
+        "python_flags": [
+          "-I",
+          "-S"
+        ],
+        "python_version": "3.12",
+        "resource_paths": [
+          "/usr/bin/python3",
+          "/usr/lib/python3.12",
+          "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "/usr/lib/x86_64-linux-gnu/libm.so.6",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2.5.5",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+          "/usr/lib/x86_64-linux-gnu/libssl.so.3",
+          "/usr/lib/x86_64-linux-gnu/libcrypto.so.3",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8.2",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libdb-5.3.so",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6.0.0",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4.0.0",
+          "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+          "/usr/lib/x86_64-linux-gnu/librt.so.1",
+          "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+          "/lib64/ld-linux-x86-64.so.2"
+        ],
+        "runtime": "python_stdlib",
+        "stdlib_sha256": "sha256:e2608e277841ed21948f808746bcd8f0a837d1551589a74636f03f50a7098cad",
+        "tools": {
+          "/home/cpx/repos/software-factory/factory/execution_contract.py": "7f335cf9c61c8ef0310e0f8f219697b7163b882078e17a0421aa713618e70a6d",
+          "/home/cpx/repos/software-factory/factory/execution_sandbox.py": "7e6cd76f8bd4dd87e271574e0452256730119934f4fe430358d85a4c99d79e92",
+          "/home/cpx/repos/software-factory/factory/milestone.py": "eb07e935fd8247ffb92da316927475a1a91e79076f85474286dab8131cdecd8e",
+          "/home/cpx/repos/software-factory/factory/project_validation.py": "308f09c12f98265c023afb04c64bc4becc1e7e7c071b445ad8197a31cd952c8b",
+          "/home/cpx/repos/software-factory/factory/reproducibility.py": "6283c3dc897f1ee80ec87f69ecdf39239fa46078ef7311eaa225aa2eae0ee7d5",
+          "/home/cpx/repos/software-factory/factory/sandbox_entry.py": "7599e31e47055c4537de4653bb23be5085fe20a712057389cbd247225fe91ac8",
+          "/home/cpx/repos/software-factory/factory/sandbox_supervisor.py": "cb083f3f0114cd6b15b561e021b03016efc4eef47f8a3e90ab3118b1e6f8ab54",
+          "/home/cpx/repos/software-factory/factory/verification.py": "6c726728f09d7a11cb0de4e87a9709cb91bd49cea9e810a114b7e3df99363ac8",
+          "/home/cpx/repos/software-factory/factory/verification_runner.py": "ef6f03cb8b5e9f9706447a5f13fbb081e57a9b18af55ebe0ac36ed508cec01f6",
+          "/lib64/ld-linux-x86-64.so.2": "cd4df4f3c7b83673d61189bf2eaebd33ca4f2853ab9772b8a25e025ef99b1e81",
+          "/usr/bin/python3": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+          "/usr/bin/unshare": "a23c8863860669003dc4660039fe642f5795c8c2195898ebc5d01afa1ac3d11c",
+          "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "cd4df4f3c7b83673d61189bf2eaebd33ca4f2853ab9772b8a25e025ef99b1e81",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libc.so.6": "8db37cf3f2169f59a0f07ef1fea308c35656668c64c8ff294e1860f4121eb161",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1": "1502636e3be8232c9cf801dfb533694aea985d449904f3e1295db26d7b348946",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0": "1502636e3be8232c9cf801dfb533694aea985d449904f3e1295db26d7b348946",
+          "/usr/lib/x86_64-linux-gnu/libcrypto.so.3": "6a66c3ba6b3749aacc9497973fff00f6ba61c703ba7015d0d7ab3fd9510974b6",
+          "/usr/lib/x86_64-linux-gnu/libdb-5.3.so": "1812047c39ea3c26ee5b2b585abbafc18cd158dfcd84e5368c998cc6178e815b",
+          "/usr/lib/x86_64-linux-gnu/libdl.so.2": "292d5f5af2e7360b3e18c56591a4960115373ecf40627660f9149b6c68a33f80",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1": "c42ff317838b4b4639e2ea801905f0317177c6df7e31b2f0d0240e3c3ac0cfde",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1": "c42ff317838b4b4639e2ea801905f0317177c6df7e31b2f0d0240e3c3ac0cfde",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6": "9d4eee22c3cdfc96d92d1dd56e09114c74203a6208b98ebd724b434047e4e070",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6.0.0": "9d4eee22c3cdfc96d92d1dd56e09114c74203a6208b98ebd724b434047e4e070",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4": "e0f14a7aa92607093b25e1401837a83a756799acc7d6f99af61581d8b618f14c",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4.0.0": "e0f14a7aa92607093b25e1401837a83a756799acc7d6f99af61581d8b618f14c",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5": "696e868dd0700a19a6d65fc01608ec2d70d3cb91f65710e89180cd2e688f30cb",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5": "696e868dd0700a19a6d65fc01608ec2d70d3cb91f65710e89180cd2e688f30cb",
+          "/usr/lib/x86_64-linux-gnu/libm.so.6": "e9c4b28d340e415b8137480ec442662f981e1399386c5931dae0e886e3639e91",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6": "b552c698f9f5c7ff8a6f7c11d8595a0d3e6dc3eaf483843895ec76f418080dfb",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6.4": "b552c698f9f5c7ff8a6f7c11d8595a0d3e6dc3eaf483843895ec76f418080dfb",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6": "8eccca53962e74575da4b649dbafdfd24a450bafdc73d871bc5346824a1e7abd",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6.4": "8eccca53962e74575da4b649dbafdfd24a450bafdc73d871bc5346824a1e7abd",
+          "/usr/lib/x86_64-linux-gnu/libpthread.so.0": "a27ffa9bf233d61a5f02ddb0cf770dd6579021afc1aa8aec0fb58ee4a965281a",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8": "0a079f958147699f7bb5bf228406a5d878dc2387fe9cdc5cce6f3e35e20380fc",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8.2": "0a079f958147699f7bb5bf228406a5d878dc2387fe9cdc5cce6f3e35e20380fc",
+          "/usr/lib/x86_64-linux-gnu/librt.so.1": "c6e6288545e24b0b3cfbf33320bda9236521625d8c3d628f3444f1ed40e5c7c5",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2": "b4d9140a7797ccf3ac14f5d9d579b64f157111662940cb8330c632b11a8cea8e",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2.5.5": "b4d9140a7797ccf3ac14f5d9d579b64f157111662940cb8330c632b11a8cea8e",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0": "f2cd05de8b6f71ea9d0495a6f9ff9cae844b15d9c45b7ef49ee0af0f81658cc7",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6": "f2cd05de8b6f71ea9d0495a6f9ff9cae844b15d9c45b7ef49ee0af0f81658cc7",
+          "/usr/lib/x86_64-linux-gnu/libssl.so.3": "8e49cebd373d90b55f3626da71dd97fe8e95c68dc4c064d8962b27907690736e",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6": "e6089d7bb95eee5b545f3770dd69095b0bca47d26701cad145af429561d16306",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4": "e6089d7bb95eee5b545f3770dd69095b0bca47d26701cad145af429561d16306",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1": "78d7f4d6f27b7dffc1c84dfe2f83e84aefa6f6ceeffc6ac4bc41f9fbc61cb84e",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0": "78d7f4d6f27b7dffc1c84dfe2f83e84aefa6f6ceeffc6ac4bc41f9fbc61cb84e",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1.3": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+        }
+      },
+      "milestones": [
+        {
+          "commit": "5553288e925360489c88e6d42f7dc2721856fc0f",
+          "receipt": "sha256:70154f6ad680d395d916883fd6fbfa76b5e864f98b9166aca2788e7133e6050e"
+        },
+        {
+          "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+          "receipt": "sha256:4991b7d0210ea03e87a0657859a561c6ea75409a74cebe8f04d0adcfaaa9f97b"
+        }
+      ],
+      "python_sha256": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+      "runner_sha256": "ef6f03cb8b5e9f9706447a5f13fbb081e57a9b18af55ebe0ac36ed508cec01f6",
+      "sources": {
+        "architecture": {
+          "fingerprint": "sha256:9dfe4cfef8439269b02f7786fe4cef0a98e0b41dc1610ecac7b4b3f20d907012",
+          "revision": 1
+        },
+        "plan": {
+          "fingerprint": "sha256:b4a7826c0afd92226594e0adcea2d13e5a65be8713b30e67eb5871a31e66181e",
+          "revision": 1
+        }
+      }
+    },
+    "exclusions": [
+      {
+        "authorization": {
+          "created_at": "2026-09-11T14:14:29.522Z",
+          "disposition": "out_of_scope",
+          "message_sha256": "1d0ea08bd94d205301f872529db41f02239c2df6d2dd14ef80d6acc41076cd9f",
+          "prior_input": {
+            "quote": "No quiero UI, red, dependencias de terceros, instalación de paquetes, persistencia,\notros lenguajes, despliegue, publicación ni cambios automáticos de arquitectura.",
+            "request_id": "records-v1-discovery-once"
+          },
+          "provenance": "operator-bound prior user input; not a generated human decision",
+          "rationale": "Authorized by initial_exclusions.",
+          "requirement": "out_of_scope",
+          "turn_id": 1
+        },
+        "disposition": "out_of_scope",
+        "milestone": "ms_ranked_cli",
+        "rationale": "Authorized by initial_exclusions.",
+        "requirement": "out_of_scope",
+        "slices": [
+          "sl_ranked_cli"
+        ]
+      }
+    ],
+    "criteria": [
+      {
+        "checks": [
+          "summary_integration_local"
+        ],
+        "index": 0,
+        "source": {
+          "criterion": 0,
+          "target": "sl_summary_core"
+        },
+        "status": "PASS",
+        "text": "Valid records aggregate by strip().casefold() category."
+      },
+      {
+        "checks": [
+          "summary_milestone"
+        ],
+        "index": 1,
+        "source": {
+          "criterion": 0,
+          "target": "ms_validated_summary"
+        },
+        "status": "PASS",
+        "text": "summarize validates records, preserves caller input, and returns the specified empty and normalized aggregate forms."
+      },
+      {
+        "checks": [
+          "summary_integration_milestone"
+        ],
+        "index": 2,
+        "source": {
+          "criterion": 1,
+          "target": "ms_validated_summary"
+        },
+        "status": "PASS",
+        "text": "The summary uses record_rules normalization and only standard-library local processing."
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary_integration_milestone"
+        ],
+        "index": 3,
+        "source": {
+          "criterion": 2,
+          "target": "ms_validated_summary"
+        },
+        "status": "PASS",
+        "text": "gm_validated_summary passes its declared summary and summary-composition checks."
+      },
+      {
+        "checks": [
+          "report_integration_local"
+        ],
+        "index": 4,
+        "source": {
+          "criterion": 0,
+          "target": "sl_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "Ranking orders total descending then category ascending and reuses summarize."
+      },
+      {
+        "checks": [
+          "delivery_contract_local",
+          "no_residual_storage_local"
+        ],
+        "index": 5,
+        "source": {
+          "criterion": 2,
+          "target": "sl_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "Declared clean-copy ranking, CLI, report-composition, delivery, and residual-storage checks pass without oracle edits."
+      },
+      {
+        "checks": [
+          "ranking_milestone",
+          "report_integration_milestone",
+          "summary",
+          "ranking",
+          "report_integration"
+        ],
+        "index": 6,
+        "source": {
+          "criterion": 0,
+          "target": "ms_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "rank_categories derives ordered category/count/total entries from the reusable summary without mutating input."
+      },
+      {
+        "checks": [
+          "cli_milestone",
+          "cli",
+          "summary_integration"
+        ],
+        "index": 7,
+        "source": {
+          "criterion": 1,
+          "target": "ms_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "The CLI produces the specified compact successful JSON and controlled invalid-input behavior."
+      },
+      {
+        "checks": [
+          "delivery_contract_milestone",
+          "no_residual_storage_milestone",
+          "delivery_contract",
+          "no_residual_storage"
+        ],
+        "index": 8,
+        "source": {
+          "criterion": 2,
+          "target": "ms_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "Required delivery paths, documented verified commands, clean-copy evidence, and unchanged oracle integrity are present."
+      },
+      {
+        "checks": [
+          "ranking_milestone",
+          "cli_milestone",
+          "report_integration_milestone",
+          "delivery_contract_milestone",
+          "no_residual_storage_milestone"
+        ],
+        "index": 9,
+        "source": {
+          "criterion": 3,
+          "target": "ms_ranked_cli"
+        },
+        "status": "PASS",
+        "text": "gm_ranked_cli passes ranking, report-composition, CLI, delivery-contract, and residual-storage checks."
+      },
+      {
+        "checks": [
+          "cli_milestone",
+          "cli"
+        ],
+        "index": 10,
+        "source": {
+          "requirement": "cli_capability"
+        },
+        "status": "PASS",
+        "text": "`python category_report.py examples/valid.json` carga una lista JSON y escribe el ranking como JSON compacto, con claves ordenadas, ASCII escapado y salto de línea final, sin mensajes extra en stdout. Una entrada/archivo inválido termina con código 2, diagnóstico en stderr y sin salida parcial."
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking",
+          "cli",
+          "delivery_contract"
+        ],
+        "index": 11,
+        "source": {
+          "requirement": "delivery_slices"
+        },
+        "status": "PASS",
+        "text": "El trabajo debe tener al menos dos slices dependientes: primero el resumen validado reutilizable y después el informe/CLI basado en ese resumen; ambos deben cerrar sus comprobaciones."
+      },
+      {
+        "checks": [
+          "summary_integration_milestone",
+          "summary_integration"
+        ],
+        "index": 12,
+        "source": {
+          "requirement": "integrations"
+        },
+        "status": "PASS",
+        "text": "No hay integraciones externas; la única dependencia interna relevante es `record_rules.py`, cuya normalización `strip().casefold()` debe conservarse."
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking"
+        ],
+        "index": 13,
+        "source": {
+          "requirement": "problem"
+        },
+        "status": "PASS",
+        "text": "Necesita validar, agregar por categoría normalizada y obtener un ranking determinista de registros sin servicios externos."
+      },
+      {
+        "checks": [
+          "ranking_milestone",
+          "report_integration_milestone",
+          "ranking",
+          "report_integration"
+        ],
+        "index": 14,
+        "source": {
+          "requirement": "ranking_capability"
+        },
+        "status": "PASS",
+        "text": "`category_report.rank_categories(records)` usa el resumen anterior y devuelve objetos `category`/`count`/`total`, ordenados por total descendente y categoría ascendente como desempate; conserva validación y no mutación; vacío devuelve []."
+      },
+      {
+        "checks": [
+          "summary_integration_milestone",
+          "no_residual_storage_milestone",
+          "summary_integration",
+          "no_residual_storage"
+        ],
+        "index": 15,
+        "source": {
+          "requirement": "runtime_constraint"
+        },
+        "status": "PASS",
+        "text": "Debe funcionar con Python y únicamente biblioteca estándar; no requiere base de datos ni archivos residuales."
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking"
+        ],
+        "index": 16,
+        "source": {
+          "requirement": "scale"
+        },
+        "status": "PASS",
+        "text": "Se asume carga de pequeños conjuntos de registros sintéticos procesados localmente; no se indican requisitos de concurrencia ni latencia."
+      },
+      {
+        "checks": [
+          "summary",
+          "ranking",
+          "cli",
+          "summary_integration",
+          "report_integration",
+          "delivery_contract"
+        ],
+        "index": 17,
+        "source": {
+          "requirement": "scope_mvp"
+        },
+        "status": "PASS",
+        "text": "Entregables del piloto: `records.py`, `category_report.py` y `USAGE.md`; se preserva la normalización del helper `record_rules.py` y se cubren resumen, ranking y CLI."
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "cli_milestone",
+          "cli"
+        ],
+        "index": 18,
+        "source": {
+          "requirement": "security"
+        },
+        "status": "PASS",
+        "text": "Se asume que los datos sintéticos se procesan localmente por el desarrollador, sin cuentas, aislamiento multiusuario, red ni almacenamiento persistente."
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary_integration_milestone",
+          "ranking_milestone",
+          "cli_milestone",
+          "report_integration_milestone",
+          "delivery_contract_milestone",
+          "no_residual_storage_milestone",
+          "summary",
+          "ranking",
+          "cli",
+          "summary_integration",
+          "report_integration",
+          "delivery_contract",
+          "no_residual_storage"
+        ],
+        "index": 19,
+        "source": {
+          "requirement": "success_criteria"
+        },
+        "status": "PASS",
+        "text": "La aceptación exige los tests independientes declarados: 10 de `test_records.py`, 4 de `test_category_report.py`, 5 de CLI y las suites de integración/contrato indicadas; la validación final se ejecuta desde una copia limpia con evidencia independiente y sin editar los oráculos."
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary"
+        ],
+        "index": 20,
+        "source": {
+          "requirement": "summary_capability"
+        },
+        "status": "PASS",
+        "text": "`records.summarize(records)` acepta una lista de diccionarios con `category` y `amount`, permite claves extra, no muta la entrada, valida cada registro y devuelve `count`, `total` y `by_category`; para vacío devuelve 0, 0 y {}."
+      },
+      {
+        "checks": [
+          "delivery_contract_milestone",
+          "delivery_contract"
+        ],
+        "index": 21,
+        "source": {
+          "requirement": "usage_documentation"
+        },
+        "status": "PASS",
+        "text": "`USAGE.md` debe documentar los comandos realmente comprobados antes de fijar el commit final."
+      },
+      {
+        "checks": [
+          "summary",
+          "cli"
+        ],
+        "index": 22,
+        "source": {
+          "requirement": "users"
+        },
+        "status": "PASS",
+        "text": "Desarrollador que revisa registros sintéticos en su propia máquina."
+      },
+      {
+        "checks": [
+          "summary_milestone",
+          "summary_integration_milestone",
+          "summary",
+          "summary_integration"
+        ],
+        "index": 23,
+        "source": {
+          "requirement": "validation_rules"
+        },
+        "status": "PASS",
+        "text": "La categoría debe ser string no vacío tras quitar espacios y se normaliza con `strip().casefold()` del helper existente. El importe debe ser int o float finito, no negativo y no bool. Cualquier entrada inválida lanza ValueError."
+      },
+      {
+        "checks": [
+          "summary",
+          "cli"
+        ],
+        "index": 24,
+        "source": {
+          "requirement": "vision"
+        },
+        "status": "PASS",
+        "text": "Utilidad local en Python para resumir y ordenar pequeños conjuntos de registros sintéticos, utilizable como biblioteca y desde terminal."
+      }
+    ],
+    "reproducibility": {
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "environment": {
+        "environment": "fresh allowlist; empty home and temporary filesystem",
+        "installation": false,
+        "network": false,
+        "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+        "profile": "linux-namespaces-seccomp-python-stdlib-v1",
+        "python_flags": [
+          "-I",
+          "-S"
+        ],
+        "python_version": "3.12",
+        "resource_paths": [
+          "/usr/bin/python3",
+          "/usr/lib/python3.12",
+          "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "/usr/lib/x86_64-linux-gnu/libm.so.6",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2.5.5",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1.3",
+          "/usr/lib/x86_64-linux-gnu/libssl.so.3",
+          "/usr/lib/x86_64-linux-gnu/libcrypto.so.3",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8.2",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6.4",
+          "/usr/lib/x86_64-linux-gnu/libdb-5.3.so",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6.0.0",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4.0.0",
+          "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+          "/usr/lib/x86_64-linux-gnu/librt.so.1",
+          "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+          "/lib64/ld-linux-x86-64.so.2"
+        ],
+        "runtime": "python_stdlib",
+        "stdlib_sha256": "sha256:e2608e277841ed21948f808746bcd8f0a837d1551589a74636f03f50a7098cad",
+        "tools": {
+          "/home/cpx/repos/software-factory/factory/execution_contract.py": "7f335cf9c61c8ef0310e0f8f219697b7163b882078e17a0421aa713618e70a6d",
+          "/home/cpx/repos/software-factory/factory/execution_sandbox.py": "7e6cd76f8bd4dd87e271574e0452256730119934f4fe430358d85a4c99d79e92",
+          "/home/cpx/repos/software-factory/factory/milestone.py": "eb07e935fd8247ffb92da316927475a1a91e79076f85474286dab8131cdecd8e",
+          "/home/cpx/repos/software-factory/factory/project_validation.py": "308f09c12f98265c023afb04c64bc4becc1e7e7c071b445ad8197a31cd952c8b",
+          "/home/cpx/repos/software-factory/factory/reproducibility.py": "6283c3dc897f1ee80ec87f69ecdf39239fa46078ef7311eaa225aa2eae0ee7d5",
+          "/home/cpx/repos/software-factory/factory/sandbox_entry.py": "7599e31e47055c4537de4653bb23be5085fe20a712057389cbd247225fe91ac8",
+          "/home/cpx/repos/software-factory/factory/sandbox_supervisor.py": "cb083f3f0114cd6b15b561e021b03016efc4eef47f8a3e90ab3118b1e6f8ab54",
+          "/home/cpx/repos/software-factory/factory/verification.py": "6c726728f09d7a11cb0de4e87a9709cb91bd49cea9e810a114b7e3df99363ac8",
+          "/home/cpx/repos/software-factory/factory/verification_runner.py": "ef6f03cb8b5e9f9706447a5f13fbb081e57a9b18af55ebe0ac36ed508cec01f6",
+          "/lib64/ld-linux-x86-64.so.2": "cd4df4f3c7b83673d61189bf2eaebd33ca4f2853ab9772b8a25e025ef99b1e81",
+          "/usr/bin/python3": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+          "/usr/bin/unshare": "a23c8863860669003dc4660039fe642f5795c8c2195898ebc5d01afa1ac3d11c",
+          "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2": "cd4df4f3c7b83673d61189bf2eaebd33ca4f2853ab9772b8a25e025ef99b1e81",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1",
+          "/usr/lib/x86_64-linux-gnu/libc.so.6": "8db37cf3f2169f59a0f07ef1fea308c35656668c64c8ff294e1860f4121eb161",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1": "1502636e3be8232c9cf801dfb533694aea985d449904f3e1295db26d7b348946",
+          "/usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0": "1502636e3be8232c9cf801dfb533694aea985d449904f3e1295db26d7b348946",
+          "/usr/lib/x86_64-linux-gnu/libcrypto.so.3": "6a66c3ba6b3749aacc9497973fff00f6ba61c703ba7015d0d7ab3fd9510974b6",
+          "/usr/lib/x86_64-linux-gnu/libdb-5.3.so": "1812047c39ea3c26ee5b2b585abbafc18cd158dfcd84e5368c998cc6178e815b",
+          "/usr/lib/x86_64-linux-gnu/libdl.so.2": "292d5f5af2e7360b3e18c56591a4960115373ecf40627660f9149b6c68a33f80",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1": "c42ff317838b4b4639e2ea801905f0317177c6df7e31b2f0d0240e3c3ac0cfde",
+          "/usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1": "c42ff317838b4b4639e2ea801905f0317177c6df7e31b2f0d0240e3c3ac0cfde",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+          "/usr/lib/x86_64-linux-gnu/libffi.so.8.1.4": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6": "9d4eee22c3cdfc96d92d1dd56e09114c74203a6208b98ebd724b434047e4e070",
+          "/usr/lib/x86_64-linux-gnu/libgdbm.so.6.0.0": "9d4eee22c3cdfc96d92d1dd56e09114c74203a6208b98ebd724b434047e4e070",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4": "e0f14a7aa92607093b25e1401837a83a756799acc7d6f99af61581d8b618f14c",
+          "/usr/lib/x86_64-linux-gnu/libgdbm_compat.so.4.0.0": "e0f14a7aa92607093b25e1401837a83a756799acc7d6f99af61581d8b618f14c",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5": "696e868dd0700a19a6d65fc01608ec2d70d3cb91f65710e89180cd2e688f30cb",
+          "/usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5": "696e868dd0700a19a6d65fc01608ec2d70d3cb91f65710e89180cd2e688f30cb",
+          "/usr/lib/x86_64-linux-gnu/libm.so.6": "e9c4b28d340e415b8137480ec442662f981e1399386c5931dae0e886e3639e91",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6": "b552c698f9f5c7ff8a6f7c11d8595a0d3e6dc3eaf483843895ec76f418080dfb",
+          "/usr/lib/x86_64-linux-gnu/libncursesw.so.6.4": "b552c698f9f5c7ff8a6f7c11d8595a0d3e6dc3eaf483843895ec76f418080dfb",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6": "8eccca53962e74575da4b649dbafdfd24a450bafdc73d871bc5346824a1e7abd",
+          "/usr/lib/x86_64-linux-gnu/libpanelw.so.6.4": "8eccca53962e74575da4b649dbafdfd24a450bafdc73d871bc5346824a1e7abd",
+          "/usr/lib/x86_64-linux-gnu/libpthread.so.0": "a27ffa9bf233d61a5f02ddb0cf770dd6579021afc1aa8aec0fb58ee4a965281a",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8": "0a079f958147699f7bb5bf228406a5d878dc2387fe9cdc5cce6f3e35e20380fc",
+          "/usr/lib/x86_64-linux-gnu/libreadline.so.8.2": "0a079f958147699f7bb5bf228406a5d878dc2387fe9cdc5cce6f3e35e20380fc",
+          "/usr/lib/x86_64-linux-gnu/librt.so.1": "c6e6288545e24b0b3cfbf33320bda9236521625d8c3d628f3444f1ed40e5c7c5",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2": "b4d9140a7797ccf3ac14f5d9d579b64f157111662940cb8330c632b11a8cea8e",
+          "/usr/lib/x86_64-linux-gnu/libseccomp.so.2.5.5": "b4d9140a7797ccf3ac14f5d9d579b64f157111662940cb8330c632b11a8cea8e",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0": "f2cd05de8b6f71ea9d0495a6f9ff9cae844b15d9c45b7ef49ee0af0f81658cc7",
+          "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6": "f2cd05de8b6f71ea9d0495a6f9ff9cae844b15d9c45b7ef49ee0af0f81658cc7",
+          "/usr/lib/x86_64-linux-gnu/libssl.so.3": "8e49cebd373d90b55f3626da71dd97fe8e95c68dc4c064d8962b27907690736e",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6": "e6089d7bb95eee5b545f3770dd69095b0bca47d26701cad145af429561d16306",
+          "/usr/lib/x86_64-linux-gnu/libtinfo.so.6.4": "e6089d7bb95eee5b545f3770dd69095b0bca47d26701cad145af429561d16306",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1": "78d7f4d6f27b7dffc1c84dfe2f83e84aefa6f6ceeffc6ac4bc41f9fbc61cb84e",
+          "/usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0": "78d7f4d6f27b7dffc1c84dfe2f83e84aefa6f6ceeffc6ac4bc41f9fbc61cb84e",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892",
+          "/usr/lib/x86_64-linux-gnu/libz.so.1.3": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+        }
+      },
+      "files": {
+        ".gitignore": {
+          "executable": false,
+          "sha256": "0729b25dbaa8e73a7e03d3da9b341ee5f998b5b93a9ffe6ef339a01ddf34f8ff"
+        },
+        "PILOT.md": {
+          "executable": false,
+          "sha256": "1d0ea08bd94d205301f872529db41f02239c2df6d2dd14ef80d6acc41076cd9f"
+        },
+        "USAGE.md": {
+          "executable": false,
+          "sha256": "6ed8ec1cf77f332301862e4bd5a766380f034e668a6f421cebea0e50acab691c"
+        },
+        "category_report.py": {
+          "executable": false,
+          "sha256": "41e144fa6165a10d48792a5284071456154f88813ca96d8352af60b7495b4849"
+        },
+        "examples/boolean.json": {
+          "executable": false,
+          "sha256": "dbcfb5cedb3f437b6bc040ee7874524628cd659717669e7ace8d0dff1d668296"
+        },
+        "examples/empty.json": {
+          "executable": false,
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        "examples/malformed.json": {
+          "executable": false,
+          "sha256": "9baf9b3760fed55b5472574159a0a714b0a949dd843fe696e3daf1e8a79359d9"
+        },
+        "examples/negative.json": {
+          "executable": false,
+          "sha256": "6c45128781c5ffc6d226422a7e2296363110f6933c47c4fccb0147508cdaa2dd"
+        },
+        "examples/reordered.json": {
+          "executable": false,
+          "sha256": "97aeb8109e7ec95abce97276f14cbed5ed1f5720043decb646a4c8e0e2f4d554"
+        },
+        "examples/valid.json": {
+          "executable": false,
+          "sha256": "a801c683cfdd58ba6aecbc000622101c6bae2db8e96b4901010ab1e5eceb1f25"
+        },
+        "pilot-contract.json": {
+          "executable": false,
+          "sha256": "9d001e229733bb2b458d256eba543484b07b800cff1e331bb8300b17ba68f4bd"
+        },
+        "record_rules.py": {
+          "executable": false,
+          "sha256": "82292f97612cefd628767f5efeb93898cc753d76697fad549a1ef536986b7d44"
+        },
+        "records.py": {
+          "executable": false,
+          "sha256": "262579f4b15a754f8956c9a8777fe16a20b347c5b5d602e779d9447de7c8e4d5"
+        },
+        "test_category_report.py": {
+          "executable": false,
+          "sha256": "60700febae6b8b5587057bf9b7238948b9428137f462f305ca077366721ca79b"
+        },
+        "test_delivery_contract.py": {
+          "executable": false,
+          "sha256": "9ca850530ea9a626d1b2521e1d997fb12e5302a696a4e2b3460b556556f55893"
+        },
+        "test_no_residual_storage.py": {
+          "executable": false,
+          "sha256": "af398f5f5611b15fc56cf89c4667c01fbcac5a391451558fdf14466c789cd9b8"
+        },
+        "test_product_cli.py": {
+          "executable": false,
+          "sha256": "dbdb477c2fa508b399963570105c876bea9dc23befd6fda3c62dafc095198765"
+        },
+        "test_records.py": {
+          "executable": false,
+          "sha256": "d2b968b2d1f362f20b9e97a7ae0a120d4f5e7e4b43b0dcf495824d26d0c459f9"
+        },
+        "test_report_integration.py": {
+          "executable": false,
+          "sha256": "2db690fdd150b59b9abf82c523eb8e32e67026163c3a371b5c29745141970867"
+        },
+        "test_summary_integration.py": {
+          "executable": false,
+          "sha256": "6e6db05c6f76d2a5d45a66468dad5c7e55f79ffb23e34a9993e55697ef4b604e"
+        }
+      },
+      "method": "git-regular-blobs-v1",
+      "path": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product/.factory/projects/sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1/source",
+      "status": "PASS",
+      "tracked_only": true
+    }
+  },
+  "evidence": [
+    {
+      "check_id": "summary_integration_local",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "summary_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "summary_integration_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "summary_integration_local"
+    },
+    {
+      "check_id": "report_integration_local",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "delivery_contract_local",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "no_residual_storage_local",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "ranking_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "cli_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": null
+    },
+    {
+      "check_id": "report_integration_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "report_integration_local"
+    },
+    {
+      "check_id": "delivery_contract_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "delivery_contract_local"
+    },
+    {
+      "check_id": "no_residual_storage_milestone",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "no_residual_storage_local"
+    },
+    {
+      "check_id": "summary",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "summary_milestone"
+    },
+    {
+      "check_id": "ranking",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "ranking_milestone"
+    },
+    {
+      "check_id": "cli",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "cli_milestone"
+    },
+    {
+      "check_id": "summary_integration",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "summary_integration_local"
+    },
+    {
+      "check_id": "report_integration",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "report_integration_local"
+    },
+    {
+      "check_id": "delivery_contract",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "delivery_contract_local"
+    },
+    {
+      "check_id": "no_residual_storage",
+      "status": "PASS",
+      "reason": null,
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "code_id": "sha256:3ee4ab27e5a631fdddbf7f6040c3695cd415db9ff4949011e818c5c75907e39d",
+      "integration_mode": "local",
+      "reused_from": "no_residual_storage_local"
+    }
+  ],
+  "delivery_report_sha256": "b70f46c1d84b74a29d47b614ae3a7503505d1d5538fee1f85ca3b47ef6dff6d9",
+  "delivery_audit": {
+    "files_match_validated_export": true,
+    "file_count": 20,
+    "files": [
+      ".gitignore",
+      "PILOT.md",
+      "USAGE.md",
+      "category_report.py",
+      "examples/boolean.json",
+      "examples/empty.json",
+      "examples/malformed.json",
+      "examples/negative.json",
+      "examples/reordered.json",
+      "examples/valid.json",
+      "pilot-contract.json",
+      "record_rules.py",
+      "records.py",
+      "test_category_report.py",
+      "test_delivery_contract.py",
+      "test_no_residual_storage.py",
+      "test_product_cli.py",
+      "test_records.py",
+      "test_report_integration.py",
+      "test_summary_integration.py"
+    ],
+    "no_internal_factory_data": true,
+    "initial_branch": "master",
+    "initial_branch_head": "3f84d77a3f327c37b02cc2235e2465e2744a87a9",
+    "working_tree_clean": true,
+    "git_remotes": [],
+    "documented_cli": {
+      "command": [
+        "/usr/bin/python3",
+        "-S",
+        "category_report.py",
+        "examples/valid.json"
+      ],
+      "cwd": "delivery/source",
+      "exit_code": 0,
+      "stdout": "[{\"category\":\"food\",\"count\":2,\"total\":12},{\"category\":\"books\",\"count\":1,\"total\":7}]\n",
+      "stderr": "",
+      "environment": "Minimal environment, bytecode disabled; receipt separately proves the sandboxed clean execution"
+    }
+  },
+  "first_pilot_preserved": {
+    "project": "p_3084354cc76d1c23",
+    "version": {
+      "commit": "d2cd9261e0a09cf7a644d2eef85c006a4303da96",
+      "receipt": "sha256:5dc1fd473da105626922b9353e396fee2c1098fbd7274c706cb147da0e36fe9f",
+      "current": true
+    },
+    "calls": 17,
+    "tokens": 268679
+  },
+  "accepted_plan": "end-to-end-12-auto-accepted-plan.json",
+  "verification_definition": "end-to-end-12-auto-verification-binding.json",
+  "real_product_workflow_accepted": true,
+  "end_to_end_acceptance_complete": false,
+  "same_smoke_inspection": {
+    "client": "Real MCP stdio client; installed plugin launcher",
+    "selection_survived_reconnect": true,
+    "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+    "continuation_id": "2abc197c-eac7-497a-850e-d4c5379cf9cf",
+    "implementation_status": "project_verified",
+    "final_commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "final_receipt": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+    "phases_really_completed": [
+      "discovery",
+      "architecture",
+      "planning",
+      "execution",
+      "milestone_closure",
+      "project_validation"
+    ]
+  },
+  "independent_test_counts": {
+    "test_summary_integration.py": 2,
+    "test_records.py": 10,
+    "test_report_integration.py": 2,
+    "test_delivery_contract.py": 2,
+    "test_no_residual_storage.py": 1,
+    "test_category_report.py": 4,
+    "test_product_cli.py": 5
+  },
+  "final_criteria_count": 25,
+  "final_bindings_count": 18,
+  "reused_identical_procedures": 11,
+  "independent_no_failures_or_skips": true
+}

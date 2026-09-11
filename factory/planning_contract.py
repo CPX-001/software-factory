@@ -54,12 +54,11 @@ PLAN_SCHEMA['properties']['execution_binding'] = obj({
         'gate_checks': array({'type': 'integer', 'minimum': 0}, 100)}), 100),
     'harness': array(obj({'id': KEY, 'paths': array(string(300), 30)}), 100),
     'requirements': array(obj({'requirement': KEY, 'milestones': REFS, 'checks': REFS}), 150),
-    'exclusions': array(obj({'requirement': KEY}), 150),
+    'exclusions': array({'anyOf': [
+        obj({'requirement': KEY, 'authorization': KEY}),
+        obj({'requirement': KEY, 'decision_id': {'type': 'integer', 'minimum': 1}}),
+    ]}, 150),
 })
-EXCLUSION_BINDING = PLAN_SCHEMA['properties']['execution_binding']['properties']['exclusions']['items']
-EXCLUSION_BINDING['properties'].update(authorization=KEY, decision_id={'type': 'integer', 'minimum': 1})
-EXCLUSION_BINDING['oneOf'] = [{'required': ['authorization'], 'not': {'required': ['decision_id']}},
-                            {'required': ['decision_id'], 'not': {'required': ['authorization']}}]
 REVIEW_SCHEMA = obj({'findings': array(obj({'id': KEY, 'severity': enum(('high', 'critical')),
     'category': enum(('coverage', 'milestones', 'slice_size', 'horizontal_slice', 'dependencies',
                       'risk_order', 'verification', 'architecture')),

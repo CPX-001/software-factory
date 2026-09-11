@@ -15,6 +15,18 @@ from factory.registry import FactoryError
 
 
 class CodexExecutionTests(unittest.TestCase):
+    def test_only_explicit_schema_rejection_is_classified_as_before_inference(self):
+        import json
+        from factory.codex_execution import schema_rejection
+        for status, code, param, expected in ((400,'invalid_json_schema','text.format.schema',True),
+                (500,'invalid_json_schema','text.format.schema',False),
+                (400,'transport_error','text.format.schema',False),
+                (400,'invalid_json_schema','input',False)):
+            value={'codex_error_info':'other','message':json.dumps({'status':status,'error':{
+                'type':'invalid_request_error','code':code,'param':param}})}
+            self.assertEqual(bool(schema_rejection(value)),expected)
+        self.assertIsNone(schema_rejection({'message':'invalid_json_schema'}))
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
         root = Path(self.tmp.name)

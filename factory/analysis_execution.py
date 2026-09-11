@@ -56,6 +56,8 @@ def ensure_group(store, run_id):
     if group:
         if group.get('analysis') and group['runtime_id'] != run_id:
             raise FactoryError('stale_run', 'Analysis must resume its original run and budget')
+        if group.get('analysis'):
+            classify_rejected_requests(store, group)
         return group
     policy = ExecutionStore(store).policy()
     if not policy.get('analysis_authorized'):
@@ -75,6 +77,29 @@ def ensure_group(store, run_id):
     return group
 
 
+def classify_rejected_requests(store, group):
+    """Recover only explicit provider schema rejections; retain requests and raw usage."""
+    import ast
+    from .codex_execution import schema_rejection
+    with store._connection(write=True) as db:
+        if db.execute('SELECT run_id FROM factory_control WHERE id=1').fetchone()[0] != group['runtime_id']:
+            raise FactoryError('stale_run', 'Only the owner can classify a saved request rejection')
+        rows = db.execute('SELECT id,data FROM continuation_calls WHERE continuation_id=?', (group['id'],)).fetchall()
+        for row in rows:
+            record = json.loads(row['data'])
+            if record.get('usage') or record.get('request_rejection') or record.get('state') != 'failed' or not record.get('runtime'):
+                continue
+            try:
+                provider_error = ast.literal_eval(record.get('error', {}).get('message', ''))
+            except (ValueError, SyntaxError):
+                continue
+            rejection = schema_rejection(provider_error)
+            if rejection:
+                record['request_rejection'] = rejection
+                db.execute('UPDATE continuation_calls SET data=? WHERE id=?', (canonical(record), row['id']))
+                Runtime.event(db, 'analysis_request_rejection_classified', {'call_id': row['id'], **rejection})
+
+
 def schema_for(phase, context):
     if phase == 'discovery':
         from .discovery_contract import INSTRUCTIONS, RESPONSE_SCHEMA
@@ -88,6 +113,8 @@ def schema_for(phase, context):
         schema['properties']['milestones']['items']['required'].append('subjective_criteria')
     if context.get('automatic_plan_binding') and not context['role'].startswith('critic'):
         schema['required'].append('execution_binding')
+    elif not context['role'].startswith('critic'):
+        schema['properties'].pop('execution_binding', None)
     return INSTRUCTIONS, schema
 
 

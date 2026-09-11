@@ -61,6 +61,14 @@ RESPONSE_SCHEMA = obj({
 
 def validate(value, schema=RESPONSE_SCHEMA, path="response"):
     """Validate our closed JSON Schema subset, including strict bool/int distinction."""
+    if 'anyOf' in schema:
+        for alternative in schema['anyOf']:
+            try:
+                validate(value, alternative, path)
+                return
+            except WorkflowError:
+                pass
+        raise WorkflowError(f'{path}: no allowed schema alternative matches')
     expected = {"object": dict, "array": list, "string": str, "integer": int, "boolean": bool}[schema["type"]]
     if type(value) is not expected:
         raise WorkflowError(f"{path}: expected {schema['type']}")

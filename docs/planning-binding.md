@@ -68,6 +68,13 @@ configuración global ni habilita facturación API. Un nivel no ofrecido bloquea
 telemetría distingue el nivel solicitado del observado cuando llega esa notificación.
 Seleccionar Fast no demuestra una aceleración medida del recorrido completo.
 
+El piloto real detectó un rechazo HTTP 400 por `oneOf` en el esquema de respuesta.
+Las alternativas de autorización usan ahora `anyOf` con dos objetos cerrados: siguen
+rechazando ausencia de autorización, campos adicionales y ambas alternativas a la vez.
+Al recuperar el mismo run, Factory puede clasificar ese rechazo exacto previo a generación.
+Conserva la llamada consumida, el error y el uso SDK sin reportar; no lo convierte en
+telemetría medida. Otros fallos sin uso conocido siguen impidiendo nueva inferencia.
+
 ## Evidencia y límite de esta corrección
 
 `tests/test_planning_binding.py` reutiliza el producto de dos milestones en repositorios

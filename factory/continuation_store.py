@@ -31,10 +31,14 @@ def budget(db, identifier):
     calls = [dict(r) for r in db.execute('SELECT * FROM continuation_calls WHERE continuation_id=?', (identifier,))]
     totals = {}
     unknown = 0
+    rejected = 0
     for call in calls:
         record = json.loads(call['data'])
         usage = record.get('usage')
         if not usage:
+            if record.get('request_rejection', {}).get('code') == 'invalid_json_schema':
+                rejected += 1  # The request still consumes a call, with no model generation.
+                continue
             unknown += 1
             continue
         # SDK total is cumulative within a thread, including repairs. Count each
@@ -43,6 +47,7 @@ def budget(db, identifier):
         totals[key] = max(totals.get(key, 0), usage.get('total', {}).get('totalTokens', 0))
     used = sum(totals.values())
     return {'calls': len(calls), 'tokens': used, 'usage_unknown_calls': unknown,
+        'rejected_before_inference': rejected,
         'analysis_calls': sum(c['kind'] in ('discovery', 'architecture', 'planning') for c in calls),
         'analysis_tokens': sum(v for k, v in totals.items() if k[0] in ('discovery', 'architecture', 'planning')),
         'implementation_calls': sum(c['kind'] == 'implementation' for c in calls),

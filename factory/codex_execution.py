@@ -37,6 +37,26 @@ the concrete failed evidence and current files. Keep changes within scope/out_of
 '''
 
 
+def schema_rejection(error):
+    """Trusted provider HTTP 400 for an invalid output schema, before generation."""
+    from hashlib import sha256
+    if not isinstance(error, dict) or error.get('codex_error_info') != 'other':
+        return None
+    try:
+        payload = json.loads(error.get('message', ''))
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(payload, dict) or payload.get('status') != 400:
+        return None
+    detail = payload.get('error')
+    if (not isinstance(detail, dict) or detail.get('type') != 'invalid_request_error' or
+            detail.get('code') != 'invalid_json_schema' or detail.get('param') != 'text.format.schema'):
+        return None
+    return {'code': 'invalid_json_schema', 'status': 400, 'param': 'text.format.schema',
+            'provenance': 'provider rejection before generation; raw SDK usage remains unreported',
+            'error_sha256': sha256(error['message'].encode()).hexdigest()}
+
+
 class CodexExecution:
     instructions = INSTRUCTIONS
     result_schema = RESULT_SCHEMA

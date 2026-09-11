@@ -27,6 +27,31 @@ from tests.project_fakes import setup_project
 
 
 class AutomaticBindingTests(unittest.TestCase):
+    def test_planning_output_schema_preserves_exclusive_approval_alternatives_in_supported_subset(self):
+        from factory.analysis_execution import schema_for
+        from factory.execution_contract import check_schema
+        from factory.discovery_contract import validate
+        from factory.workflow import WorkflowError
+        _, schema=schema_for('planning',{'role':'propose','automatic_plan_binding':True})
+        def inspect(value):
+            if isinstance(value,dict):
+                self.assertNotIn('oneOf',value); self.assertNotIn('not',value)
+                if value.get('type')=='object':
+                    self.assertEqual(set(value['required']),set(value['properties']))
+                    self.assertFalse(value['additionalProperties'])
+                for v in value.values(): inspect(v)
+            elif isinstance(value,list):
+                for v in value: inspect(v)
+        inspect(schema)
+        approval=schema['properties']['execution_binding']['properties']['exclusions']['items']
+        check_schema({'requirement':'scope','authorization':'initial'},approval)
+        check_schema({'requirement':'scope','decision_id':1},approval)
+        validate({'requirement':'scope','authorization':'initial'},approval)
+        validate({'requirement':'scope','decision_id':1},approval)
+        for value in ({'requirement':'scope'}, {'requirement':'scope','authorization':'initial','decision_id':1}):
+            with self.assertRaises(FactoryError): check_schema(value,approval)
+            with self.assertRaises(WorkflowError): validate(value,approval)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)

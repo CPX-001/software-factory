@@ -26,6 +26,30 @@ from tests.planning_fakes import fake as fake_planner
 
 
 class AuthorizedAnalysisTests(unittest.TestCase):
+    def test_schema_rejection_recovery_retains_call_budget_without_inventing_usage(self):
+        from factory.continuation_store import ContinuationStore
+        provider_error = {'codex_error_info':'other','message':json.dumps({'status':400,'error':{
+            'type':'invalid_request_error','code':'invalid_json_schema','param':'text.format.schema'}})}
+        self.sdk.responses = [FactoryError('infrastructure_failed', str(provider_error)), complete_reply()]
+        self.policy['continuation']['max_calls'] = 2
+        self.start()
+        with self.assertRaises(FactoryError): self.service.run_pending(*self.jobs[-1])
+        before = ContinuationStore(self.store).inspect()
+        self.assertEqual(before['budget']['usage_unknown_calls'], 1)
+        self.service.resume(self.identifier)
+        with self.assertRaises(FactoryError): self.service.run_pending(*self.jobs[-1])
+        after = ContinuationStore(self.store).inspect()
+        self.assertEqual(before['id'], after['id'])
+        self.assertEqual(before['deadline'], after['deadline'])
+        self.assertEqual(after['budget']['calls'], 2)
+        self.assertEqual(after['budget']['tokens'], 100)
+        self.assertEqual(after['budget']['usage_unknown_calls'], 0)
+        self.assertEqual(after['budget']['rejected_before_inference'], 1)
+        with self.store._connection() as db:
+            record=json.loads(db.execute('SELECT data FROM continuation_calls ORDER BY rowid LIMIT 1').fetchone()[0])
+            self.assertIsNone(record['usage'])
+            self.assertEqual(record['error']['message'], str(provider_error))
+
     def setUp(self):
         from scripts.execution_smoke_fixture import prepare_from_discovery
         from tests.execution_fakes import FakeSDK

@@ -54,9 +54,8 @@ def installed_parameters(prepared):
 async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
     """Prepare/inspect through the normal MCP surface without faking phase progress.
 
-    The present analysis adapters have no aggregate authorization/usage guard. This
-    driver refuses real dispatch until that integration exists, even if quota recovers.
-    It must not become an alternate phase controller or a budget enforced by polling.
+    An explicit pre-planning policy enables the existing detached controller and its
+    shared ledger. This driver does not authorize new budgets or supervise phases.
     """
     if parameters is None:
         parameters = installed_parameters(prepared) if installed else StdioServerParameters(command=sys.executable,
@@ -105,16 +104,39 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
         report['run_id'] = explicit['autonomous_run']['run_id']
         report['continuation_id'] = (explicit.get('continuation') or {}).get('id')
         report['pending_decisions'] = await call(client, 'factory_decisions', project=identifier)
+    effective_policy = ExecutionStore(Store(prepared['project']['path'])).policy()
+    guarded = effective_policy.get('analysis_authorized') or bool((explicit.get('continuation') or {}).get('budget', {}).get('analysis_calls'))
+    if guarded:
+        report['policy'] = effective_policy
+        report['full_workflow_limits'] = effective_policy['continuation']
+        report['full_workflow_limits_enforced'] = True
+        report['integration_gaps'] = [g for g in report['integration_gaps']
+                                    if g['code'] == 'initial_execution_authorization_boundary']
     if run:
         from scripts.diagnose_execution import inspect_runtime
         report['quota_preflight'] = await asyncio.to_thread(inspect_runtime,
-            prepared['policy']['model'], prepared['policy']['effort'], prepared['policy']['quota_reserve_percent'])
+            report['policy']['model'], report['policy']['effort'], report['policy']['quota_reserve_percent'])
         if report['quota_preflight']['status'] != 'ready':
             report['blocker'] = report['quota_preflight']['diagnostic']
+        elif guarded:
+            async with Client(parameters) as client:
+                explicit = await call(client, 'factory_resume', project=identifier)
+                report['run_id'] = explicit['autonomous_run']['run_id']
+                report['dispatch_requested'] = True
+            # A disconnected client never owns the work or its spending controls.
+            await asyncio.sleep(2)
+            async with Client(parameters) as client:
+                explicit = await call(client, 'factory_status', project=identifier)
+            report['status'] = explicit
+            report['continuation_id'] = (explicit.get('continuation') or {}).get('id')
+            report['blocker'] = (explicit.get('continuation') or {}).get('diagnostic')
         else:
             report['blocker'] = report['integration_gaps'][0]
     else:
-        report['blocker'] = report['integration_gaps'][0]
+        report['blocker'] = ((explicit.get('continuation') or {}).get('diagnostic') if guarded
+                             else report['integration_gaps'][0])
+    if guarded and not report.get('blocker'):
+        report['blocker'] = explicit.get('execution', {}).get('diagnostic')
     store = Store(prepared['project']['path'])
     snapshot = store.snapshot()
     report['phases_really_completed'] = [phase for phase, complete in (
@@ -123,10 +145,20 @@ async def discovery_smoke(prepared, run, *, installed=False, parameters=None):
         ('planning', snapshot['planning']['roadmap'])) if complete]
     with store._connection() as db:
         completed_turns = db.execute("SELECT count(*) FROM discovery_turns WHERE status='completed'").fetchone()[0]
+        calls = [dict(r) for r in db.execute('SELECT kind,data FROM continuation_calls')]
     report['usage_by_phase'] = {'discovery': {'completed_turns': completed_turns, 'token_usage': 'not recorded'},
         'architecture': {'calls': snapshot['architecture']['calls'], 'token_usage': 'not recorded'},
         'planning': {'calls': snapshot['planning']['calls'], 'token_usage': 'not recorded'},
         'execution_and_refinement': (explicit.get('continuation') or {}).get('budget')}
+    if guarded:
+        report['model_started'] = bool(calls)
+        report['model_calls_this_invocation'] = None  # Observation is not a per-call trace.
+        report['effective_models'] = {k: effective_policy[k] for k in ('model', 'effort')}
+        for phase in ('discovery', 'architecture', 'planning'):
+            phase_calls = [json.loads(c['data']) for c in calls if c['kind'] == phase]
+            report['usage_by_phase'][phase] = {'calls': len(phase_calls),
+                'tokens': sum((c.get('usage') or {}).get('total', {}).get('totalTokens', 0) for c in phase_calls),
+                'unknown_usage_calls': sum(not c.get('usage') for c in phase_calls)}
     from factory.project_store import ProjectStore
     final = ProjectStore(store).inspect(full=True)
     report['independent_acceptance'] = {'status': 'NOT_RUN', 'reason': 'Independent accepted-candidate checks have not run in this driver'}

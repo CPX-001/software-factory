@@ -40,5 +40,9 @@ configuración; un simple diff de archivos directos no sería suficiente.
 
 Completar el mismo escenario de dos milestones con modelo real y verificar su invocación desde
 Codex App. Los tests con modelos simulados y transporte MCP real no lo sustituyen. El diagnóstico
-del paso 11 mantiene `quota_reserve`, sin inferencia. No propongo en este paso nuevos lenguajes,
+histórico del paso 11 conserva `quota_reserve`. En el paso 12, una autorización explícita retiró
+la reserva para el único piloto y se completaron discovery, arquitectura y planning con modelo
+real. El [recorrido actual](end-to-end-acceptance.md) está pendiente de vincular la verificación
+del plan antes de implementar; la aceptación del producto continúa sin ejecutar.
+No propongo en este paso nuevos lenguajes,
 paralelismo, despliegue ni resolución automática de propuestas arquitectónicas.

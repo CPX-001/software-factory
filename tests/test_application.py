@@ -25,6 +25,145 @@ from tests.architecture_fakes import FakeArchitect, proposal, review
 from tests.planning_fakes import fake as fake_planner
 
 
+class AuthorizedAnalysisTests(unittest.TestCase):
+    def setUp(self):
+        from scripts.execution_smoke_fixture import prepare_from_discovery
+        from tests.execution_fakes import FakeSDK
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        root = Path(self.tmp.name)
+        self.prepared = prepare_from_discovery(root / 'pilot', 'gpt-5.6-terra', 'low', registry_home=root / 'registry')
+        self.policy = deepcopy(self.prepared['policy'])
+        self.policy['continuation'].update(max_calls=20, max_seconds=1800, max_tokens=250000)
+        self.policy['quota_reserve_percent'] = 0
+        self.verification = {'schema_version': 1, 'checks': self.prepared['contract']['checks'], 'harness': []}
+        self.jobs = []
+        self.sdk = FakeSDK(complete_reply(), lambda c: proposal(c['source']['knowledge']), review(),
+                           lambda c: __import__('tests.planning_fakes', fromlist=['dynamic']).dynamic(c), review())
+        self.service = FactoryService(Registry(root / 'registry'), analysis_worker_factory=self.sdk,
+            router=SkillRouter(Catalog()), launcher=lambda p, r: self.jobs.append((p, r)))
+        self.identifier = self.prepared['project']['id']
+        self.store = self.service._store(self.identifier)
+
+    def start(self):
+        self.service.configure_execution(self.policy, self.verification, self.identifier)
+        self.service.submit_user_message(self.prepared['initial_message'], self.identifier, request_id='analysis-once')
+        self.service.resume(self.identifier)
+
+    def test_real_phase_dispatch_uses_one_ledger_and_resume_cannot_reset_it(self):
+        self.policy['continuation']['max_calls'] = 2
+        self.start()
+        with self.assertRaises(FactoryError) as exc:
+            self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(exc.exception.code, 'budget_exhausted')
+        status = self.service.get_status(self.identifier)
+        group = status['continuation']
+        self.assertEqual(group['budget']['analysis_calls'], 2)
+        self.assertEqual(group['budget']['tokens'], 200)
+        run = status['autonomous_run']['run_id']
+        self.service.resume(self.identifier)
+        self.assertEqual(self.jobs[-1][1], run)
+        with self.assertRaises(FactoryError):
+            self.service.run_pending(*self.jobs[-1])
+        after = self.service.get_status(self.identifier)['continuation']
+        self.assertEqual(after['id'], group['id'])
+        self.assertEqual(after['deadline'], group['deadline'])
+        self.assertEqual(after['budget']['calls'], 2)
+        self.assertEqual(len(self.sdk.contexts), 2)
+
+    def test_completed_analysis_output_is_reused_without_spending(self):
+        from factory.analysis_execution import AnalysisModel, ensure_group
+        self.start()
+        ensure_group(self.store, self.jobs[-1][1])
+        adapter = AnalysisModel(self.service, self.store, 'discovery')
+        first = adapter.respond({'input': 'saved context'})
+        second = AnalysisModel(self.service, self.store, 'discovery').respond({'input': 'saved context'})
+        self.assertEqual(first, second)
+        self.assertEqual(len(self.sdk.contexts), 1)
+        self.assertEqual(self.service.get_status(self.identifier)['continuation']['budget']['calls'], 1)
+        self.assertEqual(self.sdk.contexts[0]['workflow_authorization']['quota_reserve_percent'], 0)
+        self.assertEqual(self.sdk.contexts[0]['workflow_authorization']['continuation']['max_calls'], 20)
+
+    def test_all_analysis_phases_stop_at_binding_boundary_and_keep_budget(self):
+        self.start()
+        self.service.run_pending(*self.jobs[-1])
+        status = self.service.get_status(self.identifier)
+        self.assertEqual(status['phase'], 'execution')
+        self.assertEqual(status['continuation']['state'], 'implementation_boundary')
+        self.assertEqual(status['continuation']['budget']['calls'], 5)
+        self.assertEqual(status['continuation']['budget']['analysis_tokens'], 500)
+        self.assertEqual(status['execution']['diagnostic']['code'], 'verification_binding_pending')
+        from factory.execution_store import ExecutionStore
+        self.assertEqual(ExecutionStore(self.store).acceptances(), [])
+        self.service.resume(self.identifier)
+        self.assertEqual(len(self.jobs), 1)
+
+    def test_explicit_zero_reserve_allows_measured_usage_but_never_exhaustion(self):
+        self.sdk.quota_value = {'observed_at': time.time(), 'buckets': {'codex': {'primary': {
+            'usedPercent': 99, 'resetsAt': time.time() + 1000}}}}
+        self.policy['continuation']['max_calls'] = 1
+        self.start()
+        with self.assertRaises(FactoryError) as exc:
+            self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(exc.exception.code, 'budget_exhausted')
+        self.assertEqual(len(self.sdk.contexts), 1)
+        from factory.quota import quota_guard
+        self.sdk.quota_value['buckets']['codex']['primary']['usedPercent'] = 100
+        with self.assertRaises(FactoryError) as exc:
+            quota_guard(self.sdk.quota_value, self.policy)
+        self.assertEqual(exc.exception.code, 'quota_exhausted')
+
+    def test_plan_binding_preserves_predeclared_checks_and_all_consumed_budget(self):
+        self.start()
+        self.service.run_pending(*self.jobs[-1])
+        before = self.service.get_status(self.identifier)['continuation']
+        definition = deepcopy(self.verification)
+        for check in definition['checks']:
+            check.update(gate='milestone_gate', criteria=[0, 1])
+        local = deepcopy(definition['checks'][0])
+        local.update(id='local_summary', gate='local_gate', criteria=[0])
+        definition['checks'].append(local)
+        weakened = deepcopy(definition)
+        weakened['checks'][0]['min_tests'] = 1
+        with self.assertRaises(FactoryError) as exc:
+            self.service.configure_execution(self.policy, weakened, self.identifier)
+        self.assertEqual(exc.exception.code, 'acceptance_contract_frozen')
+        self.service.configure_execution(self.policy, definition, self.identifier)
+        status = self.service.execute_next_slice(self.identifier, request_id='same-workflow-execution')
+        after = status['continuation']
+        self.assertEqual(before['id'], after['id'])
+        self.assertEqual(before['runtime_id'], after['runtime_id'])
+        self.assertEqual(before['deadline'], after['deadline'])
+        self.assertEqual(before['budget']['calls'], after['budget']['calls'])
+        self.assertEqual(before['budget']['tokens'], after['budget']['tokens'])
+
+    def test_missing_usage_blocks_the_next_phase_without_an_extra_inference(self):
+        self.sdk.usage = None
+        self.start()
+        with self.assertRaises(FactoryError) as exc:
+            self.service.run_pending(*self.jobs[-1])
+        self.assertEqual(exc.exception.code, 'usage_unknown')
+        self.assertEqual(len(self.sdk.contexts), 1)
+
+    def test_one_planning_recovery_retains_history_and_cannot_repeat(self):
+        from tests.planning_fakes import dynamic
+        finding = {'id': 'closure_cycle', 'severity': 'high', 'category': 'verification',
+                   'targets': ['milestone_gate'], 'description': 'Closure ordering needs correction',
+                   'recommendation': 'Preserve criteria and repair the ordering'}
+        self.sdk.responses = [complete_reply(), lambda c: proposal(c['source']['knowledge']), review(),
+                              dynamic, review([finding]), dynamic, review([finding]), dynamic, review([finding])]
+        self.start()
+        self.service.run_pending(*self.jobs[-1])
+        state = self.store.snapshot()['planning']
+        self.assertEqual(state['stage'], 'blocked')
+        self.assertEqual(state['calls'], 6)
+        self.assertEqual(state['recovery_attempts'], 1)
+        before = self.service.get_status(self.identifier)['continuation']['budget']['calls']
+        self.service.resume(self.identifier)
+        self.assertEqual(self.service.get_status(self.identifier)['continuation']['budget']['calls'], before)
+        self.assertEqual(len(self.jobs), 1)
+
+
 class ServiceTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

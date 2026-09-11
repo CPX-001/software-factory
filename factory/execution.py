@@ -68,6 +68,9 @@ def select_slice(snapshot, accepted):
 
 def configure(store, policy, verification):
     validate_policy(policy)
+    if store.snapshot()['phase'] in ('discovery', 'architecture', 'planning'):
+        from .analysis_execution import configure_analysis
+        return configure_analysis(store, policy, verification)
     sources = current_sources(store.snapshot())
     plan = store.snapshot()['planning']['roadmap']['plan']
     validate_verification(verification, plan)
@@ -75,7 +78,7 @@ def configure(store, policy, verification):
     existing = journal.latest()
     from .continuation_store import ContinuationStore, TERMINAL
     continuation = ContinuationStore(store).latest()
-    if continuation and continuation['state'] not in TERMINAL:
+    if continuation and continuation['state'] not in TERMINAL and not continuation.get('analysis'):
         raise FactoryError('run_busy', 'Continuation policy and verification remain frozen while its run is open')
     if existing and existing['state'] != 'checkpoint':
         raise FactoryError('execution_exists', 'Execution policy and checks are frozen while a run remains open')
@@ -88,6 +91,17 @@ def configure(store, policy, verification):
             any(c['sources'] == sources and c['definition_id'] != identifier for c in frozen_contracts)):
         raise FactoryError('acceptance_contract_frozen', 'Accepted work freezes project criteria and exclusions; changes require a separately approved planning revision')
     authorized = {**policy, 'repository': identity, 'definition_id': identifier, 'authorized_at': time.time()}
+    if continuation and continuation.get('analysis'):
+        if any(policy.get(k) != continuation['policy'].get(k) for k in policy):
+            raise FactoryError('policy_changed', 'Binding the accepted plan must preserve the already authorized workflow policy and budgets')
+        original = journal.definition(continuation['policy']['definition_id'])['verification']
+        mapped = {c['id']: c for c in verification['checks']}
+        for c in original['checks']:
+            if c['id'] not in mapped or any(mapped[c['id']].get(k) != v for k, v in c.items()
+                                          if k not in ('gate', 'criteria', 'gate_checks')):
+                raise FactoryError('acceptance_contract_frozen', 'Plan binding cannot weaken predeclared acceptance checks')
+        if original.get('project_acceptance') != verification.get('project_acceptance'):
+            raise FactoryError('acceptance_contract_frozen', 'Plan binding must preserve delivery and exclusion conditions')
     with store._connection(write=True) as db:
         db.execute('INSERT OR IGNORE INTO execution_definitions VALUES (?,?,?)',
                    (identifier, canonical(definition), time.time()))
@@ -98,6 +112,19 @@ def configure(store, policy, verification):
         db.execute('UPDATE execution_policy SET data=? WHERE id=1', (canonical(authorized),))
         Runtime.event(db, 'execution_authorized' if policy['enabled'] else 'execution_disabled',
                       {'definition_id': identifier, 'repository': identity})
+        if continuation and continuation.get('analysis'):
+            from .milestone import eligible_milestone
+            # Publish binding on the SAME logical run. No deadline/call/token reset.
+            milestone = eligible_milestone(plan, {})
+            if not milestone:
+                raise FactoryError('milestone_gate_pending', 'No initial milestone is eligible')
+            continuation.update(analysis=False, state='execution_authorized', policy=authorized,
+                                sources=sources, milestone=milestone['id'], reason=None, diagnostic=None)
+            if policy.get('final_validation', {}).get('enabled'):
+                continuation['final_authorization'] = {**policy['final_validation'], 'sources': sources,
+                    'definition_id': identifier, 'authorized_at': authorized['authorized_at']}
+            db.execute('UPDATE continuations SET state=?,data=? WHERE id=?',
+                       (continuation['state'], canonical(continuation), continuation['id']))
     limit = policy['continuation']['max_slices'] if policy.get('continuation', {}).get('enabled') else 1
     return {'policy': authorized, 'definition_id': identifier, 'slice_limit': limit}
 

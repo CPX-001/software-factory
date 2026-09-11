@@ -43,6 +43,8 @@ def budget(db, identifier):
         totals[key] = max(totals.get(key, 0), usage.get('total', {}).get('totalTokens', 0))
     used = sum(totals.values())
     return {'calls': len(calls), 'tokens': used, 'usage_unknown_calls': unknown,
+        'analysis_calls': sum(c['kind'] in ('discovery', 'architecture', 'planning') for c in calls),
+        'analysis_tokens': sum(v for k, v in totals.items() if k[0] in ('discovery', 'architecture', 'planning')),
         'implementation_calls': sum(c['kind'] == 'implementation' for c in calls),
         'refinement_calls': sum(c['kind'] == 'refinement' for c in calls),
         'preparation_calls': sum(c['kind'] == 'preparation' for c in calls),
@@ -114,6 +116,16 @@ class ContinuationStore:
         value.update(work_units=len(units), remediations=sum(bool(a.get('remediation')) for a in units),
                      units_remaining=max(0, data['limits']['max_slices'] - len(units)))
         result = {**data, 'budget': value}
+        if data.get('analysis'):
+            from .runtime import Runtime, ACTIVE
+            runtime = Runtime(self.store).state()
+            result.update(phase=self.store.snapshot()['phase'], closed_milestones=[], next_milestone=None,
+                          open_issues=[], verification_binding='pending accepted planning')
+            if runtime['paused']:
+                result['state'] = 'pause_requested' if runtime['status'] in ACTIVE else 'paused'
+            elif runtime['status'] in ACTIVE:
+                result['state'] = 'analysis_running'
+            return result
         from .milestone_store import MilestoneStore
         from .milestone import eligible_milestone
         milestones = MilestoneStore(self.store)

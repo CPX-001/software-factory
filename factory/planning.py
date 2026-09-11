@@ -167,6 +167,8 @@ def quality_gate(plan, source, decisions=(), review_passed=True, *, initial=True
         require(bool(m['success_criteria']) and bool(m['closure_conditions']), 'milestone_criteria:' + mid)
         require(all(i < len(m['success_criteria'] + m['closure_conditions']) for i in m.get('subjective_criteria', [])), 'subjective_criteria:' + mid)
         refs(m['verification_gates'], gates, 'milestone_gates:' + mid, True)
+        require(not any(gates[gid]['trigger'] == 'project_close' for gid in m['verification_gates'] if gid in gates),
+                'project_close_before_milestone:' + mid)
         require(any(g['kind'] == 'milestone' and g['target'] == mid and g['id'] in m['verification_gates']
                     for g in gates.values()), 'milestone_gate_missing:' + mid)
         require(any(s['milestone'] == mid for s in slices.values()), 'milestone_slices:' + mid)
@@ -403,9 +405,50 @@ def refinement_snapshot(snapshot, slice_id, evidence=()):
 
 
 class Planning:
-    def __init__(self, store, model=None, router=None, should_stop=None):
+    def __init__(self, store, model=None, router=None, should_stop=None, allow_recovery=False):
         self.store, self.model, self.router = store, model, router
         self.should_stop = should_stop or (lambda: False)
+        self.allow_recovery = allow_recovery
+
+    def queue_recovery(self):
+        """One additional plan correction, charged to an explicitly authorized workflow.
+
+        Keep proposal/reviews/call history and the accepted architecture untouched.
+        A fresh resume cannot open another recovery allowance.
+        """
+        snapshot = self.store.snapshot()
+        planning = snapshot['planning']
+        if (not self.allow_recovery or snapshot['phase'] != 'planning' or planning['stage'] != 'blocked'
+                or any(d['answer'] is None for d in snapshot['decisions'])):
+            return False
+        with self.store._connection() as db:
+            previous_review = db.execute("SELECT context FROM planning_calls WHERE role LIKE 'critic%' AND status='completed' ORDER BY id DESC LIMIT 1").fetchone()
+        refresh_review = bool(previous_review and not planning.get('review_context_refreshed')
+                              and 'runtime_semantics' not in json.loads(previous_review[0])['input'])
+        if (planning.get('recovery_attempts') and not refresh_review or
+                planning.get('calls', 0) + (1 if refresh_review else 2) > MAX_CALLS):
+            return False
+        review_failure = any(b.startswith('Unresolved review ') for b in planning['blockers'])
+        gate_failure = bool(planning.get('gate', {}).get('errors'))
+        current = source_snapshot(snapshot)
+        if (not (review_failure or gate_failure) or any(current[k] != planning['source'][k]
+                                                     for k in ('architecture', 'requirements'))):
+            return False
+        from .continuation_store import ContinuationStore, check_budget
+        group = ContinuationStore(self.store).latest()
+        if not group or not group.get('analysis'):
+            return False
+        with self.store._connection() as db:
+            remaining = check_budget(db, group['id'], dispatch=True)
+        if remaining['calls_remaining'] < (1 if refresh_review else 2) or remaining['usage_unknown_calls']:
+            return False
+        state = {k: deepcopy(v) for k, v in planning.items() if k not in ('roadmap', 'decision_details')}
+        if refresh_review:
+            state.update(stage='critic_final', review_context_refreshed=True)
+        else:
+            state.update(stage='reconcile', recovery_attempts=1, reconciliations=state['reconciliations'] + 1)
+        self._mutate(snapshot, state, 'planning_review_context_refreshed' if refresh_review else 'planning_bounded_recovery_queued')
+        return True
 
     @contextmanager
     def _lock(self):
@@ -468,6 +511,8 @@ class Planning:
                 continue
             state = {k: deepcopy(v) for k, v in planning.items() if k not in ('roadmap', 'decision_details')}
             if state['stage'] in ('blocked', 'completed'):
+                if state['stage'] == 'blocked' and self.queue_recovery():
+                    continue
                 return snapshot
             current_source = source_snapshot(snapshot)
             if any(current_source[k] != state['source'][k] for k in ('architecture', 'requirements')):
@@ -494,7 +539,7 @@ class Planning:
                     continue
                 self._complete(snapshot, state)
                 return self.store.snapshot()
-            if state['calls'] >= MAX_CALLS or state['stage'].startswith('critic') and state['critic_calls'] >= 2:
+            if state['calls'] >= MAX_CALLS or state['stage'].startswith('critic') and state['critic_calls'] >= 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)):
                 state.update(stage='blocked', blockers=['Planning persistent call/review limit reached; explicit new effort required'])
                 self._mutate(snapshot, state, 'planning_budget_exhausted')
                 return self.store.snapshot()
@@ -526,11 +571,19 @@ class Planning:
                 risk=state['classification']['risk'], concerns=concerns))
             skill_inputs = routing.required_inputs(self.router.catalog)
             state['routing'] = routing.as_dict()
+            gate_errors = state.get('gate', {}).get('errors', [])
+            if role == 'reconcile' and state['proposal']:
+                gate_errors = quality_gate(state['proposal'], state['source'], self._decisions(snapshot), True)['errors']
             context = bounded({'role': role, 'source': state['source'],
+                'runtime_semantics': {'version': 1,
+                    'milestone_dependencies': 'Factory closes prerequisite milestones before selecting ANY slice from a dependent milestone.',
+                    'slice_dependencies': 'Slice dependencies reference slice IDs only; cross-milestone closure is enforced separately by the controller.',
+                    'project_close': 'Runs only after all required milestones close; it cannot be a milestone closure prerequisite.'},
                 'source_fingerprint': state['source_fingerprint'], 'proposal': state['proposal'],
                 'review': state['review'], 'human_answers': self._decisions(snapshot),
-                'gate_errors': state.get('gate', {}).get('errors', []), 'skills': routing.context(),
-                'limits': {'critic_passes': 2, 'reconciliations': 1, 'calls': MAX_CALLS, 'detailed_slices': 3}})
+                'gate_errors': gate_errors, 'skills': routing.context(),
+                'limits': {'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
+                           'reconciliations': 1 + state.get('recovery_attempts', 0), 'calls': MAX_CALLS, 'detailed_slices': 3}})
         except WorkflowError as exc:
             state['blockers'] = [str(exc)]
             self._mutate(snapshot, state, 'planning_preflight_failed')
@@ -595,7 +648,8 @@ class Planning:
         with self.store._connection(write=True) as db:
             self.store._check(db, snapshot['revision'])
             review = {'classification': state['classification'], 'passes': state['reviews'],
-                      'limits': {'critic_passes': 2, 'reconciliations': 1, 'calls': MAX_CALLS}}
+                      'limits': {'critic_passes': 2 + state.get('recovery_attempts', 0) + int(state.get('review_context_refreshed', False)),
+                                 'reconciliations': 1 + state.get('recovery_attempts', 0), 'calls': MAX_CALLS}}
             append_revision(db, state['proposal'], state['source'], review, state['gate'], 'Initial progressive roadmap')
             state.update(stage='completed', blockers=[])
             db.execute("UPDATE workflow SET phase='execution' WHERE id=1")

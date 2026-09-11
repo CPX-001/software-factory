@@ -33,6 +33,8 @@ class Controller:
                     return  # Never replay an already claimed/finished run from another process.
             runtime.update(run_id, 'running')
             try:
+                from .analysis_execution import ensure_group
+                ensure_group(store, run_id)
                 for _ in range(MAX_PHASE_STEPS):
                     if runtime.paused():
                         from .execution_store import ExecutionStore
@@ -47,7 +49,7 @@ class Controller:
                         from .continuation import Continuation
                         continuation = Continuation(self.service, store)
                         group = continuation.journal.latest()
-                        if group and group['runtime_id'] == run_id:
+                        if group and group['runtime_id'] == run_id and not group.get('analysis'):
                             continuation.run(run_id)
                             return
                         from .execution import Execution
@@ -58,6 +60,12 @@ class Controller:
                             return
                     reason = stop_reason(snapshot)
                     if reason:
+                        from .continuation_store import ContinuationStore
+                        journal = ContinuationStore(store)
+                        group = journal.latest()
+                        if group and group.get('analysis'):
+                            group.update(state=reason, reason=reason)
+                            journal.save(group)
                         runtime.update(run_id, reason, reason)
                         return
                     if snapshot['phase'] == 'discovery':
@@ -70,5 +78,13 @@ class Controller:
                         raise AssertionError('Unimplemented phases must be stopped before dispatch')
                 runtime.update(run_id, 'limit_reached', 'Bounded continuation limit reached')
             except BaseException as exc:
+                from .continuation_store import ContinuationStore
+                journal = ContinuationStore(store)
+                group = journal.latest()
+                if group and group.get('analysis'):
+                    group.update(state='analysis_blocked', reason=str(exc)[:1000],
+                                 diagnostic={'code': getattr(exc, 'code', 'analysis_failed'), 'message': str(exc)[:1000],
+                                             **getattr(exc, 'details', {})})
+                    journal.save(group)
                 runtime.update(run_id, 'failed', 'Worker stopped; resume explicitly to retry', str(exc)[:1000])
                 raise

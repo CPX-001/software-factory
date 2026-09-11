@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-11 11:48:40 UTC",
+  "scenario": "records-v1",
+  "factory_commit": "2564407",
+  "project_id": "p_3084354cc76d1c23",
+  "user_report": {
+    "source": "User-provided excerpts from two separate Codex App conversations",
+    "independently_observed_prior_chat_tool_traces": false,
+    "observations": [
+      {
+        "chat": 1,
+        "action": "select_and_status",
+        "project_id": "p_3084354cc76d1c23",
+        "phase": "discovery",
+        "state": "paused",
+        "run_id": null
+      },
+      {
+        "chat": 1,
+        "action": "resubmit_PILOT.md",
+        "request_id": "records-v1-discovery-once",
+        "reported_ok": true,
+        "reported_pause_preserved": true,
+        "reported_run_id_before": null,
+        "reported_run_id_after": null,
+        "reported_inference_started": false
+      },
+      {
+        "chat": 2,
+        "action": "query_active_project_without_select_or_resume",
+        "project_id": "p_3084354cc76d1c23",
+        "phase": "discovery",
+        "state": "paused",
+        "run_id": null,
+        "pending_decisions": 0,
+        "reported_blockers": []
+      }
+    ]
+  },
+  "direct_native_tool_checks": {
+    "surface": "Software Factory plugin tools exposed in the current Codex conversation",
+    "calls": [
+      {
+        "tool": "factory_status",
+        "arguments": {
+          "project": "p_3084354cc76d1c23"
+        },
+        "result": {
+          "project": {
+            "id": "p_3084354cc76d1c23",
+            "name": "Records end-to-end pilot",
+            "path": "/home/cpx/.local/share/software-factory/pilots/records-v1/product"
+          },
+          "phase": "discovery",
+          "state": "paused",
+          "workflow_revision": 1,
+          "autonomous_run": {
+            "run_id": null,
+            "status": "idle",
+            "paused": true,
+            "reason": null
+          },
+          "pending_decisions": {
+            "count": 0,
+            "items": []
+          },
+          "blockers": [],
+          "progress": {
+            "knowledge_items": 0,
+            "discovery_ready": false,
+            "architecture_stage": "not_started",
+            "architecture_calls": 0,
+            "planning_stage": "not_started",
+            "planning_calls": 0,
+            "roadmap_revision": null
+          },
+          "project_validation": {
+            "state": "milestones_pending",
+            "candidate_commit": null,
+            "validated_version": null,
+            "contract_id": null,
+            "pending_criteria": [],
+            "checks": [],
+            "blocker": null,
+            "remediation": null,
+            "delivery": null,
+            "exclusions": []
+          }
+        }
+      },
+      {
+        "tool": "factory_status",
+        "arguments": {},
+        "result": {
+          "project": {
+            "id": "p_3084354cc76d1c23",
+            "name": "Records end-to-end pilot",
+            "path": "/home/cpx/.local/share/software-factory/pilots/records-v1/product"
+          },
+          "phase": "discovery",
+          "state": "paused",
+          "workflow_revision": 1,
+          "autonomous_run": {
+            "run_id": null,
+            "status": "idle",
+            "paused": true,
+            "reason": null
+          },
+          "pending_decisions": {
+            "count": 0,
+            "items": []
+          },
+          "blockers": [],
+          "progress": {
+            "knowledge_items": 0,
+            "discovery_ready": false,
+            "architecture_stage": "not_started",
+            "architecture_calls": 0,
+            "planning_stage": "not_started",
+            "planning_calls": 0,
+            "roadmap_revision": null
+          },
+          "project_validation": {
+            "state": "milestones_pending",
+            "candidate_commit": null,
+            "validated_version": null,
+            "contract_id": null,
+            "pending_criteria": [],
+            "checks": [],
+            "blocker": null,
+            "remediation": null,
+            "delivery": null,
+            "exclusions": []
+          }
+        }
+      }
+    ],
+    "active_selection_matches_pinned_project": true,
+    "model_inferences_started": 0,
+    "quota_refreshed": false,
+    "message_resent": false,
+    "resume_called": false
+  },
+  "scope": {
+    "codex_app_basic_interaction": "User-reported selection, paused message resend and persistence across conversations; current native status checks independently confirm selection and pause",
+    "running_workflow_survives_app_disconnect": "NOT_RUN",
+    "real_model_end_to_end": "NOT_RUN",
+    "independent_product_acceptance": "NOT_RUN",
+    "final_receipt": null,
+    "delivery": null
+  },
+  "limitations": [
+    "No active run existed, so reconnecting does not prove continuation of active model work.",
+    "factory_status does not refresh quota; its empty blockers list does not clear the separately recorded quota reserve blocker.",
+    "The last saved preflight observed 93 percent used with a 25 percent reserve; quota was not refreshed for this evidence.",
+    "Aggregate budgets for analysis phases, effective effort in those phases and authorized planning-to-execution transition remain unresolved."
+  ]
+}

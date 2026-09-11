@@ -31,6 +31,18 @@ class Continuation:
             data = self.journal.latest()
             if prior:
                 return prior[0]
+            if data and data['state'] == 'execution_authorized':
+                with self.store._connection() as db:
+                    check_budget(db, data['id'], dispatch=True)
+                data['integrated'] = reconcile(self.store)
+                data.update(state='queued', reason=None)
+                self.runtime.unpause()
+                self.runtime.update(data['runtime_id'], 'queued', 'Continue the original analysis/execution budget')
+                self.journal.save(data)
+                with self.store._connection(write=True) as db:
+                    db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))
+                self.service._launch_registered(self.project_id(), data['runtime_id'], self.runtime)
+                return data['id']
             if data and data['state'] not in TERMINAL:
                 with self.store._connection(write=True) as db:
                     db.execute('INSERT INTO continuation_requests VALUES (?,?)', (request_id, data['id']))

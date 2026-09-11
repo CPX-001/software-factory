@@ -62,7 +62,11 @@ Slices are coherent vertical, verifiable progress through necessary boundaries, 
 repositories then all endpoints. A bounded risk_probe may validate an important uncertainty
 early. Order arrays in intended implementation order; dependencies are authoritative, order
 breaks ties. Every milestone and slice binds exactly to source.architecture revision and
-fingerprint. Do NOT reassess architecture. potential_change is only a signal for a future
+fingerprint. Factory enforces milestone.dependencies BEFORE selecting any slice from a
+dependent milestone. Slice.dependencies contains slice IDs only; never demand an edge to
+a milestone ID or invent an extra closure slice to enforce a dependency already enforced
+by the controller. runtime_semantics describes these actual Factory guarantees.
+Do NOT reassess architecture. potential_change is only a signal for a future
 controller, never permission to change the baseline.
 
 Keep a stable global roadmap of objectives, dependencies, success/closure criteria and risk
@@ -92,12 +96,15 @@ only when the declared verification_triggers justify it (cross_component, bounda
 persistence, security, public_api); milestone gates verify all milestone criteria; system
 gates only at explicit strategic project_checkpoint or project_close targets (a milestone ID).
 project_close runs after ALL required milestones close and checks the integrated product's
-approved main entry, contracts and delivery conditions. Preserve the original success criteria;
+approved main entry, contracts and delivery conditions. A milestone's closure conditions
+and verification_gates must never depend on this later project_close gate: that would
+create a closure cycle. Preserve the original success criteria;
 never invent easier acceptance at final closure. Never impose
 full suite or expensive gate on every routine slice. Each nonlocal gate has signals and a
 specific rationale/checks. Local gates are cheap and use after_slice. Integration gates
 use before_slice/after_slice. Milestone gates use milestone_close. System gates use
-project_checkpoint. Every milestone references its milestone gate. A slice with verification
+project_checkpoint for intermediate checkpoints or project_close for final acceptance
+after all milestones. Every milestone references its milestone gate. A slice with verification
 triggers must have an integration gate matching those signals at that slice.
 
 Plan harness capabilities, not implementation: why, introducing slice/milestone, before or
@@ -117,8 +124,12 @@ milestones, oversized/horizontal slices, cycles, risk ordering/no early uncertai
 excessive or missing gates and architectural contradictions. Only important concrete findings;
 empty findings is valid. Never rewrite the plan as reviewer.
 Role reconcile: one bounded reconciliation of findings and deterministic gate errors.
-At most two critic calls, one reconciliation, eight total calls including failures. Unresolved
-important disagreement becomes a persistent blocker; no recursive debate. The controller
+Normally at most two critic calls, one reconciliation, eight total calls including failures.
+Only the controller's explicit limits may authorize one additional correction/review pair
+within the same eight-call and aggregate workflow budgets. Never renew these limits.
+Reviews created before runtime_semantics was supplied may receive one controller-authorized
+review-only refresh, preserving the proposal and all prior calls within the same total limits.
+Unresolved important disagreement becomes a persistent blocker; no recursive debate. The controller
 alone decides completion, not your prose.
 """
 

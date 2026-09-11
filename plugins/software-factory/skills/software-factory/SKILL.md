@@ -44,6 +44,12 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   support fixed Python behavior cases and exact unittest files. Required specialist reviews,
   Node/browser/Docker and other unsupported capabilities block before model spending;
   no shell string is accepted. Authorized ordinary work needs no per-command confirmation.
+- Before planning, the same `factory_execution_policy` accepts an explicitly authorized
+  finite continuation policy and predeclared check templates. This enables bounded analysis
+  with the existing worker and shared ledger, including discovery, architecture and planning.
+  It does not claim those templates are already bound to a plan. Inspect the accepted plan
+  before binding its concrete verification; the original checks, run and consumed budget
+  remain fixed. `factory_resume` reuses this analysis run, including after human input.
 - For “implement the next prepared slice”, use `factory_execute` with a new stable request_id.
   Factory chooses the slice. Reuse that ID on transport retries; do not call it repeatedly to
   supervise work. Present execution ID and current stage, then let the detached process work.
@@ -52,8 +58,11 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
 - For “why can't execution start?”, show `execution.diagnostic` and `next_action.next_step`
   from `factory_status`. Distinguish transport/authentication/configuration/method/timeout/
   parsing failures from missing/stale data and a reached quota reserve. Status does not call
-  a model or refresh account quota. Never switch to a freer bucket, invent data, lower the
-  reserve, consume a reset or use API billing to bypass a blocker. Report the observed worker
+  a model or refresh account quota. Never switch to a freer bucket, invent data, consume a
+  reset or use API billing to bypass a blocker. Preserve the existing reserve unless the
+  user explicitly authorizes changing it; zero reserve is supported and still blocks actual
+  exhaustion or unknown telemetry. Record the concrete policy through Factory, never bypass
+  the runner. Report the observed worker
   token usage separately from the shared account quota; equal percentages do not mean zero use.
 - Existing authorization accepts one slice per run. For “Continúa este milestone de forma
   autónoma, hasta tres slices o hasta necesitar una decisión”, explicitly authorize the

@@ -10,7 +10,7 @@ POLICY_SCHEMA = obj({
     'max_attempts': {'type': 'integer', 'minimum': 1, 'maximum': 3},
     'max_seconds': {'type': 'integer', 'minimum': 10, 'maximum': 3600},
     'max_tokens': {'type': 'integer', 'minimum': 1, 'maximum': 500000},
-    'quota_reserve_percent': {'type': 'integer', 'minimum': 10, 'maximum': 95},
+    'quota_reserve_percent': {'type': 'integer', 'minimum': 0, 'maximum': 95},
     'quota_max_age_seconds': {'type': 'integer', 'minimum': 5, 'maximum': 300},
     'quota_bucket': string(100),
     'write_paths': array(string(300), 30), 'context_paths': array(string(300), 30),

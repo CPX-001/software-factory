@@ -19,12 +19,14 @@ def short(value, limit=400):
 
 class FactoryService:
     def __init__(self, registry=None, *, discovery_model=None, architecture_model=None, planning_model=None, router=None, launcher=None,
-                 local_project=None, scope='default', execution_worker_factory=None, refinement_worker_factory=None):
+                 local_project=None, scope='default', execution_worker_factory=None, refinement_worker_factory=None,
+                 analysis_worker_factory=None):
         self.registry = registry or Registry()
         self.discovery_model, self.architecture_model = discovery_model, architecture_model
         self.planning_model = planning_model
         self.execution_worker_factory = execution_worker_factory
         self.refinement_worker_factory = refinement_worker_factory
+        self.analysis_worker_factory = analysis_worker_factory
         self.router, self.launcher = router, launcher or self._launch
         self.local_project = Path(local_project).expanduser().resolve() if local_project is not None else None
         self.scope = scope
@@ -135,6 +137,12 @@ class FactoryService:
                 except FactoryError as exc:
                     execution['diagnostic'] = {'code': exc.code, 'message': str(exc), **exc.details}
                     action.update(action='inspect_execution', reason=str(exc))
+                if ExecutionStore(store).policy().get('analysis_authorized'):
+                    execution['diagnostic'] = {'code': 'verification_binding_pending',
+                        'message': 'Accepted planning still needs concrete verification bindings; analysis authorization is not an executable gate mapping.',
+                        'gates': [g['id'] for g in snapshot['planning']['roadmap']['plan']['gates']],
+                        'next_step': 'Bind the accepted plan without weakening the predeclared checks, delivery conditions or exclusion approvals; preserve consumed workflow budgets.'}
+                    action.update(action='authorize_execution', reason=execution['diagnostic']['message'])
             if (execution.get('diagnostic') or {}).get('next_step'):
                 action['next_step'] = execution['diagnostic']['next_step']
         from .continuation_store import ContinuationStore, TERMINAL
@@ -292,7 +300,10 @@ class FactoryService:
 
     def _planning(self, store):
         from .planning import Planning
-        return Planning(store, self.planning_model, self.router, should_stop=Runtime(store).paused)
+        from .execution_store import ExecutionStore
+        return Planning(store, self._analysis_model(store, 'planning', self.planning_model), self.router,
+                        should_stop=Runtime(store).paused,
+                        allow_recovery=bool(ExecutionStore(store).policy().get('analysis_authorized')))
 
     def run_planning(self, project=None):
         store = self._store(project); store.initialize()
@@ -311,10 +322,18 @@ class FactoryService:
 
     def _discovery(self, store):
         from .codex_discovery import CodexDiscovery
-        return Discovery(store, self.discovery_model if self.discovery_model is not None else CodexDiscovery())
+        model = self._analysis_model(store, 'discovery', self.discovery_model)
+        return Discovery(store, model if model is not None else CodexDiscovery())
+
+    def _analysis_model(self, store, phase, fallback):
+        from .execution_store import ExecutionStore
+        if ExecutionStore(store).policy().get('analysis_authorized'):
+            from .analysis_execution import AnalysisModel
+            return AnalysisModel(self, store, phase)
+        return fallback
 
     def _architecture(self, store):
-        return Architecture(store, self.architecture_model, self.router, should_stop=Runtime(store).paused)
+        return Architecture(store, self._analysis_model(store, 'architecture', self.architecture_model), self.router, should_stop=Runtime(store).paused)
 
     def submit_user_message(self, message, project=None, *, request_id=None):
         project = self._project(project)['id']
@@ -385,6 +404,8 @@ class FactoryService:
             from .continuation_store import TERMINAL
             controller = Continuation(self, store)
             group = controller.journal.latest()
+            if group and group.get('analysis'):
+                return self.get_status(project)  # Accepted planning still needs the concrete check binding.
             if group and (group['state'] not in TERMINAL or
                           runtime.state()['run_id'] == group['runtime_id']):
                 controller.resume()
@@ -395,10 +416,20 @@ class FactoryService:
             if runtime.state()['status'] in ACTIVE or runtime.live():
                 return self.get_status(project)
             from .controller import stop_reason
+            if store.snapshot()['phase'] == 'planning':
+                self._planning(store).queue_recovery()
             reason = stop_reason(store.snapshot())
             if reason:
                 return self.get_status(project)
-            run_id = runtime.queue()
+            from .continuation_store import ContinuationStore
+            group = ContinuationStore(store).latest()
+            if group and group.get('analysis'):
+                run_id = group['runtime_id']
+                runtime.update(run_id, 'queued', 'Resume the same workflow and persistent budget')
+                group.update(state='analysis', reason=None, diagnostic=None)
+                ContinuationStore(store).save(group)
+            else:
+                run_id = runtime.queue()
             target = self._project(project)
             if target['id'] is None:
                 target = self.registry.register(target['path'], trusted=True)

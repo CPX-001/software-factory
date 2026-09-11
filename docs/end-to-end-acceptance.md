@@ -1,32 +1,39 @@
-# Paso 12: preparación verificable; aceptación end-to-end pendiente
+# Paso 12: análisis con modelo real; aceptación integral pendiente
 
-**No se ha completado el recorrido real.** El preflight del único piloto nuevo conserva
-`quota_reserve`: 92 % usado, reserva del 25 %. Se ha instalado el plugin y comprobado su
-launcher por MCP real, sin turnos de modelo ni interacción con la UI de Codex App.
+**El piloto ha completado discovery, arquitectura y planning con modelo real.** Todavía
+no ha implementado el producto ni alcanzado `project_verified`. El bloqueo actual es
+`verification_binding_pending`: los oráculos iniciales aún no están vinculados a todas
+las condiciones del plan aceptado. La reserva de cuota dejó de bloquear este piloto
+cuando el usuario autorizó expresamente retirarla.
 
-La suite completa pasa **296 tests en 460,943 segundos**, sin fallos, errores ni skips.
-Se conserva el [log](evidence/end-to-end-12-tests.txt), el
-[manifiesto de fuentes y comprobaciones](evidence/end-to-end-12-checks.json), el
-[informe sanitizado del piloto](evidence/end-to-end-12-pilot.json) y la
-[reconexión con reenvío idempotente](evidence/end-to-end-12-reconnect.json).
+La [evidencia del recorrido real](evidence/end-to-end-12-real-model.json) contiene versiones,
+identificadores, llamadas, consumo, intervenciones y limitaciones. Los resultados históricos
+con reserva del 25 % se conservan en [preflight](evidence/end-to-end-12-quota.json),
+[piloto inicial](evidence/end-to-end-12-pilot.json) y [reconexión](evidence/end-to-end-12-reconnect.json).
+No son el estado actual del piloto.
+
+La suite completa sobre los últimos cambios pasa **304 tests en 444,215 segundos**, sin
+fallos, errores ni skips. Se conservan el [log](evidence/end-to-end-12-real-model-tests.txt)
+y el [manifiesto de fuentes](evidence/end-to-end-12-real-model-checks.json). También pasan
+compilación y comprobación de whitespace. Esta suite no consume cuota LLM.
 
 ## Instancia y reproducción
 
-Se investigó el piloto anterior `p_1f2f88a25a7f899c`: el informe de los pasos 9/10 apunta a
-`/tmp/factory-continuation-smoke-bc7lwhrv/product` y a un registro bajo el mismo directorio.
-Ambos faltan. Antes de preparar este paso tampoco existía el registro por defecto de Factory.
-La búsqueda de `registry.sqlite3` en `/home/cpx`, `/tmp` y `/var/tmp` no encontró un registro
-recuperable del piloto anterior; no se tiene acceso a otros hosts. No se ha copiado estado
-ni reconstruido su identidad. Esta es **una instancia nueva del escenario de registros**.
+El piloto anterior `p_1f2f88a25a7f899c` apuntaba a
+`/tmp/factory-continuation-smoke-bc7lwhrv/product`; faltaban tanto ese repositorio como su
+registro. La búsqueda de registros en `/home/cpx`, `/tmp` y `/var/tmp` no encontró una
+instancia recuperable. Se reutilizó el escenario de registros para crear una única
+instancia nueva persistente, sin copiar estado de otro host:
 
-- Proyecto: `p_3084354cc76d1c23`.
-- Directorio persistente: `/home/cpx/.local/share/software-factory/pilots/records-v1`.
+- Proyecto: `p_3084354cc76d1c23`, Records end-to-end pilot.
+- Directorio: `/home/cpx/.local/share/software-factory/pilots/records-v1`.
 - Producto: `product/`; registro: `/home/cpx/.local/state/software-factory/registry.sqlite3`.
-- Commit inicial de fixtures: `9af30b4ae36f421f6a41eb2b77011b9fbb303a65`.
-- Mensaje estable: `records-v1-discovery-once`.
-- Run/continuation: **ninguno**; discovery tiene un mensaje pendiente y el proyecto está pausado.
+- Commit de fixtures: `9af30b4ae36f421f6a41eb2b77011b9fbb303a65`; sigue siendo el HEAD del producto.
+- Run: `9a2490b3-508b-4b60-bbb2-7aacf45d2901`.
+- Continuation: `b5774d1c-550d-49da-89df-a40749fa6e97`.
+- Estado: `execution` / `implementation_boundary`; no hay worker activo.
 
-Para recrear la preparación desde el checkout de Factory **solo cuando ese directorio no exista**:
+Para recrear la preparación **solo si el directorio no existe**:
 
 ```bash
 .venv/bin/python scripts/smoke_continuation.py --from-discovery \
@@ -34,109 +41,125 @@ Para recrear la preparación desde el checkout de Factory **solo cuando ese dire
   --model gpt-5.6-terra --effort low
 ```
 
-Se amplía el driver existente; no se añade otro orquestador. El comando no acepta una ruta
-dentro de Factory y rechaza cualquier directorio existente, incluso con cambios sin aceptar.
-No hay `--force`. El contenido de [brief](../pilots/records-v1/brief.md), los oráculos del
+La creación rechaza sobrescritura y rutas dentro de Factory. No carga arquitectura ni
+planning ficticios. Sus fuentes son el [brief](../pilots/records-v1/brief.md), el
 [fixture existente](../scripts/execution_smoke_fixture.py) y los
-[tests de CLI](../pilots/records-v1/test_product_cli.py) forman parte del código del escenario.
-`pilot-contract.json` fija sus hashes antes del worker. `factory_source` identifica el commit
-base del checkout; el manifiesto de evidencia de este paso identifica además los archivos
-locales nuevos/modificados. SQLite, observaciones, credenciales y producto generado quedan fuera
-del repositorio de Factory.
+[tests de CLI](../pilots/records-v1/test_product_cli.py). `pilot-contract.json` fija sus hashes.
+Las excepciones de presupuesto autorizadas para esta instancia no cambian los valores
+predeterminados de una nueva preparación.
 
-Para inspeccionar/reintentar el preflight de **esta misma instancia**, sin reconstruirla:
+Para inspeccionar **esta misma instancia**, sin iniciar inferencia:
 
 ```bash
 .venv/bin/python scripts/smoke_continuation.py \
-  --prepared "$HOME/.local/share/software-factory/pilots/records-v1/report.json" --installed --run
+  --prepared "$HOME/.local/share/software-factory/pilots/records-v1/report.json" --installed
 ```
 
-La carga comprueba registro, proyecto y contrato. Reutiliza el mismo ID del mensaje y no
-reinicia contadores. `report.json` es la proyección más reciente; `observations/` conserva
-cada observación. El `--run` termina con código 1 al bloquear; **hoy no inicia inferencia**,
-ni siquiera con cuota disponible, porque falta el control agregado de las fases de análisis.
-Omitir `--run` inspecciona el mismo estado sin consultar cuota. Esto no es todavía una
-reanudación end-to-end operativa.
+`report.json` proyecta el último estado y `observations/` conserva cada observación. Añadir
+`--run` consulta el preflight y solicita reanudar el trabajo autorizado mediante Factory.
+La comprobación de identidad/contrato impide reconstruir el piloto como una reanudación.
+En el estado actual, reanudar conserva la parada por falta de bindings; no vuelve a
+hacer discovery, arquitectura o planning ni crea otro presupuesto.
 
-## Producto y aceptación independiente
+## Alcance y aceptación independiente
 
-Es una utilidad local de biblioteca estándar: resumen validado y ranking determinista de
-registros JSON, con API pública y `python category_report.py examples/valid.json`.
-El primer hito entrega el resumen reutilizable; el segundo compone el ranking y su entrada
-de terminal. Son dos objetivos de producto y al menos dos slices dependientes, no un plan
-precargado. El helper existente `record_rules.py` se conserva; faltan las dos implementaciones.
+Utilidad Python de biblioteca estándar para resumir y ordenar registros JSON. El helper
+existente `record_rules.py` conserva `strip().casefold()`. Los oráculos independientes
+preceden a la implementación: 10 tests del resumen, 4 del ranking y 5 del CLI, con entradas
+válidas, vacías, desordenadas, negativas, bool, JSON malformado, Unicode, NaN/infinito,
+no mutación y resultados exactos. El brief comunica estos criterios al workflow.
 
-Los ejemplos incluyen datos válidos, orden invertido, vacío, importe negativo, bool y JSON
-malformado. Los 10 oráculos de resumen y 4 de ranking existentes cubren además Unicode,
-campos/tipos incorrectos, NaN/infinito, desempate y ausencia de mutación. Cinco nuevos tests
-de CLI fijan salida exacta, repetición determinista, entrada inválida sin resultado parcial,
-vacío y composición con la API. El brief comunica todos estos requisitos al workflow.
+La entrada prevista es `python category_report.py examples/valid.json`. Aún falta
+`category_report.py`: **este comando no se presenta como un producto entregado o ejecutado**.
+También faltan `records.py` y `USAGE.md`. La aceptación independiente sigue en **NOT_RUN**;
+no hay commits de implementación aceptados, recibos de milestones, recibo final ni entrega.
 
-Se reutilizarán el runner, el export limpio y los gates de Factory. Los checks del contrato
-son plantillas independientes: su vínculo a los gates de un plan real está **pendiente**.
-No se inventan IDs de planning ni se marcan fases como completadas. El resultado de aceptación
-independiente es **NOT_RUN**; no existe commit de producto validado, recibo final ni entrega.
+## Recorrido y consumo observados
 
-## Evidencia obtenida y límites de integración
+| Fase | Llamadas reales | Tokens observados | Resultado |
+| --- | ---: | ---: | --- |
+| Discovery | 2 | 15.737 | 14 elementos de conocimiento; completado |
+| Arquitectura | 4 | 48.022 | Baseline aceptada, revisión 1 |
+| Planning | 7 | 120.882 | Roadmap aceptado, revisión 1: 2 milestones, 3 slices, 9 gates |
+| Implementación y refinamiento | 0 | 0 | No iniciados |
+| Total | **13** | **184.641** | Sin llamadas con consumo desconocido al terminar el análisis |
 
-| Superficie | Resultado de este paso |
-| --- | --- |
-| Plugin local | Instalado/habilitado `software-factory@personal`, versión 0.1.0; skill, manifest y launcher coinciden con la caché instalada |
-| MCP real del plugin | Lista de 10 tools, selección explícita, envío del brief pausado, desconexión y selección conservada al reconectar |
-| Workflow del piloto | Inicialización y mensaje encolado; ninguna fase completada y ningún run creado |
-| Modelo real | Cero inferencias; autenticación ChatGPT, modelo solicitado `gpt-5.6-terra`, esfuerzo solicitado `low` comprobados solo en el preflight de ejecución |
-| Consumo por fase | Discovery: 0 turnos completados; arquitectura/planning: 0 llamadas; ejecución/refinamiento: no iniciados. Tokens de análisis no registrados por los adaptadores actuales |
-| UI de Codex App | Pendiente; esta sesión no expone tools nativas de Factory ni control de esa UI |
+Modelo efectivo `gpt-5.6-terra`, esfuerzo `low`, proveedor OpenAI, autenticación ChatGPT,
+SDK/runtime 0.147.0. Los workers usan el mismo adaptador aislado de ejecución, sin tools
+recursivas de Factory. No se ha cambiado de proveedor ni usado facturación alternativa.
+Los tokens del worker se distinguen de la cuota compartida de la cuenta.
 
-No se han inventado respuestas humanas ni reparaciones. La única entrada enviada es el
-brief declarado como datos del piloto, y permanece sin procesar. La suite normal conserva
-los tests con modelos simulados que llegan a `project_verified`; no sustituyen este piloto.
+El usuario autorizó reserva **0 %** y ampliar el presupuesto. Se registraron 20 llamadas,
+1.800 segundos y 250.000 tokens agregados; 600 segundos y 50.000 tokens por llamada.
+El límite inicial de unidades conserva 2; el roadmap real contiene 3 y esa diferencia debe
+resolverse expresamente al vincular la ejecución. Se mantiene el mismo ledger para fases
+iniciales y ejecución posterior. Las reanudaciones no reinician llamadas, tokens ni deadline.
+Factory no ha consumido refills o reinicios de cuenta; el agotamiento real y la telemetría
+no disponible siguen impidiendo inferencia.
 
-La revisión detectó límites que no deben ocultarse detrás de la cuota:
+## Intervenciones y correcciones
 
-1. `continuation_store.budget` empieza a contar después de planning. Discovery, arquitectura
-   y planning usan adaptadores distintos, sin ese ledger de tokens/deadline ni la reserva
-   efectiva de ejecución. Una cota vigilada desde un cliente MCP no resolvería el problema:
-   desconectar el cliente dejaría de controlar el gasto.
-2. `Controller.stop_reason` conserva `implementation_boundary`. La política tipada se liga
-   al plan ya aprobado. No existe autorización previa de todo el recorrido que materialice
-   los checks tras planning y arranque ejecución automáticamente. Esa autorización inicial
-   puede ser legítima; no se ha demostrado el recorrido sin intervención que pide el paso 12.
-3. Los adaptadores de análisis fijan modelo, pero no aplican el esfuerzo de la política de
-   ejecución. No se afirma que `low` sea efectivo en esas fases.
+1. Se aplicó la autorización del usuario a las fases iniciales mediante el mismo
+   `factory_execution_policy`, con los checks aún como plantillas. El controller reutiliza
+   `CodexExecution`, su sandbox, watchdog y ledger de continuation; no hay otro supervisor.
+2. Discovery volvió a pedir permiso porque no recibía la política efectiva. Se añadió la
+   autorización al contexto y se reenvió la instrucción real del usuario con un request ID
+   nuevo. Las decisiones de producto no se sustituyeron por respuestas inventadas.
+3. Planning creó un ciclo entre cierre del milestone y cierre del proyecto. Se corrigió
+   la instrucción contradictoria sobre `project_close`, se añadió rechazo determinista de
+   esa dependencia y una reparación adicional acotada bajo el presupuesto global.
+4. Una revisión objetó después una dependencia que el controller ya impone. Se documentaron
+   esas garantías en el contexto y se volvió a revisar **la misma propuesta**, conservando
+   todas las revisiones anteriores. Esa actualización de contexto puede solicitar una sola
+   revisión adicional; no crea una nueva ronda de reconciliación ni supera ocho llamadas
+   totales de planning. El análisis real terminó con siete.
+5. El estado diferencia ahora el binding pendiente de una revisión de fuentes obsoleta.
+   Vincular el plan no puede debilitar los oráculos iniciales ni renovar el presupuesto.
 
-Resolverlo exige integrar autorización, consumo y despacho en el controller/journal existente
-y vincular los oráculos al planning real; no basta con cambiar un flag o ejecutar cada fase
-desde el script. No se implementó esa ampliación importante durante el bloqueo de cuota,
-ni una capa paralela para aparentar éxito. El caso queda reproducible. Se conservan los
-límites anteriores: 2 unidades, 4 llamadas, 300 segundos y 30.000 tokens; se declaran como
-cota requerida de todo el piloto, pero **no se presentan como control global implementado**.
-No se han ampliado ni renovado. Esa cota tampoco garantiza que alcance para todas las fases.
+Estas intervenciones de desarrollo/reanudación quedan registradas: el recorrido real
+**todavía no demuestra autonomía completa desde la idea hasta la entrega**.
 
-La preparación corrige el uso exclusivo de `/tmp` para un piloto reanudable y separa creación
-de reanudación; las pruebas rechazan sobrescritura/contrato modificado y cualquier inferencia
-desde el driver mientras falte el control global, incluso simulando cuota disponible.
-No se han añadido las ampliaciones de presupuesto, dependencias o invalidación de
-`future-improvements.md`; la ubicación persistente responde al encargo actual.
+## Bloqueo de integración conservado
 
-## Mensajes exactos para comprobar la superficie pendiente
+El plan aceptado contiene nueve gates. Los tres oráculos predeclarados no constituyen por
+sí solos un contrato completo que pruebe cada condición de esos gates. Quedan pendientes:
 
-El plugin está instalado en este host. No hace falta instalarlo manualmente. Abre una
-conversación nueva de Codex App en el mismo entorno para que cargue sus tools.
+- Bindings concretos para criterios, integraciones y aceptación completa de requisitos
+  transversales, conservando las fuentes y pruebas originales.
+- Evidencia de que los comandos de `USAGE.md` se ejecutaron realmente y del harness de
+  copia limpia exigido por la slice de entrega. Ese harness se ha planificado como trabajo
+  de producto, aunque Factory ya posee el runner de reproducibilidad: falta resolver esa
+  integración sin presentar tests ordinarios como prueba de todas esas condiciones.
+- Referencias durables de autorización previa para `out_of_scope` y `quota_planning`, tal
+  como exige el contrato final. La intención está en los datos/instrucciones, pero el flujo
+  actual no la ha materializado en el formato de aceptación que requiere el cierre.
+- Continuidad automática desde planning hasta una ejecución con ese contrato completo.
 
-1. «Usa Software Factory. Selecciona el proyecto p_3084354cc76d1c23 y muestra su ruta, fase,
-   estado y run actual. Mantén su pausa y no inicies inferencia.»
-2. «Reenvía como datos del piloto el contenido de
-   /home/cpx/.local/share/software-factory/pilots/records-v1/product/PILOT.md a ese proyecto
-   usando request_id records-v1-discovery-once. Mantén la pausa y comprueba que no se crea otro run.»
-3. Cierra esa conversación y, en otra: «Usa Software Factory. Consulta el proyecto activo
-   sin crear ni reanudar ninguno. Confirma si sigue siendo p_3084354cc76d1c23 y muestra
-   su run y decisiones pendientes.»
+Resolverlo requiere integrar el binding y sus evidencias con el workflow existente. No se
+ha publicado un contrato parcialmente cubierto ni marcado el proyecto como validado.
+El presupuesto agotable del mismo run tampoco desaparece mientras se resuelve este hueco.
 
-Estos mensajes comprueban selección, envío y reconexión desde la UI; no completan la aceptación
-con modelo real ni la prueba de una respuesta humana a una decisión real. No se fabrican
-preguntas para demostrarla. El informe final solo podrá comprobarse cuando exista.
+## Codex App, MCP y comprobaciones
 
-La instalación se contrastó con la [documentación oficial de plugins](https://developers.openai.com/plugins/build/plugins)
-y con el CLI local. Las pruebas de transporte no prueban por sí mismas su presentación en
-la [superficie MCP de Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
+El usuario realizó selección, reenvío pausado e inspección del proyecto activo en dos
+chats. Se conserva la [evidencia de Codex App](evidence/end-to-end-12-codex-app.json), que
+identifica esas pruebas como aportadas por el usuario y añade consultas nativas directas.
+
+El launcher MCP instalado inició el worker real y se desconectó; otra conexión observó el
+mismo run y su progreso. Tras completar planning, `factory_status` nativo en esta conversación
+confirmó también el mismo run, `implementation_boundary` y las 13 llamadas. Sigue pendiente
+la observación humana de trabajo activo/decisiones/entrega en la UI. No existe informe final
+del producto que pueda abrirse todavía.
+
+El plugin está actualizado: `software-factory@personal`, caché
+`0.1.0+codex.20260911120741`. No hace falta reinstalarlo manualmente. Para consultar el estado
+en un chat nuevo del mismo host:
+
+> Usa Software Factory. Consulta el proyecto p_3084354cc76d1c23 y muestra su fase, run,
+> presupuesto consumido y el binding de verificaciones que falta. No crees otro proyecto
+> ni reinicies su presupuesto.
+
+Las pruebas anteriores de selección/reenvío no necesitan repetirse. El `blockers: []` de
+un cliente antiguo no refresca cuota ni elimina el diagnóstico de binding de la versión
+actualizada del servicio. La suite normal utiliza modelos simulados y repositorios
+desechables; sus recibos `project_verified` no se atribuyen a este piloto real.

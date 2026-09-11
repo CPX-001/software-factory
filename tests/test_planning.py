@@ -56,6 +56,13 @@ class PlanningTests(unittest.TestCase):
         self.assertEqual(self.store.events()[-1]['kind'], 'planning_completed')
         self.assertEqual([p.name for p in self.root.iterdir()], ['.factory'])
 
+    def test_project_close_cannot_be_a_prerequisite_for_its_own_milestone(self):
+        gate = deepcopy(self.plan['gates'][-1])
+        gate.update(id='final_acceptance', kind='system', trigger='project_close', harness=[])
+        self.plan['gates'].append(gate)
+        self.plan['milestones'][0]['verification_gates'].append(gate['id'])
+        self.assertIn('project_close_before_milestone:m1', self.gate()['errors'])
+
     def test_completed_planning_is_idempotent_and_markdown_is_repairable(self):
         self.run_plan()
         before = self.store.snapshot()

@@ -13,7 +13,7 @@ from factory.application import FactoryService
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--allow-root', action='append', required=True, help='Local roots allowed for new project registration')
+    parser.add_argument('--allow-root', action='append', default=[], help='Optional allowed roots for historical verified projects')
     args = parser.parse_args()
     helpers = Path.home() / '.codex/skills/.system/plugin-creator/scripts'
     python = ROOT / '.venv/bin/python'

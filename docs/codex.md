@@ -1,96 +1,54 @@
 # Usar Software Factory desde Codex
 
-La interfaz principal es el plugin local **Software Factory**: una skill corta y diez
-MCP tools por STDIO. CLI y MCP usan `FactoryService`; el estado, los gates y el controller
-pertenecen a Factory. Planning produce un roadmap progresivo; la ejecución de producto se habilita explícitamente con presupuesto, permisos y checks versionados. La autorización original permite una slice; el [piloto multislice](continuation.md) requiere una política adicional explícita. Consulta [ejecución y recuperación](execution.md).
-
-## Instalar en este host
-
-Desde el checkout, con el login Codex/ChatGPT existente:
+Instala el plugin local desde este checkout y su entorno Python:
 
 ```bash
 .venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python scripts/install_codex_plugin.py --allow-root /ruta/a/tus/proyectos
+.venv/bin/python scripts/install_codex_plugin.py
 ```
 
-El instalador usa la skill `plugin-creator` instalada, valida el paquete y lo registra en
-el marketplace personal como `software-factory@personal` (o el nombre personal existente).
-Reescribe el launcher con rutas absolutas a este checkout y su `.venv`. Mantén esas rutas;
-si las cambias, repite la instalación. No publica nada ni inicia workers.
+El instalador usa el marketplace personal y el login Codex/ChatGPT existente. No inicia
+inferencia. El launcher referencia este checkout y `.venv`; conserva esas rutas. Abre un chat
+nuevo de Codex App en el mismo host para cargar la skill y tools actualizadas.
 
-Abre una conversación nueva en Codex App usando **el mismo host/entorno**. El plugin usa
-el filesystem local de ese host: una instalación Linux/WSL no instala un ejecutable Windows.
-Si no aparece el marketplace personal, reinicia la aplicación. Puedes invocar
-`$software-factory` o seleccionar el plugin en el compositor.
+Empieza con una idea y una ubicación:
 
-Ejemplos de mensajes:
+> Usa Software Factory. Crea mi proyecto en /ruta/a/proyectos/agenda. Quiero una agenda para
+> […]. Concretemos el producto y desarrolla lo acordado sin pedirme continuar entre pasos.
 
-- «Usa Software Factory. Crea un proyecto en /ruta/a/tus/proyectos/oportunidades para
-  analizar repositorios GitHub y encontrar oportunidades SaaS».
-- «Quiero que sea para desarrolladores individuales primero».
-- «¿Cómo va el proyecto? ¿Qué decisiones necesitas de mí?».
-- «Enséñame la arquitectura vigente», «Pausa el proyecto» o «Continúa».
-- «¿Cuál es el plan?», «¿Qué milestones hay?», «¿Cuál es la próxima slice?».
-- «¿Qué requisitos siguen pendientes?», «¿Dónde están los gates importantes?».
-- «Valida el proyecto terminado y prepara su entrega local».
+Los proyectos nuevos usan `adaptive`: Codex decide cómo investigar, diseñar, implementar y
+comprobar cada producto con herramientas y skills instaladas. Arquitectura, alcance y documentos
+pueden revisarse durante el trabajo. No hay aprobación formal obligatoria, secuencia fija de
+fases ni tests preimpuestos. Las preguntas necesarias se presentan en la conversación. Las
+entradas durante una ejecución se incorporan en el siguiente punto de continuidad.
 
-Estas consultas usan las vistas `plan`, `milestones`, `next_slice`, `requirements` y
-`verification` de `factory_inspect`; `factory_decisions` muestra las decisiones humanas.
-Consulta [el contrato de planning](planning.md).
+Puedes pedir «¿Cómo va?», «Revisa esta decisión», «Enséñame el plan», «Pausa» o «Reanuda».
+Cerrar MCP o la App no cancela el proceso. Tras reiniciar la máquina hay que reanudar: no se
+instala un servicio de arranque. Las novedades en segundo plano se consultan por estado;
+MCP no entrega mensajes espontáneos en una conversación cerrada.
 
-El path se pide solo al registrar. Después se conserva la selección en
-`~/.local/state/software-factory/registry.sqlite3` (`FACTORY_HOME` permite otro directorio).
-Las tools aceptan IDs registrados; inicializar exige estar dentro de raíces autorizadas
-localmente. Codex conserva el ID devuelto para fijar el proyecto de su conversación.
-Sin selección y con varios proyectos se pide elegir. No se interpreta el cwd del servidor
-como el workspace de la conversación. Selección explícita e inicialización son las únicas
-operaciones que cambian el proyecto activo.
+`factory_project` inicializa, selecciona, lista o configura. `factory_message` envía entradas;
+`factory_answer` responde una pregunta identificada. `factory_status` consulta sin inferencia.
+`factory_inspect process` muestra la memoria; `plan`, tareas; `verification`, checks;
+`execution`, pasos y observaciones del runtime. `factory_pause` y `factory_resume` controlan
+el mismo proceso. El flujo adaptativo no requiere una política de ejecución previa.
 
-## Tools y ejecución
+Modelo y razonamiento heredan la configuración Codex del host. El selector temporal del chat
+no se transmite automáticamente. Para fijarlos por proyecto, `factory_project` acepta:
 
-`factory_project` (list/init/select), `factory_status`, `factory_message`,
-`factory_decisions`, `factory_answer`, `factory_inspect`, `factory_pause`, `factory_resume`.
-`factory_execution_policy` autoriza la política y definición tipada; `factory_execute`
-selecciona la próxima slice preparada y devuelve su ID sin esperar a que termine.
-Con `action=validate_project`, esa misma tool autoriza la validación final y entrega local
-del proyecto cerrado, conservando el run y sus límites. La remediación automática exige
-`automatic_remediation=true` por separado. Para incluir todo el recorrido desde milestones,
-la política puede autorizar `final_validation` antes del run. La vista `project_validation`
-muestra commit, criterios pendientes, checks, exclusiones, bloqueos y entrega; distingue
-`project_ready_for_validation`, `project_validating`, `project_verified`, `delivery_pending`
-y cambios posteriores en `version_pending`. Consulta [el contrato final](project-validation.md).
-Las respuestas usan `{ok, data}` o `{ok:false, error:{code,message,details}}`; los errores
-MCP también llevan `isError`. Status es compacto; inspect pide documentos completos.
-
-Message y answer guardan la entrada y arrancan trabajo elegible sin esperar a su resultado.
-Resume es una orden de continuación, no una fase: procesa discovery,
-architecture y planning; también recupera una ejecución previamente autorizada. Se detiene por preguntas/decisiones, bloqueo, fallo,
-límite o pausa. Un fallo no se reintenta automáticamente. Los checkpoints sobreviven a
-reinicios; `request_id` permite reintentar un mensaje de discovery sin duplicarlo.
-
-El proceso de Factory se separa de MCP y no necesita una conversación abierta. En las fases
-de análisis pause es cooperativo. En ejecución solicita interrupción del runtime y conserva
-`pause_requested` hasta que se detenga el turno/proceso; no empieza otro intento.
-Si muere el worker o se reinicia la máquina, el estado sobrevive; usa resume para recuperarlo.
-No es un daemon que se relance automáticamente al arrancar el sistema.
-
-La skill presenta y envía información; no repite el razonamiento de los workers. Sus hilos
-Codex desactivan la interfaz Factory para impedir recursión. Las tools no exponen shell,
-SQL, cambios directos de fase, gates o revisiones arquitectónicas.
-
-## Recuperación
-
-Los comandos CLI anteriores siguen disponibles. `pause`, `resume` y `allow-root` son nuevos.
-La CLI puede inspeccionar estado completo y ejecutar discovery/architecture/planning de forma síncrona;
-usa el mismo service y los mismos locks. Para comprobar la integración y la suite sin cuota:
-
-```bash
-codex plugin list --marketplace personal --json
-.venv/bin/python -m unittest discover -s tests -v
+```json
+{"action":"configure","project":"p_0123456789abcdef","settings":{"model":"gpt-5.6-terra","effort":"low"}}
 ```
 
-Fuentes verificadas: [MCP en Codex](https://developers.openai.com/codex/mcp),
-[plugins locales y formato compatible](https://developers.openai.com/plugins/build/plugins),
-[SDK oficial de MCP](https://github.com/modelcontextprotocol/python-sdk).
-Se usa el formato `.codex-plugin/plugin.json` compatible con el Codex local 0.149.1,
-MCP SDK 2.2.0 y el SDK Codex 0.147.0 existente.
+Son ajustes para los siguientes pasos. Null restaura herencia. `service_tier` configura velocidad
+sin cambiar proveedor ni facturación. Los límites opcionales `max_calls`, `max_tokens`,
+`max_seconds` acumulan consumo en el proyecto, también tras pausas/reinicios. No establecer
+límites adicionales no elimina los límites de la cuenta Codex.
+`max_calls` cuenta turnos SDK; cada turno puede incluir varias interacciones con herramientas/modelo.
+
+Al terminar, `completed` y el informe local describen alcance y comprobaciones reportadas por
+Codex con la versión Git observada. Puede haber archivos sin commit. No equivale a
+`project_verified`, despliegue o auditoría de seguridad.
+
+Los proyectos antiguos conservan sus contratos: [guía del workflow verificado](verified-codex.md).
+`--allow-root` sigue disponible al instalar para registrar proyectos nuevos de ese tipo.

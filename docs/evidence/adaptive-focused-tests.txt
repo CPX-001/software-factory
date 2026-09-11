@@ -1,0 +1,21 @@
+test_detached_adaptive_steps_continue_after_real_mcp_disconnect (tests.test_adaptive.AdaptiveMCPTests.test_detached_adaptive_steps_continue_after_real_mcp_disconnect) ... Executing <Task pending name='Task-2' coro=<AdaptiveMCPTests.test_detached_adaptive_steps_continue_after_real_mcp_disconnect() running at /home/cpx/repos/software-factory/tests/test_adaptive.py:338> cb=[_run_until_complete_cb() at /usr/lib/python3.12/asyncio/base_events.py:182] created at /usr/lib/python3.12/asyncio/runners.py:100> took 0.548 seconds
+ok
+test_checkpoint_format_is_repaired_without_user_approval (tests.test_adaptive.AdaptiveTests.test_checkpoint_format_is_repaired_without_user_approval) ... ok
+test_cli_initializes_new_directory_and_reads_adaptive_context (tests.test_adaptive.AdaptiveTests.test_cli_initializes_new_directory_and_reads_adaptive_context) ... ok
+test_conversation_soft_focus_and_optional_checks_without_approval (tests.test_adaptive.AdaptiveTests.test_conversation_soft_focus_and_optional_checks_without_approval) ... ok
+test_cumulative_optional_limit_survives_restart_and_can_be_extended (tests.test_adaptive.AdaptiveTests.test_cumulative_optional_limit_survives_restart_and_can_be_extended) ... ok
+test_exact_runtime_turn_recovery_and_no_budget_reset (tests.test_adaptive.AdaptiveTests.test_exact_runtime_turn_recovery_and_no_budget_reset) ... ok
+test_explained_check_revision_is_allowed_and_keeps_history (tests.test_adaptive.AdaptiveTests.test_explained_check_revision_is_allowed_and_keeps_history) ... ok
+test_failed_product_check_is_repaired_before_completion (tests.test_adaptive.AdaptiveTests.test_failed_product_check_is_repaired_before_completion) ... ok
+test_message_during_work_is_not_lost_even_at_completion (tests.test_adaptive.AdaptiveTests.test_message_during_work_is_not_lost_even_at_completion) ... ok
+test_pause_during_turn_preserves_partial_work_and_all_attempt_usage (tests.test_adaptive.AdaptiveTests.test_pause_during_turn_preserves_partial_work_and_all_attempt_usage) ... ok
+test_pause_idempotence_report_recovery_and_new_scope (tests.test_adaptive.AdaptiveTests.test_pause_idempotence_report_recovery_and_new_scope) ... ok
+test_registration_retry_preserves_old_projects_and_mcp_adaptive_default (tests.test_adaptive.AdaptiveTests.test_registration_retry_preserves_old_projects_and_mcp_adaptive_default) ... ok
+test_required_check_cannot_silently_disappear (tests.test_adaptive.AdaptiveTests.test_required_check_cannot_silently_disappear) ... ok
+test_saved_result_recovery_does_not_repeat_inference (tests.test_adaptive.AdaptiveTests.test_saved_result_recovery_does_not_repeat_inference) ... ok
+test_sdk_uses_normal_tools_and_inherits_configuration (tests.test_adaptive.AdaptiveTests.test_sdk_uses_normal_tools_and_inherits_configuration) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 5.792s
+
+OK

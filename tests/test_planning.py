@@ -441,7 +441,7 @@ class PlanningServiceTests(unittest.TestCase):
         self.registry = Registry(self.root / 'registry'); self.registry.allow_root(self.root)
         self.jobs = []
         from tests.architecture_fakes import proposal as architecture_proposal
-        self.service = FactoryService(self.registry, discovery_model=FakeModel(complete_reply()),
+        self.service = FactoryService(self.registry, workflow_mode='verified', discovery_model=FakeModel(complete_reply()),
             architecture_model=FakeArchitect(architecture_proposal(), review()), planning_model=fake(),
             router=SkillRouter(Catalog()), launcher=lambda p, r: self.jobs.append((p, r)))
         self.service.initialize_project(str(self.root / 'project'))

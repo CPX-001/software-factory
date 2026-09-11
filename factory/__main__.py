@@ -66,9 +66,14 @@ def converse(store, *, message=None, once=False, model=None):
 def main():
     parser = argparse.ArgumentParser(description="Local deterministic software factory")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show", "execution-policy", "execute", "execution-show", "validate-project", "project-validation-show"):
+    for name in ("init", "message", "process", "status", "next", "discovery", "skills", "route-skills", "architecture", "architecture-show", "architecture-status", "architecture-adrs", "answer", "pause", "resume", "allow-root", "planning", "planning-show", "execution-policy", "execute", "execution-show", "validate-project", "project-validation-show"):
         command = commands.add_parser(name)
         command.add_argument("project", nargs="?", default=".")
+        if name == 'init':
+            command.add_argument('--workflow', choices=('adaptive', 'verified'), default='adaptive')
+        if name == 'message':
+            command.add_argument('--message', required=True)
+            command.add_argument('--request-id')
         if name == 'execution-policy':
             command.add_argument('--policy', required=True, help='Reviewed JSON policy file')
             command.add_argument('--verification', required=True, help='Typed verification JSON file')
@@ -107,7 +112,11 @@ def main():
             if work and result["routing"]["status"] == "blocked":
                 parser.exit(2)
             return
-        if args.command == 'execution-policy':
+        if args.command == 'message':
+            result = service.submit_user_message(args.message, request_id=args.request_id)
+        elif args.command == 'process':
+            result = service.inspect(view='process')
+        elif args.command == 'execution-policy':
             from pathlib import Path
             result = service.configure_execution(json.loads(Path(args.policy).read_text()),
                                                  json.loads(Path(args.verification).read_text()))
@@ -137,7 +146,7 @@ def main():
             service.answer_decision(args.id, args.answer, continue_run=False)
             result = service.snapshot()
         elif args.command == "init":
-            service.initialize_project()
+            service.initialize_project(workflow=args.workflow)
             result = service.snapshot()
         elif args.command == "architecture-show":
             result = service.get_architecture()

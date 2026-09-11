@@ -32,6 +32,42 @@ class Controller:
                 if not row or row['status'] != 'queued':
                     return  # Never replay an already claimed/finished run from another process.
             runtime.update(run_id, 'running')
+            from .adaptive import Adaptive, enabled, step
+            if enabled(store):
+                journal = Adaptive(store)
+                worker = None
+                settings = None
+                try:
+                    while True:
+                        # Serialize the stop decision with incoming chat messages. A message
+                        # arriving at completion either belongs to this loop or launches recovery.
+                        with runtime.lock('launch', timeout=10):
+                            if runtime.paused():
+                                runtime.update(run_id, 'paused', 'Pause saved; no subsequent Codex turn')
+                                return
+                            if not journal.ready():
+                                journal.report()
+                                runtime.update(run_id, journal.state()['status'], journal.state()['next_step'])
+                                return
+                        current = journal.state()['settings']
+                        if worker is None or settings != current:
+                            if worker is not None:
+                                worker.close()
+                            from .codex_adaptive import CodexAdaptive
+                            factory = self.service.adaptive_worker_factory or CodexAdaptive
+                            worker = factory(store.project, current)
+                            settings = current
+                        step(self.service, journal, run_id, worker)
+                except BaseException as exc:
+                    paused = runtime.paused()
+                    runtime.update(run_id, 'paused' if paused else 'blocked',
+                                   'paused' if paused else getattr(exc, 'code', 'worker_failed'), str(exc)[:1000])
+                    if not paused:
+                        raise
+                finally:
+                    if worker is not None:
+                        worker.close()
+                return
             try:
                 from .analysis_execution import ensure_group
                 ensure_group(store, run_id)

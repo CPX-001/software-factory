@@ -1,0 +1,24 @@
+{
+  "normal_suite_model_inference": false,
+  "test_runs": [
+    {
+      "path": "docs/evidence/adaptive-full-tests.txt",
+      "tests": 356,
+      "seconds": 524.871,
+      "result": "PASS",
+      "sha256": "042fd2f8d6576cc33390d59ed63c8e87e2a3b9f08d0c4ea800e7c487069987b0"
+    },
+    {
+      "path": "docs/evidence/adaptive-focused-tests.txt",
+      "tests": 15,
+      "seconds": 5.792,
+      "result": "PASS",
+      "sha256": "8bace0bcf4b95cc1d6a8d6b502092c361fd8ea457e153f17075f2dd97dc6315c"
+    }
+  ],
+  "note": "Full suite ran once. The final focused run covers the subsequent CLI initialization case and final adaptive status metadata changes; counts overlap.",
+  "real_model_evidence": "docs/evidence/adaptive-runtime-smoke.json",
+  "installed_plugin": "0.1.0+codex.20260911180714",
+  "installed_mcp_checked": true,
+  "new_flow_checked_by_human_in_codex_app": false
+}

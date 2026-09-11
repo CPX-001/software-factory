@@ -10,6 +10,7 @@ from .discovery import Discovery
 from .registry import FactoryError, Registry
 from .runtime import ACTIVE, Runtime
 from .workflow import Store, WorkflowError, next_action
+from .adaptive import Adaptive, enabled as adaptive_enabled
 
 
 def short(value, limit=400):
@@ -20,13 +21,15 @@ def short(value, limit=400):
 class FactoryService:
     def __init__(self, registry=None, *, discovery_model=None, architecture_model=None, planning_model=None, router=None, launcher=None,
                  local_project=None, scope='default', execution_worker_factory=None, refinement_worker_factory=None,
-                 analysis_worker_factory=None):
+                 analysis_worker_factory=None, adaptive_worker_factory=None, workflow_mode='adaptive'):
         self.registry = registry or Registry()
         self.discovery_model, self.architecture_model = discovery_model, architecture_model
         self.planning_model = planning_model
         self.execution_worker_factory = execution_worker_factory
         self.refinement_worker_factory = refinement_worker_factory
         self.analysis_worker_factory = analysis_worker_factory
+        self.adaptive_worker_factory = adaptive_worker_factory
+        self.workflow_mode = workflow_mode
         self.router, self.launcher = router, launcher or self._launch
         self.local_project = Path(local_project).expanduser().resolve() if local_project is not None else None
         self.scope = scope
@@ -46,13 +49,21 @@ class FactoryService:
         Registry.validate_path(target['path'])
         return Store(target['path'])
 
-    def initialize_project(self, path=None, name=None):
+    def initialize_project(self, path=None, name=None, workflow=None):
+        mode = workflow or self.workflow_mode
+        if mode not in ('adaptive', 'verified'):
+            raise FactoryError('invalid_workflow', 'Unknown project workflow')
+        requested = self.local_project if self.local_project is not None else Path(path).expanduser()
+        existing = (requested / '.factory/state.sqlite3').is_file()
         if self.local_project is not None:
-            self.registry.register(str(self.local_project), name, trusted=True)
+            self.registry.register(str(self.local_project), name, trusted=True, create=True)
             self._store().initialize()
         else:
-            project = self.registry.register(path, name, create=True)
+            project = self.registry.register(path, name, create=True, trusted=mode == 'adaptive')
             self.registry.select(project['id'], self.scope)
+        # Registration retries never convert an existing project or reinterpret its receipts.
+        if not existing and mode == 'adaptive':
+            Adaptive(self._store(project['id'] if self.local_project is None else None)).initialize()
         return self.get_status(project['id'] if self.local_project is None else None)
 
     def projects(self):
@@ -65,6 +76,8 @@ class FactoryService:
 
     def snapshot(self, project=None):
         """Full diagnostic representation for the CLI; status remains compact."""
+        if adaptive_enabled(self._store(project)):
+            return {**self.get_status(project), 'memory': Adaptive(self._store(project)).state()}
         return self._store(project).snapshot()
 
     @staticmethod
@@ -79,11 +92,17 @@ class FactoryService:
 
     def get_next_action(self, project=None):
         project = self._project(project)['id']
+        if adaptive_enabled(self._store(project)):
+            return self.get_status(project)['next_action']
         if self.snapshot(project)['phase'] == 'execution':
             return self.get_status(project)['next_action']
         return self._next(self.snapshot(project), Runtime(self._store(project)).state())
 
     def list_pending_decisions(self, project=None, *, offset=0, limit=5):
+        if adaptive_enabled(self._store(project)):
+            items = Adaptive(self._store(project)).questions()
+            return {'items': items[offset:offset + limit], 'total': len(items),
+                    'next_offset': offset + limit if offset + limit < len(items) else None}
         snapshot = self.snapshot(project)
         details = {d['id']: d for d in snapshot['discovery']['decision_details'] + snapshot['architecture']['decision_details'] + snapshot['planning']['decision_details']}
         pending = [d for d in snapshot['decisions'] if d['answer'] is None]
@@ -100,6 +119,8 @@ class FactoryService:
         target = self._project(project)
         project = target['id']
         store = self._store(project)
+        if adaptive_enabled(store):
+            return Adaptive(store).status(target)
         snapshot = store.snapshot()
         runtime = Runtime(store).state()
         discovery, architecture = snapshot['discovery'], snapshot['architecture']
@@ -195,9 +216,13 @@ class FactoryService:
                                  'planning_implemented': True, 'execution_slice_limit': continuation_policy['max_slices'] if continuation_policy.get('enabled') else 1}}
 
     def get_discovery(self, project=None):
+        if adaptive_enabled(self._store(project)):
+            return Adaptive(self._store(project)).state()
         return self.snapshot(project)['discovery']
 
     def get_architecture(self, project=None, *, view='baseline'):
+        if adaptive_enabled(self._store(project)):
+            return self.inspect(project, view='architecture' if view == 'baseline' else view)
         architecture = self.snapshot(project)['architecture']
         if view == 'baseline':
             baseline = architecture['baseline']
@@ -215,6 +240,8 @@ class FactoryService:
         raise FactoryError('invalid_view', 'Unknown architecture view')
 
     def get_planning(self, project=None, *, view='plan', slice_id=None):
+        if adaptive_enabled(self._store(project)):
+            return self.inspect(project, view=view, slice_id=slice_id)
         from .planning import executable_slices, refinement_snapshot
         snapshot = self.snapshot(project)
         state = snapshot['planning']
@@ -296,6 +323,21 @@ class FactoryService:
         raise FactoryError('invalid_view', 'Unknown planning view')
 
     def inspect(self, project=None, *, view, slice_id=None):
+        if adaptive_enabled(self._store(project)):
+            journal = Adaptive(self._store(project))
+            state = journal.state()
+            if view == 'execution':
+                with journal.store._connection() as db:
+                    steps = journal.steps(db)
+                return {'status': self.get_status(project), 'steps': [{k: v for k, v in s.items()
+                        if k not in ('context', 'result')} for s in steps[-20:]], 'total_steps': len(steps)}
+            if view in ('verification', 'project_validation'):
+                return {'checks': state['checks'], 'completion': self.get_status(project)['completion']}
+            if view == 'revision':
+                return {'revision': state['revision'], 'version': state.get('version')}
+            if view in ('plan', 'milestones', 'next_slice', 'refinement'):
+                return {'focus': state['focus'], 'tasks': state['tasks'], 'next_step': state['next_step']}
+            return state
         if view == 'project_validation':
             from .project_store import ProjectStore
             return ProjectStore(self._store(project)).inspect(full=True)
@@ -351,6 +393,12 @@ class FactoryService:
         project = self._project(project)['id']
         store = self._store(project)
         store.initialize()
+        if adaptive_enabled(store):
+            runtime = Runtime(store)
+            with runtime.lock('launch', timeout=10):
+                Adaptive(store).enqueue(message, request_id)
+            self.resume(project, _preserve_pause=True)
+            return self.get_status(project)
         if request_id is not None:
             with store._connection() as db:
                 previous = db.execute('SELECT r.message,t.status FROM factory_requests r '
@@ -382,6 +430,12 @@ class FactoryService:
         store = self._store(project)
         store.initialize()
         runtime = Runtime(store)
+        if adaptive_enabled(store):
+            with runtime.lock('launch', timeout=10):
+                Adaptive(store).answer(decision_id, answer)
+            if continue_run:
+                self.resume(project, _preserve_pause=True)
+            return self.get_status(project)
         with runtime.lock('launch'), runtime.lock():
             if runtime.state()['status'] == 'queued':
                 raise FactoryError('run_busy', 'A worker is starting; inspect status before another input')
@@ -403,6 +457,8 @@ class FactoryService:
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
         Runtime(store).pause()
+        if adaptive_enabled(store):
+            return self.get_status(project)
         from .execution_store import ExecutionStore
         execution = ExecutionStore(store).latest()
         if execution and execution['state'] != 'checkpoint':
@@ -420,6 +476,28 @@ class FactoryService:
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
         runtime = Runtime(store)
+        if adaptive_enabled(store):
+            journal = Adaptive(store)
+            with runtime.lock('launch', timeout=10):
+                if _preserve_pause and runtime.paused():
+                    return self.get_status(project)
+                if not _preserve_pause:
+                    runtime.unpause()
+                current = runtime.state()
+                if current['status'] in ACTIVE or runtime.live():
+                    return self.get_status(project)
+                if not journal.ready():
+                    journal.report()  # Recover a missing report without another inference.
+                    if current['run_id'] and journal.state()['status'] == 'completed':
+                        runtime.update(current['run_id'], 'completed', 'Agreed project scope completed')
+                    return self.get_status(project)
+                run_id = current['run_id']
+                if run_id:
+                    runtime.update(run_id, 'queued', 'Continue the same project with its saved memory and usage')
+                else:
+                    run_id = runtime.queue()
+                self._launch_registered(project, run_id, runtime)
+            return self.get_status(project)
         if _preserve_pause and store.snapshot()['phase'] != 'planning':
             return self.get_status(project)
         if store.snapshot()['phase'] == 'execution':
@@ -479,6 +557,8 @@ class FactoryService:
     def configure_execution(self, policy, verification, project=None, planning_recovery=None):
         from .execution import configure
         store = self._store(project); store.initialize()
+        if adaptive_enabled(store):
+            raise FactoryError('adaptive_settings', 'This project uses normal Codex. Use factory_project action=configure for optional model settings or limits; checks are chosen during work.')
         runtime = Runtime(store)
         with runtime.lock('launch'):
             from .planning import recovery_replay
@@ -502,6 +582,8 @@ class FactoryService:
             raise FactoryError('invalid_request', 'Use a stable request_id for this execution request')
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
+        if adaptive_enabled(store):
+            return self.resume(project)
         runtime, journal = Runtime(store), ExecutionStore(store)
         if journal.policy().get('continuation', {}).get('enabled'):
             from .continuation import Continuation
@@ -535,6 +617,9 @@ class FactoryService:
             raise FactoryError('invalid_request', 'Use a stable request_id and explicit remediation authorization')
         project = self._project(project)['id']
         store = self._store(project); store.initialize()
+        if adaptive_enabled(store):
+            return self.submit_user_message('Revisa el producto contra el alcance acordado, realiza las comprobaciones pertinentes y prepara la entrega local.',
+                                            project, request_id=request_id)
         identifier = Continuation(self, store).start_validation(request_id, automatic_remediation=automatic_remediation)
         return {**self.get_status(project), 'requested_continuation_id': identifier}
 
@@ -547,6 +632,14 @@ class FactoryService:
         except Exception as exc:
             runtime.update(run_id, 'failed', 'Worker could not start', str(exc)[:1000])
             raise FactoryError('worker_start_failed', 'Intent is durable; resume to recover') from exc
+
+    def configure_project(self, settings, project=None):
+        store = self._store(project)
+        if not adaptive_enabled(store):
+            raise FactoryError('verified_workflow', 'This historical project keeps its execution policy')
+        with Runtime(store).lock('launch', timeout=10):
+            return {'settings': Adaptive(store).configure(settings), 'applies': 'next_step',
+                    'usage': Adaptive(store).usage()}
 
     def _resume_execution(self, project):
         from .execution_store import ExecutionStore

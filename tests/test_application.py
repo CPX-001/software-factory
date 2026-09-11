@@ -448,7 +448,7 @@ class ServiceTests(unittest.TestCase):
         self.jobs = []
         self.discovery = FakeModel(reply())
         self.architect = FakeArchitect(proposal(), review())
-        self.service = FactoryService(self.registry, discovery_model=self.discovery, architecture_model=self.architect,
+        self.service = FactoryService(self.registry, workflow_mode='verified', discovery_model=self.discovery, architecture_model=self.architect,
                                       planning_model=fake_planner(), router=SkillRouter(Catalog()), launcher=lambda p, r: self.jobs.append((p, r)))
         self.project = self.service.initialize_project(str(self.root / 'projects' / 'first'))['project']
         self.store = Store(self.project['path'])

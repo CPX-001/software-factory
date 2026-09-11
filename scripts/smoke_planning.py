@@ -30,7 +30,7 @@ def main():
     root = Path(tempfile.mkdtemp(prefix='factory-planning-smoke-'))
     registry = Registry(root / 'registry'); registry.allow_root(root)
     jobs = []
-    service = FactoryService(registry, launcher=lambda p, r: jobs.append((p, r)))
+    service = FactoryService(registry, workflow_mode='verified', launcher=lambda p, r: jobs.append((p, r)))
     service.initialize_project(str(root / 'word-count'))
     print('Smoke artifacts: ' + str(root), flush=True)
     if args.planning_only:

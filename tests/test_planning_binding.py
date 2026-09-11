@@ -84,7 +84,7 @@ class AutomaticBindingTests(unittest.TestCase):
         self.jobs = []
         self.model = FakeSDK(complete_reply(), lambda c: proposal(c['source']['knowledge']), review(), self.propose, review())
         self.worker = worker
-        self.service = FactoryService(Registry(self.root / 'registry'), router=SkillRouter(Catalog()),
+        self.service = FactoryService(Registry(self.root / 'registry'), workflow_mode='verified', router=SkillRouter(Catalog()),
             launcher=lambda p,r: self.jobs.append((p,r)), analysis_worker_factory=self.model,
             execution_worker_factory=self.worker)
         self.service.authorize_root(self.root)

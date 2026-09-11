@@ -184,7 +184,7 @@ def prepare_from_discovery(root, model, effort, *, registry_home=None, automatic
     git(product, 'add', '.')
     git(product, '-c', 'user.name=Pilot fixture', '-c', 'user.email=fixture@localhost',
         'commit', '-qm', 'Independent records pilot inputs and acceptance, before discovery')
-    service = FactoryService(Registry(registry_home))
+    service = FactoryService(Registry(registry_home), workflow_mode='verified')
     service.authorize_root(root)
     status = service.initialize_project(str(product), 'Records end-to-end pilot')
     service.pause(status['project']['id'])  # Preparation never permits an unguarded analysis call.

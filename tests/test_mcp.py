@@ -32,7 +32,7 @@ class ToolTests(unittest.TestCase):
         self.registry = Registry(self.root / 'registry')
         self.registry.allow_root(self.root)
         self.jobs = []
-        self.service = FactoryService(self.registry, discovery_model=FakeModel(reply()),
+        self.service = FactoryService(self.registry, workflow_mode='verified', discovery_model=FakeModel(reply()),
             architecture_model=FakeArchitect(proposal(), review()), planning_model=fake_planner(), router=SkillRouter(Catalog()),
             launcher=lambda p, r: self.jobs.append((p, r)))
         self.tools = FactoryTools(self.service)
@@ -170,7 +170,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             parameters = StdioServerParameters(command=sys.executable,
                 args=['-m', 'factory.mcp_server', '--home', str(registry.home)], cwd=str(Path(__file__).resolve().parent.parent))
             async with Client(parameters) as client:
-                initialized = await client.call_tool('factory_project', {'action': 'init', 'path': str(root / 'project')})
+                initialized = await client.call_tool('factory_project', {'action': 'init', 'path': str(root / 'project'), 'workflow': 'verified'})
                 project = initialized.structured_content['data']['project']['id']
                 await client.call_tool('factory_pause', {})
                 queued = await client.call_tool('factory_message', {'message': 'Durable without a worker', 'request_id': 'persisted'})
@@ -232,7 +232,7 @@ main()
             parameters = StdioServerParameters(command=sys.executable,
                 args=[str(bootstrap), '--home', str(registry.home)])
             async with Client(parameters) as client:
-                await client.call_tool('factory_project', {'action': 'init', 'path': str(root / 'project')})
+                await client.call_tool('factory_project', {'action': 'init', 'path': str(root / 'project'), 'workflow': 'verified'})
                 response = await client.call_tool('factory_message', {'message': 'Mock worker only'})
                 self.assertTrue(response.structured_content['ok'])
                 for _ in range(100):

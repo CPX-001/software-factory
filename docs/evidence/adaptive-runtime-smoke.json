@@ -1,0 +1,146 @@
+{
+  "workflow": "adaptive",
+  "model_simulated": false,
+  "model": "gpt-5.6-terra",
+  "effort": "low",
+  "codex_app_human_checked": false,
+  "mcp_disconnect_test": "real STDIO transport with simulated model, tests.test_adaptive.AdaptiveMCPTests",
+  "initial_test_token_limit": 100000,
+  "extended_same_instance_token_limit": 500000,
+  "status": {
+    "project": {
+      "id": "p_2fe13d17fab0d2e0",
+      "name": "Adaptive normal Codex smoke",
+      "path": "/tmp/software-factory-adaptive-smoke-_v1gzh0l/product"
+    },
+    "workflow": "adaptive",
+    "phase": "completed",
+    "state": "completed",
+    "workflow_revision": 1,
+    "current_objective": "Crear una utilidad Node.js sin dependencias que sume dos argumentos, con errores claros e instrucciones breves.",
+    "last_message": "Utilidad terminada: suma dos argumentos numéricos con Node.js, sin dependencias, y muestra errores claros para entradas inválidas. Incluye instrucciones breves de uso.",
+    "questions": [],
+    "pending_decisions": {
+      "count": 0,
+      "items": []
+    },
+    "blockers": [],
+    "next_action": {
+      "action": "done",
+      "reason": ""
+    },
+    "tasks": [
+      {
+        "id": "inspect",
+        "title": "Inspeccionar repositorio e instrucciones",
+        "status": "done"
+      },
+      {
+        "id": "implement",
+        "title": "Implementar utilidad y documentación",
+        "status": "done"
+      },
+      {
+        "id": "verify",
+        "title": "Ejecutar comprobaciones de uso y errores",
+        "status": "done"
+      }
+    ],
+    "checks": [
+      {
+        "id": "valid-sum",
+        "description": "La suma de dos números válidos muestra el resultado",
+        "required": true,
+        "status": "passed",
+        "evidence": "`node sum.js -1.5 4` devolvió código 0 y salida `2.5`."
+      },
+      {
+        "id": "invalid-input",
+        "description": "Las entradas inválidas fallan con un error claro y código 1",
+        "required": true,
+        "status": "passed",
+        "evidence": "`node sum.js 2 foo` y `node sum.js 2` devolvieron código 1 con mensajes explicativos."
+      }
+    ],
+    "deferred": [],
+    "settings": {
+      "model": "gpt-5.6-terra",
+      "effort": "low",
+      "max_calls": 3,
+      "max_tokens": 500000,
+      "max_seconds": 240
+    },
+    "usage": {
+      "calls": 2,
+      "call_unit": "codex_turns",
+      "tokens": 207961,
+      "seconds": 75.80777011100145,
+      "usage_unreported": 0
+    },
+    "autonomous_run": {
+      "run_id": "c5b8291a-c55d-4b4b-8423-9b1a1629aacf",
+      "status": "completed",
+      "paused": false,
+      "reason": ""
+    },
+    "completion": {
+      "status": "completed",
+      "version": {
+        "head": null,
+        "working_tree": "?? .gitignore\n?? README.md\n?? sum.js"
+      },
+      "delivery": "/tmp/software-factory-adaptive-smoke-_v1gzh0l/product/.factory/deliveries/checkpoint-1/REPORT.md",
+      "independently_verified": false
+    }
+  },
+  "independent_local_checks": [
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "2",
+        "3"
+      ],
+      "exit_code": 0,
+      "stdout": "5",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "-1.5",
+        "4"
+      ],
+      "exit_code": 0,
+      "stdout": "2.5",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "bad",
+        "3"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Error: ambos argumentos deben ser números finitos. Ejemplo: node sum.js 2 3"
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Error: indica exactamente dos números. Ejemplo: node sum.js 2 3"
+    }
+  ],
+  "files": {
+    "README.md": "4c10d7bd9d11cf7a8fa6a6c0ef91ca0e47d727be872c148bcc173d239300f835",
+    ".gitignore": "b52715f5ec3178f092333f72a54364ca751bc5f80eeeeb22852579984e7d9569",
+    "sum.js": "469434f359ba7185b83010709ce0d0a3cdb947ad63cb9185b61eb5ae2df541e7"
+  },
+  "repeat_resume_started_inference": false
+}

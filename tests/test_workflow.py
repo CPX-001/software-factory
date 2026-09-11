@@ -90,7 +90,8 @@ class WorkflowTests(unittest.TestCase):
 
     def test_cli_across_processes(self):
         def cli(command):
-            return subprocess.run([sys.executable, "-m", "factory", command, str(self.project)], capture_output=True, text=True)
+            return subprocess.run([sys.executable, "-m", "factory", command, str(self.project),
+                                   *(['--workflow', 'verified'] if command == 'init' else [])], capture_output=True, text=True)
         self.assertEqual(cli("init").returncode, 0)
         self.assertEqual(json.loads(cli("status").stdout)["phase"], "discovery")
         self.assertEqual(json.loads(cli("next").stdout)["action"], "discovery")

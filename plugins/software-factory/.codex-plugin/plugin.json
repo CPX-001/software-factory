@@ -8,8 +8,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Software Factory",
-    "shortDescription": "Manage Factory projects from Codex.",
-    "longDescription": "Run discovery, architecture, planning and explicitly authorized execution. Close milestones, validate the integrated project on an exact commit and prepare a reproducible local delivery within persistent budgets.",
+    "shortDescription": "Develop ideas with persistent Codex continuity.",
+    "longDescription": "Discuss an idea and let normal Codex develop the agreed product through an adaptive workflow, with persistent memory, revisable decisions, suitable checks and autonomous continuation. Ask the user when their input is needed.",
     "developerName": "Local developer",
     "category": "Productivity",
     "capabilities": [],
@@ -17,9 +17,9 @@
       "Continúa mi proyecto de Software Factory.",
       "¿Qué decisiones necesita mi proyecto?",
       "Enséñame la arquitectura vigente.",
-      "Implementa la próxima slice preparada.",
-      "¿Por qué no puedes iniciar la ejecución?",
-      "Continúa el proyecto entre milestones dentro de la política autorizada y detente si necesitas una decisión.",
+      "Desarrolla la idea conmigo y construye lo acordado.",
+      "Revisa esta decisión y actualiza lo que corresponda.",
+      "Continúa el proyecto y pregúntame cuando necesites mi criterio.",
       "Valida el proyecto terminado y prepara su entrega local."
     ]
   },

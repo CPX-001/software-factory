@@ -11,6 +11,23 @@ from .workflow import WorkflowError
 INSTRUCTIONS = '''Software Factory owns workflow and persistent state. Pin the registered project ID; server cwd is not the conversation workspace. Relay user answers verbatim. Runs survive MCP/chat disconnection. Execution requires explicit factory_execution_policy authorization with reviewed permissions, budget and typed checks. factory_execute returns a durable ID promptly; reuse request_id on retries. Existing authorization remains one slice unless continuation.enabled is explicitly authorized with aggregate limits. A continuation refines, executes and validates integrated milestone criteria. Cross-milestone advancement requires continuation.inter_milestone=true; it is disabled by default. The detached controller prepares only the next eligible milestone and preserves aggregate limits including remediation. checkpoint is a work limit; milestone_ready is validation pending; milestone_closed has a receipt; project_ready_for_validation still needs final project validation. Mandatory subjective reviews require actual human answers. Never act as an LLM supervisor or poll tightly. Use factory_status on user request, factory_inspect execution for evidence, and factory_pause/factory_resume for recovery.'''
 INSTRUCTIONS += ''' Final validation uses factory_execute action=validate_project and the SAME run budget. automatic_remediation=true requires separate user authorization. For automatic milestone-to-project continuity, authorize policy.final_validation beforehand. Inspect project_validation for exact candidate, missing conditions, checks, simulated integrations, exclusions and local delivery. project_verified covers one recorded version; version_pending does not. delivery_pending requires report recovery. Never describe validation as deployment, universal security assurance or completed Codex App UI testing.'''
 INSTRUCTIONS += ''' Before planning, policy.automatic_plan_binding=true separately authorizes the existing planner and critic to reference immutable predeclared checks and pinned resources. It is disabled by default. The owning controller compiles the reviewed references into the normal execution contract and continues on the same run without another execute request. Missing coverage/resources or prior exclusion authorization remains a blocker; never invent a mapping or weaken procedures in the conversation.'''
+VERIFIED_INSTRUCTIONS = INSTRUCTIONS
+INSTRUCTIONS = '''Software Factory provides persistent project memory and autonomous continuity for normal Codex.
+New projects use an adaptive workflow: Codex chooses the process, tools, skills, technologies and suitable
+checks, revisits earlier decisions naturally and continues until agreed work is done or actual user input
+is needed. No mandatory architecture approval, fixed phase sequence, language or test suite. Initialize
+at a path supplied by the user/workspace, pin the returned project ID, and relay substantive user messages
+faithfully with factory_message. It starts eligible work; messages during execution steer the next step.
+Do not make the user say continue between steps or confirm ordinary implementation. factory_status shows
+focus, tasks, checks, questions, accumulated usage and completion. factory_inspect process/memory shows
+the saved context. Use factory_answer for a specific question or factory_message for a conversational reply.
+factory_project action=configure optionally sets model/effort/service_tier or cumulative limits; omission
+inherits Codex configuration. Do not claim the App conversation's temporary model selection was transferred.
+Runs survive MCP/chat disconnection. Pause persists until resume. Never poll tightly or supervise the loop
+from the conversation. completed is Codex's completion of agreed scope, not independent project_verified
+certification. Existing verified-workflow projects retain their original contracts and authorization;
+consult the skill's verified-workflow reference for those projects. Do not develop Factory recursively.
+'''
 
 PROJECT = {'type': 'string', 'pattern': '^p_[0-9a-f]{16}$'}
 TEXT = {'type': 'string', 'minLength': 1, 'maxLength': 8000}
@@ -21,10 +38,15 @@ def schema(properties, required=()):
 
 
 TOOLS = {
-    'factory_project': ('List, initialize or explicitly select a registered project. Initialization is restricted to locally authorized roots.',
-        schema({'action': {'enum': ['list', 'init', 'select']}, 'project': PROJECT,
+    'factory_project': ('List, initialize, select or configure a project. New projects use normal Codex with adaptive persistent continuity.',
+        schema({'action': {'enum': ['list', 'init', 'select', 'configure']}, 'project': PROJECT,
                 'path': {'type': 'string', 'minLength': 1, 'maxLength': 4096},
-                'name': {'type': 'string', 'minLength': 1, 'maxLength': 120}}, ['action'])),
+                'name': {'type': 'string', 'minLength': 1, 'maxLength': 120},
+                'workflow': {'enum': ['adaptive', 'verified']},
+                'settings': {'type': 'object', 'additionalProperties': False, 'properties': {
+                    'model': {'type': ['string', 'null']}, 'effort': {'type': ['string', 'null']},
+                    'service_tier': {'type': ['string', 'null']},
+                    **{key: {'type': ['integer', 'null'], 'minimum': 1} for key in ('max_calls', 'max_tokens', 'max_seconds')}}}}, ['action'])),
     'factory_status': ('Compact authoritative status, blockers, next action and autonomous run progress.', schema({'project': PROJECT})),
     'factory_message': ('Relay the user message verbatim to Factory. Returns promptly; eligible workers continue independently. Reuse request_id when retrying a discovery submission.',
         schema({'project': PROJECT, 'message': TEXT, 'request_id': {'type': 'string', 'minLength': 1, 'maxLength': 128}}, ['message'])),
@@ -54,6 +76,11 @@ TOOLS['factory_execute'] = ('Start authorized execution and return promptly. Def
             'action': {'enum': ['execute', 'validate_project']}, 'automatic_remediation': {'type': 'boolean'}}, ['request_id']))
 TOOLS['factory_inspect'][1]['properties']['view']['enum'].append('execution')
 TOOLS['factory_inspect'][1]['properties']['view']['enum'].append('project_validation')
+TOOLS['factory_inspect'][1]['properties']['view']['enum'].extend(['process', 'memory'])
+TOOLS['factory_execute'] = ('Adaptive projects: resume saved autonomous work, or request a product review with action=validate_project. '
+    'Historical verified projects: start authorized execution/final validation within the existing policy. Reuse request_id on retries.', TOOLS['factory_execute'][1])
+TOOLS['factory_inspect'] = ('Inspect saved project memory/process, plan/tasks, architecture, checks, execution observations or delivery. '
+    'Historical verified projects also expose their pinned contracts and receipts.', TOOLS['factory_inspect'][1])
 TOOLS['factory_pause'] = ('Persist pause; implementation requests runtime interruption and remains pause_requested until the active turn/process stops. Prevents new attempts.', schema({'project': PROJECT}))
 READ_ONLY = {'factory_status', 'factory_decisions', 'factory_inspect'}
 OUTPUT_SCHEMA = schema({'ok': {'type': 'boolean'}, 'data': {}, 'error': {'type': 'object'}}, ['ok'])
@@ -77,8 +104,10 @@ class FactoryTools:
                 action = args.pop('action')
                 if action == 'list' and not args:
                     result = self.service.projects()
-                elif action == 'init' and set(args) <= {'path', 'name'} and 'path' in args:
+                elif action == 'init' and set(args) <= {'path', 'name', 'workflow'} and 'path' in args:
                     result = self.service.initialize_project(**args)
+                elif action == 'configure' and set(args) <= {'project', 'settings'} and 'settings' in args:
+                    result = self.service.configure_project(**args)
                 elif action == 'select' and set(args) == {'project'}:
                     result = self.service.select_project(**args)
                 else:

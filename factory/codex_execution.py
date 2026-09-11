@@ -60,6 +60,23 @@ def schema_rejection(error):
 class CodexExecution:
     instructions = INSTRUCTIONS
     result_schema = RESULT_SCHEMA
+    monitors_quota = True
+
+    def thread_options(self, *, starting):
+        from openai_codex import ApprovalMode, Sandbox
+        args = dict(model=self.policy['model'], model_provider='openai', cwd='/workspace',
+                    sandbox=Sandbox.read_only, approval_mode=ApprovalMode.deny_all)
+        if starting:
+            args['base_instructions'] = self.instructions
+        return args
+
+    def turn_options(self):
+        from openai_codex.generated.v2_all import ReasoningEffort
+        return {'effort': ReasoningEffort(self.policy['effort']), 'output_schema': self.result_schema}
+
+    def observe_item(self, item):
+        """Optional durable tool observations for workers using the normal Codex tools."""
+
     def __init__(self, sandbox, policy, worktree, skill_inputs=()):
         from openai_codex import Codex, CodexConfig
         from openai_codex.client import _resolve_codex_bin
@@ -171,17 +188,15 @@ class CodexExecution:
                 'thread_id': reference['thread_id'], 'usage': None}
 
     def respond(self, context, *, thread_id, should_stop, on_runtime, on_usage, on_quota):
-        from openai_codex import ApprovalMode, Sandbox, SkillInput, TextInput
-        from openai_codex.generated.v2_all import ReasoningEffort
-        args = dict(model=self.policy['model'], model_provider='openai', cwd='/workspace',
-                    sandbox=Sandbox.read_only, approval_mode=ApprovalMode.deny_all)
+        from openai_codex import SkillInput, TextInput
+        args = self.thread_options(starting=not thread_id)
         speed = {'service_tier': self.policy['service_tier']} if self.policy.get('service_tier') else {}
         args.update(speed)
         thread = (self.codex.thread_resume(thread_id, **args) if thread_id else
-                  self.codex.thread_start(**args, base_instructions=self.instructions))
+                  self.codex.thread_start(**args))
         inputs = [TextInput(json.dumps(context, ensure_ascii=False))]
         inputs += [SkillInput(name=s['name'], path=s['path']) for s in self.skill_inputs]
-        handle = thread.turn(inputs, effort=ReasoningEffort(self.policy['effort']), output_schema=self.result_schema, **speed)
+        handle = thread.turn(inputs, **self.turn_options(), **speed)
         on_runtime({'thread_id': thread.id, 'turn_id': handle.id,
                     'process': process_identity(self.codex._client._proc.pid)})
         finished = threading.Event()
@@ -190,7 +205,7 @@ class CodexExecution:
             refreshed = time.monotonic()
             while not finished.wait(.2):
                 reason = should_stop()
-                if not reason and time.monotonic() - refreshed >= min(15, self.policy['quota_max_age_seconds'] / 2):
+                if self.monitors_quota and not reason and time.monotonic() - refreshed >= min(15, self.policy['quota_max_age_seconds'] / 2):
                     try:
                         quota = self.quota()
                         on_quota(quota)
@@ -225,6 +240,7 @@ class CodexExecution:
                     handle.interrupt()
                 elif event.method == 'item/completed':
                     item = payload.item.root
+                    self.observe_item(item)
                     if getattr(item, 'type', None) == 'agentMessage':
                         response = item.text
                 elif event.method == 'turn/completed':
@@ -241,12 +257,12 @@ class CodexExecution:
                       'worker_status': completed.status.value}
             finished.set()
             watchdog.join(timeout=4)
-            try:
-                output['quota_after'] = self.quota()
-            except FactoryError as exc:
-                # Finished code is still inspectable/verifiable. An unavailable final
-                # observation is explicit and can never authorize a subsequent attempt.
-                output['quota_after_diagnostic'] = {'code': exc.code, 'message': str(exc), **exc.details}
+            if self.monitors_quota:
+                try:
+                    output['quota_after'] = self.quota()
+                except FactoryError as exc:
+                    # Finished code remains inspectable even when telemetry is unavailable.
+                    output['quota_after_diagnostic'] = {'code': exc.code, 'message': str(exc), **exc.details}
             return output
         finally:
             finished.set()

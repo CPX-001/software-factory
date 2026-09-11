@@ -31,12 +31,17 @@ def recovery_replay(store, policy, verification, request):
     from .registry import FactoryError
     check_schema(request, RECOVERY_SCHEMA)
     group = ContinuationStore(store).latest()
-    grant = (group or {}).get('planning_recovery')
-    if grant and grant['request']['request_id'] == request['request_id']:
-        if grant['request_fingerprint'] != fingerprint([policy, verification, request]):
-            raise FactoryError('request_id_conflict', 'Recovery request ID already records different authorization')
-        return grant['result']
+    for grant in recovery_grants(group):
+        if grant['request']['request_id'] == request['request_id']:
+            if grant['request_fingerprint'] != fingerprint([policy, verification, request]):
+                raise FactoryError('request_id_conflict', 'Recovery request ID already records different authorization')
+            return grant['result']
     return None
+
+
+def recovery_grants(group):
+    group = group or {}
+    return group.get('planning_recoveries', [group['planning_recovery']] if group.get('planning_recovery') else [])
 
 
 def authorize_recovery(store, policy, verification, request):
@@ -57,10 +62,12 @@ def authorize_recovery(store, policy, verification, request):
     group = ContinuationStore(store).latest()
     snapshot = store.snapshot()
     state = {k: deepcopy(v) for k, v in snapshot['planning'].items() if k not in ('roadmap', 'decision_details')}
-    if (not group or not group.get('analysis') or group.get('planning_recovery') or
+    grants = recovery_grants(group)
+    if (not group or not group.get('analysis') or any(
+            g['request']['proposal_fingerprint'] == request['proposal_fingerprint'] for g in grants) or
             snapshot['phase'] != 'planning' or state['stage'] != 'blocked' or not state['proposal'] or
             snapshot['planning']['roadmap'] or group['accepted']):
-        raise FactoryError('planning_recovery_unavailable', 'One operator recovery is available only for an unaccepted blocked analysis plan')
+        raise FactoryError('planning_recovery_unavailable', 'An operator grant needs a distinct unaccepted blocked proposal; replay or renaming cannot renew it')
     if request['run_id'] != group['runtime_id'] or request['proposal_fingerprint'] != fingerprint(state['proposal']):
         raise FactoryError('stale_sources', 'Recovery must name the current run and exact blocked proposal')
     if any(d['answer'] is None for d in snapshot['decisions']) or source_snapshot(snapshot) != state['source']:
@@ -100,7 +107,8 @@ def authorize_recovery(store, policy, verification, request):
                  'request_id': request['request_id']}
     state.update(stage='reconcile', authorized_recovery=limits, reconciliations=state['reconciliations'] + 1)
     state['classification']['required'] = True
-    group.update(policy=result['policy'], limits=after, deadline=deadline, planning_recovery=grant)
+    group.update(policy=result['policy'], limits=after, deadline=deadline, planning_recovery=grant,
+                 planning_recoveries=[*grants, grant])
     if before != after:
         group.setdefault('budget_amendments', []).append(amendment)
     with store._connection(write=True) as db:

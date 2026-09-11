@@ -13,15 +13,19 @@ esas definiciones exactas. No acepta otro modelo, esfuerzo, permisos, número de
 tokens ni unidades de trabajo. Solo permite ampliar explícitamente el tiempo agregado,
 sumando la diferencia al deadline anterior; nunca lo recalcula como si el run fuera nuevo.
 
-Hay una sola concesión de operador por run de análisis: exactamente una corrección y una
-revisión independiente adicionales. Los contadores de planning siguen aumentando desde
+Cada concesión de operador corresponde a una propuesta concreta: exactamente una corrección
+y una revisión independiente adicionales. Una propuesta revisada que mantenga objeciones
+necesita otra autorización del operador; todas comparten los topes originales de llamadas
+y tokens. Cambiar el nombre de una petición sobre la misma propuesta no concede nada.
+Los contadores de planning siguen aumentando desde
 su valor actual, incluidos errores anteriores. El plan y sus criterios no se editan al
 autorizar. Se conservan las llamadas, revisiones, fallos, arquitectura y fuentes previas.
 Un requisito humano pendiente, fuentes obsoletas, consumo desconocido o presupuesto
 insuficiente impiden conceder la recuperación. El gate sigue decidiendo la aceptación.
 
 La petición es idempotente, incluso después del cierre: el mismo ID con otro contenido
-se rechaza. Otro nombre no abre una concesión nueva. Una caída tras guardar la autorización
+se rechaza. Se conserva el historial de todas las concesiones y se reconocen también las
+repeticiones de las antiguas. Una caída tras guardar la autorización
 y antes de arrancar se recupera con la misma petición. La publicación utiliza los locks
 de proceso y lanzamiento y comprueba revisión y propietario actuales.
 
@@ -36,3 +40,11 @@ del historial, fuentes y checks inmutables, reintentos, pausa concurrente y recu
 tras caída. El escenario existente de dos milestones también recorre mediante MCP la
 autorización, desconexión, corrección, revisión, implementación y entrega verificada.
 Esto no sustituye la evidencia del recorrido con modelo real.
+
+La revisión puede referirse a la raíz `execution_binding` y a IDs de sus checks, además
+de requisitos y elementos del plan. Reconocer esas referencias conserva los hallazgos;
+no los convierte en aprobación. Si el modelo terminó y falló el guardado/validación del
+checkpoint, planning reutiliza la respuesta del ledger de análisis con el mismo contexto,
+esquema, instrucciones, fuentes y autorizaciones. No repite inferencia ni incrementa
+contadores; los errores anteriores siguen registrados. Esto también funciona si esa
+respuesta consumió la última llamada de fase.

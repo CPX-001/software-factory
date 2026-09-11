@@ -182,6 +182,30 @@ class AuthorizedAnalysisTests(unittest.TestCase):
         self.assertEqual(call['status'], 'completed')
         self.assertIn('before planning checkpoint', call['error'])
 
+    def test_separate_operator_grants_keep_one_aggregate_budget_and_replay_history(self):
+        from factory.architecture import fingerprint
+        _, before, policy, first = self.blocked_recovery()
+        finding = {'id':'acceptance_gap','severity':'high','category':'verification','targets':['s1'],
+            'description':'The revised proposal still needs evidence','recommendation':'Preserve the criteria and resolve the gap'}
+        self.sdk.responses = [self.repaired_owner, review([finding])]
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=first)
+        self.service.run_pending(*self.jobs[-1])
+        second = {**first,'request_id':'separately-authorized-correction',
+            'proposal_fingerprint':fingerprint(self.store.snapshot()['planning']['proposal']),
+            'reason':'Operator authorizes correcting the newly reviewed proposal within the original call/token ceilings'}
+        self.sdk.responses = [lambda c: deepcopy(c['proposal']), review()]
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=second)
+        self.service.run_pending(*self.jobs[-1])
+        after = self.service.get_status(self.identifier)['continuation']
+        self.assertEqual(after['budget']['calls'], before['budget']['calls'] + 4)
+        self.assertEqual(after['limits']['max_calls'], before['limits']['max_calls'])
+        self.assertEqual(after['limits']['max_tokens'], before['limits']['max_tokens'])
+        self.assertEqual(after['deadline'], before['deadline'] + 1800)
+        self.assertEqual(len(after['planning_recoveries']), 2)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=first)
+        self.service.configure_execution(policy, self.verification, self.identifier, planning_recovery=second)
+        self.assertEqual(len(self.jobs), 3)
+
     def test_schema_rejection_recovery_retains_call_budget_without_inventing_usage(self):
         from factory.continuation_store import ContinuationStore
         provider_error = {'codex_error_info':'other','message':json.dumps({'status':400,'error':{

@@ -65,7 +65,10 @@ Use its tools, not your own discovery, architectural design, planning, SQL edits
   This grants exactly one correction/review pair, preserving all previous calls,
   criteria and history. Only aggregate max_seconds may increase explicitly; model,
   effort, call/token budgets, permissions and checks stay fixed. Repeating the request
-  or renaming a later failure cannot grant another pair. Existing session authorization
+  or renaming a failure on the same proposal cannot grant another pair. A newly revised
+  proposal needs its own operator authorization; all grants share the original call/token
+  ceilings and append history. They do not renew the automatic recovery allowance.
+  Existing session authorization
   applies; do not ask again when it already covers recovery and the concrete extension.
   Authorization continues the same detached run unless paused. A normal resume alone
   never extends a budget. Recovery is unavailable after planning/work has been accepted.

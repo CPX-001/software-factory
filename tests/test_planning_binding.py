@@ -180,8 +180,10 @@ class AutomaticBindingTests(unittest.TestCase):
         self.assertEqual(len(self.jobs), 2)
 
     def test_critic_can_identify_binding_root_and_check_without_losing_real_findings(self):
+        self.plan['slices'][0]['acceptance_criteria'].append('Additional declared acceptance condition')
         finding = {'id':'mapping_gap','severity':'high','category':'verification',
-            'targets':['execution_binding',self.binding['checks'][0]['id']],
+            'targets':['execution_binding',self.binding['checks'][0]['id'],
+                       'verification_binding_invalid','slice_criterion_unmapped'],
             'description':'The claimed behavior lacks evidence','recommendation':'Preserve the acceptance gap'}
         self.model.responses[3:] = [self.propose, review([finding]), self.propose, review([finding]),
                                    self.propose, review([finding])]
@@ -189,6 +191,22 @@ class AutomaticBindingTests(unittest.TestCase):
         self.assertEqual(state['state'], 'blocked')
         self.assertEqual(self.store.snapshot()['planning']['review']['findings'], [finding])
         self.assertIn('Unresolved review mapping_gap', state['blockers'][0])
+        self.assertEqual(self.worker.contexts, [])
+
+    def test_critic_cannot_cite_a_diagnostic_absent_from_its_current_context(self):
+        finding = {'id':'invented_gap','severity':'high','category':'verification',
+            'targets':['execution_binding','slice_criterion_unmapped'],
+            'description':'A diagnostic absent from this proposal',
+            'recommendation':'Should be rejected as an invalid reference'}
+        self.model.responses[3:] = [self.propose, review([finding])]
+        from factory.workflow import WorkflowError
+        self.start()
+        with self.assertRaisesRegex(WorkflowError, 'valid targets'):
+            self.drive()
+        state = self.service.get_status(self.pid)
+        self.assertEqual(state['state'], 'failed')
+        self.assertIn('valid targets', state['blockers'][0])
+        self.assertFalse(self.store.snapshot()['planning']['review'])
         self.assertEqual(self.worker.contexts, [])
 
     def test_additive_evidence_before_acceptance_preserves_pending_answer_and_original_checks(self):

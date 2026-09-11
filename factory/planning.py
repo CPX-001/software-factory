@@ -812,6 +812,12 @@ class Planning:
                 if state['proposal'].get('execution_binding'):
                     targets.add('execution_binding')
                     targets.update(c['id'] for c in state['proposal']['execution_binding']['checks'])
+                # A critic may cite a deterministic diagnostic supplied for this
+                # exact proposal. Use the saved call context, including on recovery;
+                # do not accept arbitrary error names from the model response.
+                row = db.execute('SELECT context FROM planning_calls WHERE id=?', (call_id,)).fetchone()
+                diagnostics = json.loads(row['context'])['input'].get('gate_errors', [])
+                targets.update(error.partition(':')[0] for error in diagnostics)
                 findings = response['findings']
                 if len({f['id'] for f in findings}) != len(findings) or any(not f['targets'] or not set(f['targets']) <= targets for f in findings):
                     raise WorkflowError('Planning findings require unique IDs and valid targets')

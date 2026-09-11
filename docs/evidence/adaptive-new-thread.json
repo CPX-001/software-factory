@@ -1,0 +1,283 @@
+{
+  "thread": {
+    "thread_id": "01a091db-a66f-7083-899d-a7a7286f0e09",
+    "project_id": "p_2fe13d17fab0d2e0",
+    "product": "/tmp/software-factory-adaptive-smoke-_v1gzh0l/product",
+    "driver": "official Python SDK / App Server",
+    "visual_app_ui": false
+  },
+  "thread_name": "Software Factory — prueba del plugin en hilo nuevo",
+  "model_simulated": false,
+  "model": "gpt-5.6-terra",
+  "effort": "low",
+  "outer_conversation_turns": 4,
+  "ui_automation": false,
+  "codex_app_visual_validation": false,
+  "official_runtime_documentation": "https://learn.chatgpt.com/docs/app-server",
+  "installed_skill_read": [
+    {
+      "command": "/bin/bash -lc \"sed -n '1,240p' /home/cpx/.codex/plugins/cache/personal/software-factory/0.1.0+codex.20260911180714/skills/software-factory/SKILL.md\"",
+      "exit_code": 0
+    },
+    {
+      "command": "/bin/bash -lc \"sed -n '1,240p' /home/cpx/.codex/plugins/cache/personal/software-factory/0.1.0+codex.20260911180714/skills/software-factory/SKILL.md\"",
+      "exit_code": 0
+    },
+    {
+      "command": "/bin/bash -lc \"sed -n '1,240p' /home/cpx/.codex/plugins/cache/personal/software-factory/0.1.0+codex.20260911180714/skills/software-factory/SKILL.md\"",
+      "exit_code": 0
+    },
+    {
+      "command": "/bin/bash -lc \"sed -n '1,240p' /home/cpx/.codex/plugins/cache/personal/software-factory/0.1.0+codex.20260911180714/skills/software-factory/SKILL.md\"",
+      "exit_code": 0
+    }
+  ],
+  "mcp_calls": [
+    {
+      "turn_log": "events.jsonl",
+      "tool": "factory_inspect",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "events.jsonl",
+      "tool": "factory_status",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "events.jsonl",
+      "tool": "factory_message",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "recover-events.jsonl",
+      "tool": "factory_status",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "recover-events.jsonl",
+      "tool": "factory_project",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "recover-events.jsonl",
+      "tool": "factory_message",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "recover-events.jsonl",
+      "tool": "factory_resume",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "finish-events.jsonl",
+      "tool": "factory_project",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "finish-events.jsonl",
+      "tool": "factory_resume",
+      "status": "completed",
+      "ok": true
+    },
+    {
+      "turn_log": "status-events.jsonl",
+      "tool": "factory_status",
+      "status": "completed",
+      "ok": true
+    }
+  ],
+  "outer_thread_product_writes": [],
+  "same_factory_run_preserved": true,
+  "factory_run_count": 1,
+  "baseline_usage": {
+    "calls": 2,
+    "tokens": 207961
+  },
+  "project_status_after_read_only_thread_query": {
+    "project": {
+      "id": "p_2fe13d17fab0d2e0",
+      "name": "Adaptive normal Codex smoke",
+      "path": "/tmp/software-factory-adaptive-smoke-_v1gzh0l/product"
+    },
+    "workflow": "adaptive",
+    "phase": "completed",
+    "state": "completed",
+    "workflow_revision": 4,
+    "current_objective": "Añadir la opción `--help` a la utilidad Node.js existente.",
+    "last_message": "Registro de cierre completado. Se conservaron sin cambios los IDs y descripciones de todos los checks anteriores; las cuatro comprobaciones se repitieron correctamente en el estado actual.",
+    "questions": [],
+    "pending_decisions": {
+      "count": 0,
+      "items": []
+    },
+    "blockers": [],
+    "next_action": {
+      "action": "done",
+      "reason": "No queda trabajo dentro del alcance acordado."
+    },
+    "tasks": [
+      {
+        "id": "inspect",
+        "title": "Inspeccionar utilidad e instrucciones",
+        "status": "done"
+      },
+      {
+        "id": "implement",
+        "title": "Añadir opción --help",
+        "status": "done"
+      },
+      {
+        "id": "verify",
+        "title": "Comprobar ayuda y suma normal",
+        "status": "done"
+      },
+      {
+        "id": "closeout",
+        "title": "Registrar cierre preservando checks",
+        "status": "done"
+      }
+    ],
+    "checks": [
+      {
+        "id": "help",
+        "description": "`--help` muestra instrucciones breves y termina correctamente",
+        "required": true,
+        "status": "passed",
+        "evidence": "Verificación final: `node sum.js --help` mostró uso y ejemplo; código 0."
+      },
+      {
+        "id": "normal-sum",
+        "description": "La suma normal se conserva",
+        "required": true,
+        "status": "passed",
+        "evidence": "Verificación final: `node sum.js -1.5 4` imprimió `2.5`; código 0."
+      },
+      {
+        "id": "valid-sum",
+        "description": "La suma de dos números válidos muestra el resultado",
+        "required": true,
+        "status": "passed",
+        "evidence": "Verificación final: `node sum.js -1.5 4` imprimió `2.5`; código 0."
+      },
+      {
+        "id": "invalid-input",
+        "description": "Las entradas inválidas fallan con un error claro y código 1",
+        "required": true,
+        "status": "passed",
+        "evidence": "Verificación final: `node sum.js 2 foo` y `node sum.js 2` imprimieron mensajes explícitos y devolvieron código 1."
+      }
+    ],
+    "deferred": [],
+    "settings": {
+      "model": "gpt-5.6-terra",
+      "effort": "low",
+      "max_calls": 5,
+      "max_tokens": 500000,
+      "max_seconds": 240
+    },
+    "usage": {
+      "calls": 5,
+      "call_unit": "codex_turns",
+      "tokens": 427268,
+      "seconds": 203.6304379219946,
+      "usage_unreported": 0
+    },
+    "autonomous_run": {
+      "run_id": "c5b8291a-c55d-4b4b-8423-9b1a1629aacf",
+      "status": "completed",
+      "paused": false,
+      "reason": "No queda trabajo dentro del alcance acordado."
+    },
+    "completion": {
+      "status": "completed",
+      "version": {
+        "head": null,
+        "working_tree": "?? .gitignore\n?? README.md\n?? sum.js"
+      },
+      "delivery": "/tmp/software-factory-adaptive-smoke-_v1gzh0l/product/.factory/deliveries/checkpoint-4/REPORT.md",
+      "independently_verified": false
+    }
+  },
+  "operator_budget_changes": [
+    {
+      "max_calls": 3,
+      "to": 4
+    },
+    {
+      "max_calls": 4,
+      "to": 5
+    }
+  ],
+  "test_findings": [
+    "Worker renamed existing checks; closure retained originals and requested a corrected checkpoint.",
+    "Prepared step recovery missed later user input; fixed by refreshing pending inputs before starting a prepared turn."
+  ],
+  "independent_product_checks": [
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "--help"
+      ],
+      "returncode": 0,
+      "stdout": "Uso: node sum.js <número1> <número2>\nSuma dos números finitos. Ejemplo: node sum.js 2 3",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "2",
+        "3"
+      ],
+      "returncode": 0,
+      "stdout": "5",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "-1.5",
+        "4"
+      ],
+      "returncode": 0,
+      "stdout": "2.5",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js",
+        "bad",
+        "3"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "Error: ambos argumentos deben ser números finitos. Ejemplo: node sum.js 2 3"
+    },
+    {
+      "argv": [
+        "node",
+        "sum.js"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "Error: indica exactamente dos números. Ejemplo: node sum.js 2 3"
+    }
+  ],
+  "product_files_sha256": {
+    "README.md": "322c4c9d7595aaed197bd7114c3a3a00de37f9f5df77d81d6495a111c9ef84f2",
+    ".gitignore": "b52715f5ec3178f092333f72a54364ca751bc5f80eeeeb22852579984e7d9569",
+    "sum.js": "05c6ca28cce9f57cb00c37843e82c7d12e42064710494c8fe0764104ec685385"
+  },
+  "final_thread_answer": "Consultaré solo el estado de Software Factory, sin reanudar, enviar mensajes ni cambiar configuración.\n\nEstado real: `completed` (workflow adaptativo, revisión 4). No es `project_verified`: Factory indica `independently_verified: false`.\n\nAlcance completado: opción `--help` en la utilidad Node.js; muestra uso breve y termina con código 0, preservando la suma normal y la validación de errores. El cierre conservó sin cambios los IDs y descripciones de los checks anteriores.\n\nComprobaciones aprobadas:\n\n- `help`: `node sum.js --help` mostró uso y ejemplo; código 0.\n- `normal-sum`: `node sum.js -1.5 4` imprimió `2.5`; código 0.\n- `valid-sum`: misma suma válida, `2.5`; código 0.\n- `invalid-input`: `node sum.js 2 foo` y `node sum.js 2` dieron mensajes claros y código 1.\n\nRun: `c5b8291a-c55d-4b4b-8423-9b1a1629aacf`, estado `completed`.\n\nConsumo: 5 turnos, 427.268 tokens, 203,63 s.\n\nInforme: [/tmp/software-factory-adaptive-smoke-_v1gzh0l/product/.factory/deliveries/checkpoint-4/REPORT.md](/tmp/software-factory-adaptive-smoke-_v1gzh0l/product/.factory/deliveries/checkpoint-4/REPORT.md)"
+}

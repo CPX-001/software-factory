@@ -212,6 +212,25 @@ class AdaptiveTests(unittest.TestCase):
         self.assertEqual(self.service.get_status()['checks'][0]['status'], 'unavailable')
         self.assertEqual(self.worker.contexts[-1]['checkpoint']['status'], 'continue')
 
+    def test_input_added_to_prepared_step_is_seen_before_recovery_call(self):
+        def recover(worker, context, callbacks):
+            self.assertEqual([i['message'] for i in context['user_messages']], ['Prioriza la nueva condición'])
+            return checkpoint(status='completed')
+        self.service.configure_project({'max_calls': 1})
+        self.worker.responses = [checkpoint(), recover]
+        self.service.submit_user_message('Empieza')
+        with self.assertRaises(FactoryError):
+            self.run_work()
+        self.service.pause()
+        self.service.submit_user_message('Prioriza la nueva condición', request_id='during-budget-block')
+        self.service.configure_project({'max_calls': 2})
+        self.service.resume()
+        self.run_work()
+        self.assertEqual(self.service.get_status()['state'], 'completed')
+        self.assertEqual(self.worker.calls, 2)
+        with self.store._connection() as db:
+            self.assertEqual(self.journal.pending(db), [])
+
     def test_registration_retry_preserves_old_projects_and_mcp_adaptive_default(self):
         old = self.root / 'historical'
         old.mkdir()

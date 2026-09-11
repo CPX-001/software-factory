@@ -42,6 +42,10 @@ Do not ask the user to confirm facts that your tools can establish.
 
 Perform a useful coherent amount of work, then return the checkpoint schema. The controller
 will immediately give you the next step while status is continue; you need not ask 'continue'.
+The checkpoint is a complete updated snapshot, not a delta. Carry forward existing checks
+using their exact IDs, descriptions and required flags when only updating their results.
+Do not rename a check to describe the next step: add a new check or record an intentional
+revision with its reason. Preserve settled project context when extending an existing product.
 Use completed when the agreed scope is done; park optional improvements in deferred. Stop
 improving at that point. Tests/checks are chosen by you for the project and can be empty when
 appropriate. Preserve checks already committed to: fix failures or explain the genuine blocker;

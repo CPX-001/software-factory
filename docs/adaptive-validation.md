@@ -42,3 +42,29 @@ La suite completa pasó: 356 tests en 524,871 segundos, sin fallos ni skips. Tra
 ajustes de inicialización CLI y presentación de estado, pasaron 15 tests específicos en
 5,792 segundos (incluyen los 14 adaptativos de la suite y un caso CLI adicional). Los recuentos
 se solapan. [Resultados y logs](evidence/adaptive-validation.json).
+
+## Prueba posterior desde un hilo nuevo
+
+A petición del usuario se creó el hilo Codex `01a091db-a66f-7083-899d-a7a7286f0e09`,
+«Software Factory — prueba del plugin en hilo nuevo», mediante el SDK oficial/App Server.
+Leyó la skill instalada y utilizó sus tools MCP reales para consultar memoria/estado y pedir
+`--help` sobre el mismo producto desechable. No editó directamente el producto. Factory
+continuó después de terminar el turno y cerrar esa conexión; el hilo consultó al final
+`completed`, sus checks y el informe, sin iniciar otra ejecución.
+
+La prueba detectó que un paso preparado antes de un bloqueo podía conservar una instantánea
+de entradas anterior a una nueva instrucción del usuario. La recuperación actualiza ahora
+las entradas pendientes antes de arrancar un turno preparado; los turnos ya iniciados conservan
+su contexto original para la recuperación exacta. También se aclaró al worker que el checkpoint
+es completo y debe conservar IDs/descripciones de checks o explicar su revisión.
+
+Hubo dos ampliaciones explícitas del límite de la prueba, de 3 a 4 y de 4 a 5 turnos, conservando
+modelo, tiempo máximo, tokens máximos, run e historial. El proyecto terminó con 5 turnos y
+427.268 tokens acumulados, incluyendo los 2 turnos/207.961 tokens de la prueba anterior.
+Pasaron 16 tests específicos (incluida la regresión nueva) y cinco comprobaciones locales de
+ayuda, suma y entradas inválidas. No se repitió la suite general por este ajuste localizado.
+
+[Evidencia del hilo y llamadas MCP](evidence/adaptive-new-thread.json) y
+[tests de la corrección](evidence/adaptive-new-thread-tests.txt).
+Es un hilo real de Codex con modelo y plugin reales; no se automatizó visualmente la ventana
+de Codex App ni se presenta como una comprobación humana de esa interfaz.

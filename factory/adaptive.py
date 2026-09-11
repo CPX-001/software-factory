@@ -151,7 +151,14 @@ class Adaptive:
             self._owner(db, run_id)
             old = db.execute("SELECT * FROM adaptive_steps WHERE state NOT IN ('applied','interrupted') ORDER BY id DESC LIMIT 1").fetchone()
             if old:
-                return dict(json.loads(old['data']), id=old['id'], state=old['state'])
+                data = json.loads(old['data'])
+                if old['state'] == 'prepared':
+                    # No turn owns this prepared context yet. Input may have arrived
+                    # during a budget block/pause; include it before spending a call.
+                    # Running/recoverable turns keep their exact original input snapshot.
+                    data['context']['user_messages'] = self.pending(db)
+                    db.execute('UPDATE adaptive_steps SET data=? WHERE id=?', (json.dumps(data), old['id']))
+                return dict(data, id=old['id'], state=old['state'])
             state = self.state(db)
             inputs = self.pending(db)
             context = {'project_path': str(self.store.project), 'checkpoint': {k: v for k, v in state.items()

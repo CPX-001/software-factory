@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-11T17:21:33.943Z",
+  "project_id": "p_ba973102351c9eac",
+  "user_report": {
+    "source": "User supplied the result of the requested separate Codex App conversation and confirmed: esta prueba funciona",
+    "reported_local_time": "2026-09-11 19:19 Europe/Madrid",
+    "independently_observed_other_chat_tool_traces": false,
+    "prompt": "Usa Software Factory. Selecciona el proyecto p_ba973102351c9eac y muestra la versión validada, sus exclusiones y la ruta del informe de entrega local. No inicies ni reanudes ejecuciones.",
+    "selected_project": "Records end-to-end pilot",
+    "state": "project_verified",
+    "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+    "current": true,
+    "pending_criteria": [],
+    "exclusions": [
+      "UI",
+      "red",
+      "dependencias de terceros",
+      "instalación de paquetes",
+      "persistencia",
+      "otros lenguajes",
+      "despliegue",
+      "publicación",
+      "cambios automáticos de arquitectura"
+    ],
+    "delivery": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product/.factory/deliveries/sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1/REPORT.md",
+    "report_available": true,
+    "execution_started_or_resumed": false
+  },
+  "direct_current_checks": {
+    "surface": "Native Software Factory tools in the current Codex conversation",
+    "persisted_selection": "p_ba973102351c9eac",
+    "pinned_project": "p_ba973102351c9eac",
+    "state": "project_verified",
+    "run": {
+      "run_id": "50fe4228-5bee-4f71-a660-dcc6357768db",
+      "status": "project_verified",
+      "paused": false,
+      "reason": "Recorded project conditions verified on the accepted commit; local delivery prepared"
+    },
+    "version": {
+      "commit": "74b9861896a571cf3d9c271dcf9a0e6fd2b32abb",
+      "receipt": "sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1",
+      "current": true
+    },
+    "pending_criteria": [],
+    "delivery": "/home/cpx/.local/share/software-factory/pilots/records-auto-v1/product/.factory/deliveries/sha256:b9b0685f90250bfd830f150d99607e8f125f333efa1095f9a34104fb2f1aeca1/REPORT.md",
+    "delivery_ready": true,
+    "calls": 29,
+    "tokens": 715259,
+    "same_run_commit_receipt_and_usage_as_before_human_query": true,
+    "actions": [
+      "factory_status without project",
+      "factory_status with pinned project"
+    ],
+    "inference_started": false
+  },
+  "scope": {
+    "human_app_final_consultation": "PASS, user-reported result corroborated by current native selection, version, exclusions and local report",
+    "previous_two_chat_checks": "end-to-end-12-codex-app.json",
+    "real_product_workflow": "end-to-end-12-auto-real-delivery.json",
+    "independent_acceptance": "26 tests in 7 procedures; accepted candidate from clean export",
+    "limits": "Acceptance of this bounded Python/stdlib pilot, including recorded operator recoveries; not a universal UI audit or proof of zero-intervention runs"
+  }
+}

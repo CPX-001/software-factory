@@ -3,8 +3,9 @@
 **El mismo piloto alcanzó `project_verified` y tiene entrega local.** El planner real produjo
 la vinculación, su crítico la revisó y Factory la compiló. Después implementó dos slices
 dependientes, cerró ambos milestones y validó el producto integrado desde una copia limpia.
-La consulta humana del informe en otro chat de Codex App sigue pendiente; no se declara
-completada esa parte de la aceptación end-to-end.
+El usuario confirmó la consulta del informe en otro chat de Codex App, incluida la versión
+vigente y sus exclusiones. La aceptación del recorrido de este piloto queda completada,
+con las intervenciones y limitaciones registradas a continuación.
 
 La [evidencia final](evidence/end-to-end-12-auto-real-delivery.json), el
 [plan aceptado](evidence/end-to-end-12-auto-accepted-plan.json) y la
@@ -131,8 +132,12 @@ se desconectó después de la respuesta humana; el controller terminó autónoma
 El mismo smoke consultó el PASS independiente y reconectó sin crear otra instancia.
 
 Las dos pruebas humanas anteriores de selección/envío pausado en chats distintos siguen
-registradas y no necesitan repetirse. La consulta humana de la entrega final sigue pendiente.
-Las tools nativas y el cliente MCP real no sustituyen esa observación de la UI.
+registradas. El usuario confirmó después la consulta del resultado final en otro chat:
+proyecto correcto, commit vigente, exclusiones y enlace disponible al informe, sin iniciar
+ni reanudar trabajo. La [evidencia de App](evidence/end-to-end-12-auto-codex-app.json)
+separa su respuesta de nuestras consultas nativas posteriores, que corroboran selección,
+recibo y consumo sin cambios. No se observaron directamente las trazas internas de aquel
+chat; no se atribuye a un cliente MCP de prueba la observación humana.
 El launcher instalado carga el código actual del repositorio; una conexión nativa antigua
 puede conservar módulos/esquemas previos hasta abrir otra conversación.
 

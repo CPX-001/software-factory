@@ -1,15 +1,17 @@
-# Paso 12: entregas reales; comprobación humana final pendiente
+# Paso 12: entregas reales y consulta humana final comprobadas
 
 El [segundo piloto autorizado](automatic-pilot-result.md) completó la vinculación automática,
-dos milestones y la entrega validada en su mismo run. Falta la consulta humana del informe.
+dos milestones y la entrega validada en su mismo run. El usuario confirmó después la consulta
+humana del informe en otro chat, con versión, exclusiones y ubicación correctas.
 Este documento conserva la evidencia del primer piloto, que llegó a `project_verified`
 con la intervención de vinculación registrada.
 
 **El mismo piloto real ha alcanzado `project_verified` y tiene entrega local.** Sus dos
 milestones están cerrados y los tests independientes y el CLI pasaron desde una copia limpia.
-No se declara completado el goal de autonomía general desde una idea nueva: la vinculación
-inicial de las pruebas al roadmap todavía necesitó una intervención revisada. También está
-pendiente la observación humana del informe final en otro chat de Codex App.
+La vinculación inicial de las pruebas al roadmap de esta primera instancia necesitó una
+intervención revisada. La segunda instancia comprobó esa vinculación automática y su consulta
+humana final, con las recuperaciones de planning documentadas. Ningún resultado demuestra
+ausencia de intervenciones en cualquier proyecto nuevo.
 
 La [corrección posterior de esa vinculación](planning-binding.md) está implementada con
 autorización previa y revisión en el planning existente. Sus pruebas usan modelos simulados
@@ -167,11 +169,15 @@ MCP instalado se desconectó mientras el controller avanzaba entre slices, miles
 validación. Esto no equivale a observar todos los pasos en la UI humana.
 
 El primer piloto utilizó el plugin `0.1.0+codex.20260911131027`. La comprobación humana final
-se hará sobre la segunda instancia, con el launcher actualizado. El mensaje en otro chat es:
+se realizó sobre la segunda instancia, con el launcher actualizado. El usuario confirmó
+el resultado del siguiente mensaje en otro chat:
 
 > Usa Software Factory. Selecciona el proyecto p_ba973102351c9eac y muestra la versión
 > validada, sus exclusiones y la ruta del informe de entrega local. No inicies ni
 > reanudes ejecuciones.
+
+La [evidencia de esa consulta](evidence/end-to-end-12-auto-codex-app.json) conserva la respuesta
+aportada por el usuario y su contraste con el estado actual. No hace falta repetirla.
 
 Antes de la corrección de vinculación, la suite completa pasó **310 tests en 505,201 segundos**, sin fallos, errores ni omisiones
 y sin inferencia. Se conservan el [log](evidence/end-to-end-12-final-tests.txt) y el
@@ -185,5 +191,6 @@ La corrección posterior de vinculación pasa **321 tests en 533,917 segundos**,
 errores ni omisiones y sin inferencia real. Se conservan el [nuevo log](evidence/end-to-end-12-automatic-binding-tests.txt)
 y la [evidencia con hashes](evidence/end-to-end-12-automatic-binding.json). El plugin instalado
 `0.1.0+codex.20260911135342` expone la nueva autorización. El mismo smoke instalado, en modo
-consulta, mantiene el commit, recibo y consumo del piloto real. No completa la validación
-real de la nueva transición ni sustituye la comprobación humana pendiente.
+consulta, mantiene el commit, recibo y consumo del primer piloto real. Esa comprobación
+inicial no validaba la nueva transición; su ejecución real y consulta humana posteriores
+quedan registradas en el informe del segundo piloto.

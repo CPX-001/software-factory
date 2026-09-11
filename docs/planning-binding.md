@@ -92,7 +92,8 @@ recorrido esta vinculación automática: allí hubo una intervención revisada. 
 autorizó después un [segundo piloto real con Fast](automatic-pilot-result.md), que completó
 discovery, arquitectura, planning con vinculación automática y la entrega verificada tras
 dos milestones. Sus recuperaciones de planning y la autorización humana de un oráculo adicional
-quedan registradas. La comprobación humana del informe final en otro chat sigue pendiente.
+quedan registradas. El usuario confirmó también la consulta humana del informe final en otro
+chat, con la versión y exclusiones correctas y sin reanudar el trabajo.
 
 La versión inicial de esta corrección pasó **321 tests en 533,917 segundos**. Su [evidencia](evidence/end-to-end-12-automatic-binding.json)
 incluye hashes de fuentes, log, versión instalada del plugin y la consulta al piloto sin

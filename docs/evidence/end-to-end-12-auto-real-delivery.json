@@ -1843,7 +1843,7 @@
   "native_plugin_start": "end-to-end-12-auto-native-start.json",
   "human_app_checks": {
     "selection_and_paused_message": "User supplied two separate chats on first Records instance",
-    "final_delivery_observation": "pending"
+    "final_delivery_observation": "User confirmed successful separate Codex App consultation; see end-to-end-12-auto-codex-app.json"
   },
   "interventions": "Factory code fixes, explicit planning recovery grants and budget amendments; detached controller owns phase transitions; no SQLite edits or synthetic approvals",
   "human_decisions": [
@@ -1867,7 +1867,7 @@
     }
   ],
   "storage_evidence_authorization": "end-to-end-12-auto-storage-authorization.json",
-  "human_ui_acceptance_complete": false,
+  "human_ui_acceptance_complete": true,
   "storage_independent_acceptance": {
     "status": "PASS",
     "check_ids": [
@@ -2883,7 +2883,7 @@
   "accepted_plan": "end-to-end-12-auto-accepted-plan.json",
   "verification_definition": "end-to-end-12-auto-verification-binding.json",
   "real_product_workflow_accepted": true,
-  "end_to_end_acceptance_complete": false,
+  "end_to_end_acceptance_complete": true,
   "same_smoke_inspection": {
     "client": "Real MCP stdio client; installed plugin launcher",
     "selection_survived_reconnect": true,
@@ -2913,5 +2913,7 @@
   "final_criteria_count": 25,
   "final_bindings_count": 18,
   "reused_identical_procedures": 11,
-  "independent_no_failures_or_skips": true
+  "independent_no_failures_or_skips": true,
+  "completion_recorded_at": 1789147293.9932864,
+  "human_final_evidence": "end-to-end-12-auto-codex-app.json"
 }

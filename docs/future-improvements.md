@@ -38,16 +38,17 @@ declararse dependencias de cada check sobre archivos, contratos y configuración
 solo resultados cuyo ámbito siga idéntico. Harían falta pruebas de cambios transitivos y de
 configuración; un simple diff de archivos directos no sería suficiente.
 
-## Validación pendiente que tiene prioridad
+## Validación prioritaria completada en el paso 12
 
-Completar el mismo escenario de dos milestones con modelo real y verificar su invocación desde
-Codex App. Los tests con modelos simulados y transporte MCP real no lo sustituyen. El diagnóstico
+Se completó el escenario de dos milestones con modelo real y su consulta desde
+Codex App. Los tests con modelos simulados y transporte MCP real no sustituyen esa evidencia. El diagnóstico
 histórico del paso 11 conserva `quota_reserve`. En el paso 12, una autorización explícita retiró
 la reserva para el único piloto y se completaron discovery, arquitectura y planning con modelo
 real. El [recorrido actual](end-to-end-acceptance.md) ya tiene producto, dos milestones
 cerrados, validación limpia y entrega. La vinculación inicial automática con opt-in también
 se comprobó con modelo real en el [segundo piloto autorizado](automatic-pilot-result.md),
-incluida su entrega validada. Queda la observación humana del informe final en otro chat.
+incluida su entrega validada. El usuario confirmó la consulta del informe final en otro chat;
+la [evidencia de App](evidence/end-to-end-12-auto-codex-app.json) conserva su alcance exacto.
 Las recuperaciones de planning y la autorización de evidencia adicional están registradas;
 el recorrido no se presenta como una ejecución sin intervenciones operativas.
 No propongo en este paso nuevos lenguajes,
